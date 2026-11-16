@@ -1,3 +1,4 @@
 .dot-green {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #77df4e;
 }

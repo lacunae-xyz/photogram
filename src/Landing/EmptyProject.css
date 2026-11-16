@@ -19,22 +19,24 @@
 
 .empty-project-item {
   display: flex;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   border-radius: 0.8rem;
   transition-property: transform background-color;
   transition-duration: 0.5s;
-  color: #222;
+  color: var(--pg-color-text);
   text-decoration: none;
   padding-bottom: 1.6rem;
 }
 
 .empty-project-item:hover {
   transform: scale(1.05);
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eee;
   cursor: pointer;
 }
 
 .empty-project-item:active {
-  background-color: rgba(180, 220, 220, 0.5);
+  background-color: var(--pg-color-hover);
 }
 
 .empty-project-item img {
@@ -66,5 +68,5 @@
 .empty-project-item span {
   display: inline-block;
   padding: 0rem 1.6rem;
-  color: #444;
+  color: var(--pg-color-text-muted);
 }

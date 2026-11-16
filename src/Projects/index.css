@@ -18,10 +18,13 @@
 .btn-delete {
   display: inline-block;
   opacity: 0;
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background: #fff;
-  color: #444;
+  color: var(--pg-color-text-muted);
   font-weight: bold;
+  /* stylelint-disable-next-line color-named -- pg: 6.5 */
   border: 1px solid silver;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   border-radius: 100px;
   position: absolute;
   top: -1.3rem;
@@ -32,8 +35,9 @@
 }
 
 .btn-delete:active {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background: #ddd;
-  color: #222;
+  color: var(--pg-color-text);
 }
 
 .projects-container #grid {

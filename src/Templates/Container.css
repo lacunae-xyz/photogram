@@ -1,8 +1,9 @@
 .ele {
   display: inline-block;
+  /* stylelint-disable-next-line color-named -- pg: 6.5 */
   border: 1px solid silver;
   overflow: unset;
-  background-color: #fff;
+  background-color: var(--pg-color-surface-raised);
   text-align: left;
   page-break-inside: avoid;
   box-sizing: border-box;

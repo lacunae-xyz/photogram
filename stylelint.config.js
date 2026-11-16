@@ -1,0 +1,34 @@
+// Raw colours, radii, shadows and fonts belong in the design-system tokens.
+// The ones 06 §6.5 still has to fold into the scale carry `-- pg: 6.5` on their disable comment.
+const notAToken = /^(?!var\(--pg-|(inherit|initial|unset|none|0)$)/;
+
+export default {
+  ignoreFiles: [
+    'packages/design-system/tokens.css',
+    'dist/**',
+    'coverage/**',
+    'e2e/**',
+    'public/**',
+  ],
+  reportNeedlessDisables: true,
+  reportDescriptionlessDisables: true,
+  rules: {
+    'color-no-hex': true,
+    'color-named': 'never',
+    'function-disallowed-list': [
+      'rgb',
+      'rgba',
+      'hsl',
+      'hsla',
+      'hwb',
+      'oklch',
+      'lab',
+      'lch',
+    ],
+    'declaration-property-value-disallowed-list': {
+      '/^(border(-[a-z]+)*-radius|box-shadow|font|font-family|font-size)$/': [
+        notAToken,
+      ],
+    },
+  },
+};
