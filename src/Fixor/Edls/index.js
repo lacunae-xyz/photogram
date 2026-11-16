@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import compare from '../compare';
 import Table from '../Table';
 import CompareTable from '../CompareTable';
-import GoogleApi from '../GoogleApi'
-import ExportButton from '../ExportButton'
 import logo from '../../Header/logo.svg';
 import './index.css';
 
@@ -129,13 +127,6 @@ function Edls(props) {
 				</form>
 				<button onClick={onCopy} className="import-button-label">Copy</button>
 			</header>
-			<GoogleApi
-				apiKey={process.env.REACT_APP_GOOGLE_API_KEY}
-				clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
-				discoveryDocs={["https://sheets.googleapis.com/$discovery/rest?version=v4"]}
-				scope="https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file">
-				<ExportButton data={edl.data} imagePerSeconde={imagePerSeconde} />
-			</GoogleApi>
 			<br/>
 			{content}
 		</div>
