@@ -21,6 +21,16 @@ class Page extends Component {
   }
 
   componentDidMount() {
+    // Chromium updates hover at the start of the frame after a layout. Without a frame between the page shell's
+    // first layout and the tiles, the pointer enters the shell in the frame that lays out every tile: React's
+    // pointerover listeners run there, and the whole layout frame counts as a long task. A hidden tab has no frames.
+    this.shellHovered = document.hidden
+      ? Promise.resolve()
+      : new Promise(resolve =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => setTimeout(resolve)),
+          ),
+        );
     this.loadData();
   }
 
@@ -30,7 +40,8 @@ class Page extends Component {
     } else {
       this.application
         .get(this.props.id)
-        .then(project => {
+        .then(async project => {
+          await this.shellHovered;
           if (project.template === undefined) {
             project.template = 'small';
           }
