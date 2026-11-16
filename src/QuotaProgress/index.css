@@ -1,6 +1,6 @@
 .quota-progress-container {
   display: inline-flex;
-  background-color: white;
+  background-color: var(--pg-color-surface);
   margin: auto;
   min-height: 3.2rem;
 

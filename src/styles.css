@@ -30,5 +30,5 @@ body {
 
 .md-button:hover,
 .md-button:focus {
-  background-color: rgba(180, 220, 220, 0.5);
+  background-color: var(--pg-color-hover);
 }

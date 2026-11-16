@@ -29,7 +29,7 @@
   width: 25.6rem;
   transition-property: transform;
   transition-duration: 0.5s;
-  color: #222;
+  color: var(--pg-color-text);
   text-decoration: none;
   text-align: center;
 }

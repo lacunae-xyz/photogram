@@ -1,4 +1,4 @@
 .tiles-container {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--pg-font-mono);
   background-color: #eee;
 }

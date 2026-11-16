@@ -19,7 +19,7 @@
   display: inline-block;
   opacity: 0;
   background: #fff;
-  color: #444;
+  color: var(--pg-color-text-muted);
   font-weight: bold;
   border: 1px solid silver;
   border-radius: 100px;
@@ -33,7 +33,7 @@
 
 .btn-delete:active {
   background: #ddd;
-  color: #222;
+  color: var(--pg-color-text);
 }
 
 .projects-container #grid {
