@@ -4,11 +4,11 @@ import './index.css';
 import { useHistory } from 'react-router-dom';
 import useDocumentMeta from '../useDocumentMeta';
 import Header from '../Header';
-import ImportProject from '../ImportProject';
-import QuotaProgress from '../QuotaProgress';
 import Application from '../Application';
-import Card from './Card';
-import OpenProject from '../OpenProject';
+import './photogram-import-project';
+import './photogram-open-project';
+import './photogram-project-card';
+import './photogram-quota';
 
 function ListProject() {
   useDocumentMeta({
@@ -79,8 +79,12 @@ function ListProject() {
     <div className="projects-container">
       <Header nav="projects" />
       <div className="action-project">
-        <ImportProject onProject={files => onImportProject(files)} />
-        <OpenProject onProject={dirHandle => onOpenProject(dirHandle)} />
+        <photogram-import-project
+          onimport={event => onImportProject(event.detail.files)}
+        />
+        <photogram-open-project
+          onopen={event => onOpenProject(event.detail.dirHandle)}
+        />
       </div>
       {projects.length <= 0 ? (
         <img
@@ -92,16 +96,16 @@ function ListProject() {
       <ul id="grid">
         {projects.map(project => {
           return (
-            <Card
+            <photogram-project-card
               key={project.key}
               project={project}
-              onDeleteProject={key => onDeleteProject(key)}
-              onLinkProject={key => onLinkProject(key)}
+              onopen={event => onLinkProject(event.detail.key)}
+              ondelete={event => onDeleteProject(event.detail.key)}
             />
           );
         })}
       </ul>
-      <QuotaProgress value={quotas.value} max={quotas.max} />
+      <photogram-quota value={quotas.value} max={quotas.max} />
     </div>
   );
 }
