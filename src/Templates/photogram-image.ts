@@ -1,6 +1,6 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import empty from './Image/empty.svg';
+import empty from './empty.svg';
 
 @customElement('photogram-image')
 export class PhotogramImage extends LitElement {

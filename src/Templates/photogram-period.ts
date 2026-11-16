@@ -2,7 +2,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { dotStyles } from './dot-styles';
-import { periodToClassName, periodToIcon } from './Period/period';
+import { periodToClassName, periodToIcon } from './period';
 
 @customElement('photogram-period')
 export class PhotogramPeriod extends LitElement {

@@ -1,9 +1,10 @@
-import { periodToClassName, periodToSrc } from './period';
-import night from './weather-night.svg';
-import sunny from './weather-sunny.svg';
-import sunsetUp from './weather-sunset-up.svg';
-import sunsetDown from './weather-sunset-down.svg';
-import none from './weather-none.svg';
+import { periodToClassName, periodToIcon } from './period';
+
+const night = 'weather-night';
+const sunny = 'weather-sunny';
+const sunsetUp = 'weather-sunset-up';
+const sunsetDown = 'weather-sunset-down';
+const none = 'weather-none';
 
 describe('period', () => {
   test.each([
@@ -19,8 +20,8 @@ describe('period', () => {
     [undefined, 'hide', none],
     ['après-midi', 'hide', none],
     [' matin', 'hide', none],
-  ])('%s gives %s and %s', (value, className, src) => {
+  ])('%s gives %s and %s', (value, className, icon) => {
     expect(periodToClassName(value)).toEqual(className);
-    expect(periodToSrc(value)).toEqual(src);
+    expect(periodToIcon(value)).toEqual(icon);
   });
 });
