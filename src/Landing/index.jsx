@@ -43,6 +43,14 @@ export default function Landing() {
       .catch(error => console.log(error));
   }
 
+  function onOpenProject(dirHandle) {
+    application
+      .open(dirHandle)
+      .then(projects => setProjects(projects))
+      .then(_ => _checkQuotas())
+      .catch(error => console.log(error));
+  }
+
   function onDeleteProject(key) {
     ReactGA.event({
       category: 'Project',
@@ -82,7 +90,10 @@ export default function Landing() {
           />
         </div>
       )}
-      <EmptyProject onImportProject={files => onImportProject(files)} />
+      <EmptyProject
+        onImportProject={files => onImportProject(files)}
+        onOpenProject={dirHandle => onOpenProject(dirHandle)}
+      />
       <QuotaProgress value={quotas.value} max={quotas.max} />
       <Creators />
     </div>

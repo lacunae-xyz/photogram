@@ -1,5 +1,5 @@
 import { test, expect } from '../support/test';
-import { openFolder, readDataJson } from '../support/open-folder';
+import { openFolder, openedName, readDataJson, stubDirectoryPicker } from '../support/open-folder';
 import { expectCover, importRows, waitForServiceWorker } from '../support/projects';
 
 test.describe('Chromium', () => {
@@ -18,6 +18,37 @@ test.describe('Chromium', () => {
     await card.click();
     await expect(page.locator('.tiles-container .ele')).toHaveCount(importRows);
     expect(pageErrors).toEqual([]);
+  });
+
+  test('open a folder from the landing page', async ({ page }) => {
+    await stubDirectoryPicker(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: /Open/ }).click();
+    await expect(page.locator('.projects-card', { hasText: openedName })).toBeVisible();
+  });
+
+  test('cancelling the picker is not an error (B21)', async ({ page, pageErrors }) => {
+    await page.addInitScript(() => {
+      const target = window as unknown as { showDirectoryPicker: () => Promise<never>; pickerCalls: number };
+      target.pickerCalls = 0;
+      target.showDirectoryPicker = async () => {
+        target.pickerCalls++;
+        throw new DOMException('The user aborted a request.', 'AbortError');
+      };
+    });
+    const pickerCalls = () => page.evaluate(() => (window as unknown as { pickerCalls: number }).pickerCalls);
+    const settle = () => page.evaluate(() => new Promise(resolve => setTimeout(resolve)));
+
+    await page.goto('/projects');
+    await page.locator('#open-project-label').click();
+    await expect.poll(pickerCalls).toBe(1);
+    await settle();
+    await page.goto('/');
+    await page.getByRole('button', { name: /Open/ }).click();
+    await expect.poll(pickerCalls).toBe(1);
+    await settle();
+    expect(pageErrors).toEqual([]);
+    await expect(page.locator('.projects-card')).toHaveCount(0);
   });
 
   test('edits are written to data.json', async ({ page }) => {
@@ -63,10 +94,16 @@ test.describe('Chromium', () => {
   });
 });
 
-// B20: the button shows everywhere and throws where showDirectoryPicker is missing. Hidden in phase 3.
-test('Open project throws without showDirectoryPicker (B20)', async ({ page, browserName, pageErrors }) => {
-  test.skip(browserName === 'chromium', 'Chromium has showDirectoryPicker');
+test('Open is hidden without showDirectoryPicker (B20)', async ({ page, pageErrors }) => {
+  await page.addInitScript(() => {
+    delete (window as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+    delete (Window.prototype as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+  });
   await page.goto('/projects');
-  await page.locator('#open-project-label').click();
-  await expect.poll(() => pageErrors.map(error => error.message).join('\n')).toMatch(/showDirectoryPicker/);
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await expect(page.locator('#open-project-label')).toHaveCount(0);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Create' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Open' })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });

@@ -7,6 +7,16 @@
   text-decoration: none;
 }
 
+.empty-project-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+}
+
 .empty-project-item {
   display: flex;
   border-radius: 0.8rem;

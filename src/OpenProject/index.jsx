@@ -1,15 +1,37 @@
 import React from 'react';
 import './index.css';
 
-export default function OpenProject(props) {
-  async function handleDir(event) {
-    event.preventDefault();
-    const dirHandle = await window.showDirectoryPicker({
+export function canOpenFolder() {
+  return 'showDirectoryPicker' in window;
+}
+
+/** Resolves with the picked folder, or undefined when the picker is cancelled. */
+export async function pickFolder() {
+  try {
+    return await window.showDirectoryPicker({
       id: 'photogram-projects',
       mode: 'readwrite',
       startIn: 'pictures',
     });
-    props.onProject(dirHandle);
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+export default function OpenProject(props) {
+  if (!canOpenFolder()) {
+    return null;
+  }
+
+  async function handleDir(event) {
+    event.preventDefault();
+    const dirHandle = await pickFolder();
+    if (dirHandle) {
+      props.onProject(dirHandle);
+    }
   }
 
   return (
