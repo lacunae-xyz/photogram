@@ -33,3 +33,10 @@ test('compare two EDLs', async ({ page }) => {
   await page.mouse.move(0, 0);
   await expect(page.locator('#fixor-table')).toHaveScreenshot('fixor-compare.png');
 });
+
+test('the FPS label names the FPS input (B7)', async ({ page }) => {
+  await page.goto('/fixor');
+  await page.locator('#import-button').setInputFiles(edl('v1'));
+  await expect(page.getByLabel('FPS')).toHaveId('fps-input');
+  await expect(page.getByLabel('Compare')).toHaveId('compare-button');
+});

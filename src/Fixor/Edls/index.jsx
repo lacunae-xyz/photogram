@@ -128,7 +128,7 @@ function Edls(props) {
               </select>
             </span>
             <span className="fixor-tool-action">
-              <label htmlFor="compare-button">FPS: </label>
+              <label htmlFor="fps-input">FPS: </label>
               <input
                 type="number"
                 id="fps-input"
