@@ -74,7 +74,7 @@ function splitLines(rawData) {
 
 function parseLine(value) {
   let number = value.match(/(^\d+)\s+(\S+)\s+/);
-  let dates = value.match(/(\d+:\d+:\d+:\d+)/g);
+  let dates = value.match(/(\d+:\d+:\d+[:;]\d+)/g);
   let vfxName = value.match(/.*FROM CLIP NAME:\s*(.*)\s*\n/);
   let idAndDesc = value.match(/LOC:.*\s([\S]+)\s\/\/\s(.*)\n/);
   let sourceFile = value.match(/SOURCE FILE: ([\S]+)/);
@@ -103,7 +103,7 @@ function parseLine(value) {
 }
 
 function toDate(value) {
-  let stringValues = value.split(':');
+  let stringValues = value.split(/[:;]/);
   if (stringValues.length === 4) {
     let values = stringValues.map(s => parseInt(s));
     return {

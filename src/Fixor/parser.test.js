@@ -212,13 +212,12 @@ it('skip an event without FROM CLIP NAME', () => {
   expect(result).toEqual([]);
 });
 
-// Drop-frame timecodes (HH:MM:SS;FF) are not matched: only the LOC timecode is found and parsing throws.
-it('drop-frame timecodes throw', () => {
+it('parse drop-frame timecodes (B23)', () => {
   let dropFrame = oneEvent.replace(
     '16:51:25:10 16:51:28:00 01:01:05:19 01:01:08:09',
     '16:51:25;10 16:51:28;00 01:01:05;19 01:01:08;09',
   );
-  expect(() => parser(dropFrame)).toThrow(TypeError);
+  expect(parser(dropFrame)).toStrictEqual(parser(oneEvent));
 });
 
 describe('duration', () => {
