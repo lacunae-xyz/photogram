@@ -4,6 +4,7 @@ import ProjectsDataSource from "./ProjectsDataSource";
 import Uuidv4 from "../FilesParser/uuidv4";
 import Images from "../FilesParser/Images";
 import IndexedDBProjectsDataSource from "./IndexedDBProjectsDataSource";
+import MigrationDataSource from "./MigrationDataSource";
 
 describe("Application", () => {
 
@@ -79,6 +80,63 @@ describe("Application", () => {
             await expect(images.has(identifier)).resolves.toEqual(true);
         })
 
+        test("more than 16 labels wraps the palette", async () => {
+            const labels = [...Array(17).keys()].map(i => `label${i}`);
+            const csv = createCsv({ content: labels.map((label, i) => `${i + 1};action;${label}`).join("\n") });
+            const project = await addProject(Application.createNull(), csv);
+            expect(Object.keys(project.colors)).toEqual(labels);
+            expect(project.colors["label0"]).toEqual("#F44336");
+            expect(project.colors["label15"]).toEqual("#795548");
+            expect(project.colors["label16"]).toEqual("#F44336");
+        });
+
+        test("empty and whitespace labels get no colour", async () => {
+            const csv = createCsv({ content: "1;action;\n2;action;   \n3;action;label" });
+            const project = await addProject(Application.createNull(), csv);
+            expect(project.colors).toEqual({ "label": "#F44336" });
+        });
+
+        test("image 10 is not matched to row 1 and vice versa", async () => {
+            const project = await addProject(Application.createNull(), createCsv({ content: "1;a\n10;b" }), [
+                createJpg({ name: "10.jpg" }), createJpg({ name: "1.jpg" }),
+            ]);
+            expect(project.data.map(d => d.url)).toEqual([imageUrl("1.jpg"), imageUrl("10.jpg")]);
+        });
+
+        test("two images for one row takes the first", async () => {
+            const project = await addProject(Application.createNull(), createCsv({ content: "1;a" }), [
+                createJpg({ name: "1.jpg" }), createPng({ name: "1.png" }),
+            ]);
+            expect(project.data[0].url).toEqual(imageUrl("1.jpg"));
+        });
+
+        test("upper case extension", async () => {
+            const project = await addProject(Application.createNull(), createCsv({ content: "1;a" }), [
+                createJpg({ name: "1.JPG" }),
+            ]);
+            expect(project.data[0].url).toEqual(imageUrl("1.JPG"));
+        });
+
+        test("row without image has no url", async () => {
+            const project = await addProject(Application.createNull(), createCsv({ content: "1;a\n2;b" }), [
+                createJpg({ name: "1.jpg" }),
+            ]);
+            expect(project.data[1].url).toEqual(undefined);
+        });
+
+        test("ignores data.json", async () => {
+            const csv = createCsv({ content: "1;action" });
+            const json = createJson({ content: JSON.stringify({ key: "other", name: "from json", data: [], colors: {} }) });
+            const projects = await Application.createNull().add([csv, json]);
+            expect(projects).toEqual([{
+                key: Uuidv4.createNull().generate(),
+                name: "Project (0)",
+                data: await new Csv().execute([csv]),
+                colors: {},
+                template: "small",
+            }]);
+        });
+
         test("fails if no data.csv is present", async () => {
             await expect(Application.createNull().add([])).rejects.toThrow("Could not found data.csv");
         });
@@ -94,15 +152,20 @@ describe("Application", () => {
 
     describe("open", () => {
 
-        function createDirHandle(files) {
+        function createDirHandle(files, directories = []) {
             return {
                 name: "dir",
-                values: () => files.map(file => {
+                values: () => directories.map(name => {
+                    return {
+                        kind: "directory",
+                        name: name,
+                    }
+                }).concat(files.map(file => {
                     return {
                         kind: "file",
                         getFile: () => file,
                     }
-                })
+                }))
             };
         }
         test("empty csv", async () => {
@@ -165,6 +228,28 @@ describe("Application", () => {
             await expect(source.open(dirHandle)).resolves.toEqual([createProject({ dirLink: dirHandle })]);
         });
 
+        test("subdirectories are ignored", async () => {
+            const csv = createCsv({ content: "1;action" });
+            const dirHandle = createDirHandle([csv], ["sub"]);
+            const projects = await Application.createNull().open(dirHandle);
+            expect(projects[0].data).toEqual(await new Csv().execute([csv]));
+        });
+
+        test("invalid data.json rejects", async () => {
+            const dirHandle = createDirHandle([createJson({ content: "{ not json" }), createCsv()]);
+            await expect(Application.createNull().open(dirHandle)).rejects.toThrow(SyntaxError);
+        });
+
+        test("from data.json re-caches images under the project key", async () => {
+            const images = Images.createNull();
+            const project = createProject();
+            delete project.dirLink;
+            const dirHandle = createDirHandle([createJson({ content: JSON.stringify(project) }), createJpg({ name: "1.jpg" })]);
+            await Application.createNull({ images: images }).open(dirHandle);
+            await expect(images.has(project.key)).resolves.toEqual(true);
+            await expect(images.has(Uuidv4.createNull().generate())).resolves.toEqual(false);
+        });
+
         test("fails if no data.csv is present", async () => {
             await expect(Application.createNull().open(createDirHandle([]))).rejects.toThrow("Could not found data.csv");
         });
@@ -189,6 +274,20 @@ describe("Application", () => {
             const project = await addProject(application);
             await expect(application.list()).resolves.toEqual([project]);
         });
+
+        test("opened projects first, then imported ones", async () => {
+            const imported = Object.assign(createProject({ dirLink: null }), { key: "imported" });
+            delete imported.dirLink;
+            const opened = Object.assign(createProject(), { key: "opened" });
+            const application = Application.createNull({
+                dataSource: new MigrationDataSource(
+                    IndexedDBProjectsDataSource.createNull({ projects: [opened] }),
+                    ProjectsDataSource.createNull({ projects: [imported] }),
+                )
+            });
+            const projects = await application.list();
+            expect(projects.map(p => p.key)).toEqual(["opened", "imported"]);
+        });
     });
 
     describe("delete", () => {
@@ -202,6 +301,17 @@ describe("Application", () => {
 
         test("fails is project not present", async () => {
             await expect(Application.createNull().delete("id")).rejects.toThrow("");
+        });
+
+        // B1: the project is removed, then clearing the missing cache rejects. The fix resolves with [].
+        test("project without image cache rejects after removing it (B1)", async () => {
+            const images = Images.createNull();
+            const application = Application.createNull({ images: images });
+            const project = await addProject(application, createCsv(), []);
+            await expect(images.has(project.key)).resolves.toEqual(false);
+
+            await expect(application.delete(project.key)).rejects.toThrow(`Cannot delete the cache: ${project.key}`);
+            await expect(application.list()).resolves.toEqual([]);
         });
     });
 
@@ -275,6 +385,15 @@ describe("Application", () => {
             await expect(application.needsPermission("key")).resolves.toEqual(false);
         });
 
+        test("false when denied", async () => {
+            const application = Application.createNull({
+                dataSource: IndexedDBProjectsDataSource.createNull({
+                    projects: [createProject({ dirLink: createDirLink({ queryPermission: () => "denied" }) })]
+                })
+            });
+            await expect(application.needsPermission("key")).resolves.toEqual(false);
+        });
+
         test("false if no dirLink present", async () => {
             const application = Application.createNull({
                 dataSource: ProjectsDataSource.createNull({
@@ -341,6 +460,34 @@ describe("Application", () => {
                 const actual = await application.get(project.key);
                 expect(actual.colors).toEqual({});
                 expect(actual.data[0].label).toEqual(undefined);
+            });
+
+            // B13: deleteColor leaves an undefined key that JSON drops, so the next label reuses a colour.
+            test("new label after delete with a JSON round trip reuses a colour (B13)", async () => {
+                const application = Application.createNull();
+                const project = await addProject(application, createCsv({ content: "1;a;A\n2;b;B\n3;c;C\n4;d" }));
+
+                await application.deleteColor(project.key, "A");
+                await application.update(project.key, { id: "4", label: "D" });
+
+                const actual = await application.get(project.key);
+                expect(actual.colors).toEqual({ B: "#E91E63", C: "#9C27B0", D: "#9C27B0" });
+            });
+
+            test("new label after delete without a JSON round trip gets a new colour", async () => {
+                const project = Object.assign(createProject(), {
+                    data: [{ id: "1", label: "A" }, { id: "2", label: "B" }, { id: "3", label: "C" }, { id: "4" }],
+                    colors: { A: "#F44336", B: "#E91E63", C: "#9C27B0" },
+                });
+                const application = Application.createNull({
+                    dataSource: IndexedDBProjectsDataSource.createNull({ projects: [project] })
+                });
+
+                await application.deleteColor("key", "A");
+                await application.update("key", { id: "4", label: "D" });
+
+                const actual = await application.get("key");
+                expect(actual.colors).toEqual({ A: undefined, B: "#E91E63", C: "#9C27B0", D: "#3F51B5" });
             });
 
             test("do nothing if element not found", async () => {
@@ -453,11 +600,79 @@ describe("Application", () => {
             });
         });
     });
+
+    describe("legacy localStorage projects", () => {
+        const legacy = {
+            key: "legacy",
+            name: "Legacy",
+            data: [{ id: "1", sequence: "1", action: "action", label: "label", periode: "matin", fx: "" }],
+            colors: { label: "#F44336" },
+            template: "small",
+            mainPicture: "/project/legacy/images/1.jpg/",
+        };
+
+        function createApplication() {
+            return Application.createNull({
+                dataSource: new MigrationDataSource(
+                    IndexedDBProjectsDataSource.createNull(),
+                    ProjectsDataSource.create(),
+                )
+            });
+        }
+
+        beforeEach(() => {
+            localStorage.setItem("projects", JSON.stringify([legacy]));
+        });
+
+        afterEach(() => {
+            localStorage.clear();
+        });
+
+        test("list", async () => {
+            await expect(createApplication().list()).resolves.toEqual([legacy]);
+        });
+
+        test("get", async () => {
+            await expect(createApplication().get("legacy")).resolves.toEqual(legacy);
+        });
+
+        test("save keeps the shape", async () => {
+            await createApplication().update("legacy", { id: "1", sequence: "1", action: "changed", label: "other" });
+
+            expect(JSON.parse(localStorage.getItem("projects"))).toEqual([Object.assign({}, legacy, {
+                data: [{ id: "1", sequence: "1", action: "changed", label: "other" }],
+                colors: { label: "#F44336", other: "#E91E63" },
+            })]);
+        });
+
+        test("delete", async () => {
+            const images = Images.createNull();
+            const application = Application.createNull({
+                images: images,
+                dataSource: new MigrationDataSource(
+                    IndexedDBProjectsDataSource.createNull(),
+                    ProjectsDataSource.create(),
+                )
+            });
+            await images.execute("legacy", [createJpg({ name: "1.jpg" })]);
+
+            await expect(application.delete("legacy")).resolves.toEqual([]);
+            expect(JSON.parse(localStorage.getItem("projects"))).toEqual([]);
+        });
+    });
 });
 
-async function addProject(application, csv = createCsv()) {
-    const result = await application.add([csv, createPng()]);
+async function addProject(application, csv = createCsv(), images = [createPng()]) {
+    const result = await application.add([csv, ...images]);
     return result[result.length - 1];
+}
+
+function imageUrl(name) {
+    return `/project/${Uuidv4.createNull().generate()}/images/${name}/`;
+}
+
+function createJpg({ name = "image.jpg", content = "" } = {}) {
+    return new File([content], name, { type: 'image/jpeg' });
 }
 
 function createCsv({ name = "data.csv", content = "" } = {}) {

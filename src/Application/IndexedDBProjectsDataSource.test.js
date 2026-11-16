@@ -1,6 +1,6 @@
 import IndexedDBProjectsDataSource from "./IndexedDBProjectsDataSource";
 
-describe("ProjectsDataSource", () => {
+describe("IndexedDBProjectsDataSource", () => {
     describe("create", () => {
         beforeAll(() => {
             global.indexedDB = null;
@@ -60,7 +60,40 @@ describe("ProjectsDataSource", () => {
             const source = IndexedDBProjectsDataSource.createNull();
             await expect(source.save(createProject())).rejects.toThrow();
         });
+
+        test("writes data.json", async () => {
+            const source = IndexedDBProjectsDataSource.createNull();
+            await source.add(createProject());
+            await source.save(createProject({ data: ["new"] }));
+            await expect(source.get("key")).resolves.toEqual(createProject({ data: ["new"] }));
+        });
+
+        // B14: the DB is updated before data.json is written, so a failed write leaves them out of sync.
+        test("when data.json cannot be written, the DB is already updated (B14)", async () => {
+            const source = IndexedDBProjectsDataSource.createNull();
+            await source.add(createProject());
+            failWrites(source);
+
+            await expect(source.save(createProject({ data: ["new"] }))).rejects.toThrow("Permission for dir was denied");
+
+            await expect(source.list()).resolves.toEqual([createProject({ data: ["new"] })]);
+            await expect(source.get("key")).resolves.toEqual(createProject());
+        });
     })
+
+    // B15: list reads the DB, get reads data.json.
+    describe("data.json edited outside the app (B15)", () => {
+        test("list keeps the DB copy, get returns the file", async () => {
+            const source = IndexedDBProjectsDataSource.createNull();
+            await source.add(createProject());
+            await editOutside(source, Object.assign(createProject(), { name: "edited" }));
+
+            const listed = await source.list();
+            expect(listed[0].name).toEqual(undefined);
+            const project = await source.get("key");
+            expect(project.name).toEqual("edited");
+        });
+    });
 
     describe("delete", () => {
         test("one existing project", async () => {
@@ -99,4 +132,16 @@ function createProject({ data } = { data: [] }) {
         colors: {},
         dirLink: { name: "dir" },
     }
+}
+
+function failWrites(source) {
+    source._fileHandle.write = async (dirHandle) => {
+        throw Error(`Permission for ${dirHandle.name} was denied`);
+    };
+}
+
+async function editOutside(source, project) {
+    const dirLink = project.dirLink;
+    delete project.dirLink;
+    await source._fileHandle.write(dirLink, "data.json", project);
 }
