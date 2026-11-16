@@ -55,6 +55,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - name: actionlint
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: -color
 
   build:
     runs-on: ubuntu-latest
