@@ -220,6 +220,25 @@ describe('IndexedDBProjectsDataSource', () => {
 
       await expect(keysOf(source)).resolves.toEqual(['key', 'z']);
     });
+
+    test('get returns the file even when the DB cannot be refreshed', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(createProject());
+      await editOutside(
+        source,
+        Object.assign(createProject(), { name: 'edited' }),
+      );
+      await failDbWrites(source);
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const project = await source.get('key');
+
+      expect(project.name).toEqual('edited');
+      expect(consoleError).toHaveBeenCalled();
+      consoleError.mockRestore();
+    });
   });
 
   describe('delete', () => {
@@ -291,4 +310,22 @@ async function editOutside(
 ) {
   const { dirLink, ...data } = project;
   await source._fileHandle.write(dirLink!, 'data.json', data);
+}
+
+async function failDbWrites(source: IndexedDBProjectsDataSource) {
+  const db = await source.open();
+  const transaction = db.transaction.bind(db);
+  const failing = {
+    set onsuccess(_: unknown) {},
+    set onerror(handler: (event: unknown) => void) {
+      handler({ target: { error: new Error('QuotaExceededError') } });
+    },
+  };
+  db.transaction = ((...args: Parameters<IDBDatabase['transaction']>) => {
+    const tx = transaction(...args);
+    return {
+      objectStore: (name: string) =>
+        Object.assign(tx.objectStore(name), { put: () => failing }),
+    };
+  }) as unknown as IDBDatabase['transaction'];
 }

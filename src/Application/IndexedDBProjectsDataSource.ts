@@ -179,9 +179,12 @@ export default class IndexedDBProjectsDataSource {
         'data.json',
       );
       // data.json may have been edited outside the app: list() reads the DB, so keep it in step.
+      // Best effort: data.json is the source of truth, a stale list is better than no project.
       const { dirLink: _, ...stored } = projectDb;
       if (JSON.stringify(stored) !== JSON.stringify(projectFs)) {
-        await this._save(id, projectFs);
+        await this._save(id, projectFs).catch(error => {
+          console.error(`Could not refresh the stored project ${id}`, error);
+        });
       }
       return { ...projectFs, dirLink: projectDb.dirLink };
     } catch (error) {
