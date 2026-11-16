@@ -1,0 +1,19 @@
+{
+  "name": "photogram-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc",
+    "screenshots:update": "./docker.sh --project=screenshots --project=e2e --update-snapshots",
+    "perf:budgets": "./docker.sh --budgets"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.65.1",
+    "@types/node": "26.6.6",
+    "pdfjs-dist": "6.5.438",
+    "serve": "14.2.8",
+    "typescript": "7.0.2"
+  }
+}
