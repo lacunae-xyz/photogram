@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
+import backgroundColor from './background';
 import './Container.css'
 class Container extends Component {
 
     render() {
-        let backgroundColor
-        if (this.props.colorDistribution === "card") {
-            backgroundColor = this.props.color
-        } else {
-            backgroundColor = null
-        }
         return (
-            <div className={`ele ${this.props.className}`} style={{ backgroundColor: backgroundColor }} onClick={this.props.onClick}>
+            <div className={`ele ${this.props.className}`} style={{ backgroundColor: backgroundColor(this.props.colorDistribution, this.props.color) }} onClick={this.props.onClick}>
                 {this.props.children}
             </div>
         )

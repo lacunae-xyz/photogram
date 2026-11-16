@@ -121,4 +121,4 @@ function dateDuration(din, dout, numberOfImages) {
 }
 
 export default parse;
-export {Line};
+export {Line, dateDuration};
