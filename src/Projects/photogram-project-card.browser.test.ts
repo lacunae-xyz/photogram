@@ -93,6 +93,36 @@ describe('photogram-project-card', () => {
     expect(location.pathname).not.toBe('/project/p1');
   });
 
+  it('leaves a modified click on the name to the browser', async () => {
+    const card = await renderCard(project);
+    const onOpen = vi.fn();
+    card.addEventListener('open', onOpen);
+    const link = inCard(card, 'pg-card')!.shadowRoot!.querySelector('a')!;
+    const leftToBrowser: boolean[] = [];
+    // Cancels the navigation the browser would start once the card has seen the click.
+    const block = (event: Event) => {
+      leftToBrowser.push(!event.defaultPrevented);
+      event.preventDefault();
+    };
+    window.addEventListener('click', block);
+    try {
+      for (const modifier of ['metaKey', 'ctrlKey', 'shiftKey', 'altKey', '']) {
+        link.dispatchEvent(
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            ...(modifier ? { [modifier]: true } : {}),
+          }),
+        );
+      }
+    } finally {
+      window.removeEventListener('click', block);
+    }
+    expect(leftToBrowser).toEqual([true, true, true, true, false]);
+    expect(onOpen).toHaveBeenCalledOnce();
+  });
+
   it('deletes without opening', async () => {
     const card = await renderCard(project);
     const onOpen = vi.fn();

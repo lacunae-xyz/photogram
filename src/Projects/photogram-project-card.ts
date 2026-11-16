@@ -80,8 +80,11 @@ export class PhotogramProjectCard extends LitElement {
     const onLink = event
       .composedPath()
       .some(target => target instanceof HTMLAnchorElement);
-    // A modified click on the name opens it in a new tab or window, as links do.
-    if (onLink && (event.metaKey || event.ctrlKey || event.shiftKey)) {
+    // A modified click on the name does what it does on any link (new tab, window, download).
+    if (
+      onLink &&
+      (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    ) {
       return;
     }
     event.preventDefault();
