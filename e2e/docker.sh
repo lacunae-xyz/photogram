@@ -4,12 +4,16 @@
 # Usage: ./docker.sh [playwright test args]
 #        E2E_NODE_MODULES_VOLUME=name ./docker.sh ...   separate node_modules volume for concurrent runs
 #        ./docker.sh --budgets    rewrites perf/budgets.json
+#        ./docker.sh --perf       the CI perf gate: 3 runs per scenario, median blocking time
 set -eu
 cd "$(dirname "$0")/.."
 version=$(node -p "require('./e2e/package.json').devDependencies['@playwright/test']")
 if [ "${1:-}" = "--budgets" ]; then
   shift
   command='node perf/update-budgets.mjs "$@"'
+elif [ "${1:-}" = "--perf" ]; then
+  shift
+  command='node perf/check-budgets.mjs "$@"'
 else
   command='npx playwright test "$@"'
 fi

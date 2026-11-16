@@ -1,15 +1,9 @@
-import { LitElement, css, html, type PropertyValues } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
-import FontSizeAdjuster from './FontSizeAdjuster';
+import { observeTitle, unobserveTitle } from './titleSizing';
 
-const fontSizeAdjuster = new FontSizeAdjuster(0.2, 2);
-
-// Fits `.action` to `.action-container` with an inline font-size, which e2e's waitForTitleSizing reads.
-function sizeTitle(title: HTMLElement) {
-  fontSizeAdjuster.apply(title);
-}
-
+// Fits `.action` to `.action-container` with an inline font-size, which e2e's waitForTitleSizing reads. titleSizing
+// re-sizes it when its text changes, so `updated()` has nothing to do.
 @customElement('photogram-action')
 export class PhotogramAction extends LitElement {
   static styles = css`
@@ -25,28 +19,34 @@ export class PhotogramAction extends LitElement {
 
   @property() accessor value: string | undefined;
 
-  #title = createRef<HTMLElement>();
+  // Not a `ref()`: Lit clears those on disconnect, before `disconnectedCallback` could unobserve the title.
+  #title: HTMLElement | null = null;
 
-  #scheduled = false;
-
-  protected updated(changed: PropertyValues<this>) {
-    if (!this.#scheduled) {
-      this.#scheduled = true;
-      setTimeout(() => this.#sizeTitle(), 200);
-    } else if (changed.has('value')) {
-      this.#sizeTitle();
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.#title) {
+      observeTitle(this.#title);
     }
   }
 
-  #sizeTitle() {
-    if (this.#title.value) {
-      sizeTitle(this.#title.value);
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.#title) {
+      unobserveTitle(this.#title);
+    }
+  }
+
+  protected firstUpdated() {
+    this.#title = this.renderRoot.querySelector<HTMLElement>('.action');
+    // Lit still renders an element removed before its first update: it is observed once connected.
+    if (this.isConnected && this.#title) {
+      observeTitle(this.#title);
     }
   }
 
   render() {
     return html`<div part="container" class="action-container">
-      <p class="action" ${ref(this.#title)}>${this.value}</p>
+      <p class="action">${this.value}</p>
     </div>`;
   }
 }

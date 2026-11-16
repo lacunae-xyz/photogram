@@ -1,6 +1,6 @@
 import { test, expect, tileSelector } from '../support/test';
 import { addToOpenedFolder, openFolder, openedName, readDataJson, stubDirectoryPicker } from '../support/open-folder';
-import { expectCover, importRows, waitForServiceWorker } from '../support/projects';
+import { expectCover, importRows, storedProject, waitForServiceWorker } from '../support/projects';
 
 test.describe('Chromium', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'showDirectoryPicker is Chromium only');
@@ -69,10 +69,16 @@ test.describe('Chromium', () => {
     const image = page.locator(tileSelector).nth(2).locator('.img');
     await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
 
+    const key = page.url().split('/').pop()!;
+
     await addToOpenedFolder(page, '3.jpg');
     await page.goto('/projects');
     await page.locator('#open-project-label').click();
     await expect(page.locator('.projects-card', { hasText: openedName })).toHaveCount(1);
+    // The card is there from the first open: wait for the reopen to be saved before opening it.
+    await expect
+      .poll(async () => ((await storedProject(page, key))?.data as { url?: string }[] | undefined)?.[2]?.url)
+      .toMatch(/\/images\/3\.jpg\/$/);
     await page.locator('.projects-card', { hasText: openedName }).click();
     await expect(image).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
     await expect.poll(async () => (await readDataJson(page)).data[2].url).toMatch(/\/images\/3\.jpg\/$/);

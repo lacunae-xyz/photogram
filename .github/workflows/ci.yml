@@ -115,7 +115,7 @@ jobs:
           if [ "$UPDATE_BUDGETS" = true ]; then
             node perf/update-budgets.mjs --output=test-results-perf
           else
-            npx playwright test --project=perf --workers=1 --output=test-results-perf
+            node perf/check-budgets.mjs --output=test-results-perf
           fi
         env:
           PERF_SLOW: ${{ (github.event_name == 'schedule' || env.UPDATE_BUDGETS == 'true') && '1' || '' }}

@@ -62,12 +62,18 @@ function report(scenario: string, measure: Measure, wallClockMs: number) {
   info.annotations.push({ type: scenario, description: JSON.stringify({ ...measure, wallClockMs: Math.round(wallClockMs) }) });
   if (process.env.PERF_RECORD) {
     fs.appendFileSync(process.env.PERF_RECORD, JSON.stringify({ scenario, ...measure }) + '\n');
+  }
+  // update-budgets.mjs records without checking. check-budgets.mjs checks LayoutCount here and the blocking time median itself.
+  const recordOnly = process.env.PERF_RECORD && !process.env.PERF_CHECK;
+  if (recordOnly) {
     return;
   }
   const budget = budgets[scenario];
   expect(budget, `budget for ${scenario} in perf/budgets.json`).toBeDefined();
   expect.soft(measure.layoutCount, `${scenario} LayoutCount`).toBeLessThanOrEqual(budget.layoutCount);
-  expect.soft(measure.totalBlockingTimeMs, `${scenario} total blocking time`).toBeLessThanOrEqual(budget.totalBlockingTimeMs);
+  if (!process.env.PERF_RECORD) {
+    expect.soft(measure.totalBlockingTimeMs, `${scenario} total blocking time`).toBeLessThanOrEqual(budget.totalBlockingTimeMs);
+  }
 }
 
 async function openLargeProject(page: Page, rows: number) {

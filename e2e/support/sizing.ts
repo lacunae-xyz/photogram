@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test';
 
 /**
- * Waits until FontSizeAdjuster is done: every `.action` has an inline font-size that holds across two frames.
+ * Waits until title sizing (src/Templates/titleSizing.ts) is done: every `.action` has an inline font-size that holds across two frames.
  * Holds until the Lit port changes the sizing (06 §6.5 item 7).
  */
 export async function waitForTitleSizing(page: Page, timeout = 30_000) {
