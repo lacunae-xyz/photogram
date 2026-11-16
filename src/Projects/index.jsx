@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import ReactGA from 'react-ga';
+import track from '../track';
 import './index.css';
 import { useHistory } from 'react-router-dom';
 import Header from '../Header';
@@ -31,10 +31,7 @@ function ListProject() {
   }
 
   function onImportProject(files) {
-    ReactGA.event({
-      category: 'Project',
-      action: 'create',
-    });
+    track('project-create');
     application
       .add(files)
       .then(projects => setProjects(projects))
@@ -43,10 +40,7 @@ function ListProject() {
   }
 
   function onOpenProject(dirHandle) {
-    ReactGA.event({
-      category: 'Project',
-      action: 'create',
-    });
+    track('project-create');
     application
       .open(dirHandle)
       .then(projects => setProjects(projects))
@@ -55,10 +49,7 @@ function ListProject() {
   }
 
   function onDeleteProject(key) {
-    ReactGA.event({
-      category: 'Project',
-      action: 'delete',
-    });
+    track('project-delete');
     application
       .delete(key)
       .then(projects => setProjects(projects))

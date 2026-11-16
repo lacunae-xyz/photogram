@@ -27,7 +27,6 @@
     <meta name="twitter:card" content="summary">
     <!--  Non-Essential, But Recommended -->
     <meta property="og:site_name" content="photogram.app">
-    <!--  Non-Essential, But Required for Analytics -->
     <meta name="twitter:site" content="@sagix">
 
     <title>Photogram - 🎞 A tool for editor assistants 🚀</title>
@@ -42,6 +41,8 @@
       "logo": "https://photogram.app/android-chrome-512x512.png"
     }
     </script>
+    <!-- Umami Cloud, cookieless. The website id is public. umamiBeforeSend (src/track.js) strips project ids from URLs. -->
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="UMAMI_WEBSITE_ID" data-domains="photogram.app" data-before-send="umamiBeforeSend"></script>
   </head>
   <body>
     <noscript>

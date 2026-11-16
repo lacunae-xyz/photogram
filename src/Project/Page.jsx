@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactGA from 'react-ga';
+import track from '../track';
 import Image from '../FilesParser/Images';
 import Toolbar from './Toolbar';
 import Configuration from './Configuration';
@@ -47,20 +47,12 @@ class Page extends Component {
   }
 
   back() {
-    ReactGA.event({
-      category: 'Project',
-      action: 'back',
-    });
+    track('project-back');
     this.props.onBack();
   }
 
   print() {
-    let projectSize = this.state.project.data.length;
-    ReactGA.event({
-      category: 'Project',
-      action: 'print',
-      value: projectSize,
-    });
+    track('project-print', { tiles: this.state.project.data.length });
     window.print();
   }
 
