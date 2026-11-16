@@ -46,6 +46,11 @@ class Page extends Component {
     }
   }
 
+  // Controlled checkboxes revert on click until the save reloads the project: show the new value now.
+  showSetting(setting) {
+    this.setState({ project: { ...this.state.project, ...setting } });
+  }
+
   back() {
     track('project-back');
     this.props.onBack();
@@ -151,6 +156,7 @@ class Page extends Component {
           </div>
           <div className="layout-right">
             <Configuration
+              colorDistribution={this.state.project.colorDistribution}
               defaultColor={this.state.project.defaultColor}
               colors={this.state.project.colors}
               template={this.state.project.template}
@@ -176,21 +182,23 @@ class Page extends Component {
                   .deleteColor(this.props.id, key)
                   .then(() => this.loadData())
               }
-              onColorDistributionChange={distribution =>
+              onColorDistributionChange={distribution => {
+                this.showSetting({ colorDistribution: distribution });
                 this.application
                   .updateColorDistribution(this.props.id, distribution)
-                  .then(() => this.loadData())
-              }
+                  .then(() => this.loadData());
+              }}
               onFontFamilyChange={fontFamily =>
                 this.application
                   .updateFontFamily(this.props.id, fontFamily)
                   .then(() => this.loadData())
               }
-              onPrintSpaceAroundChange={printSpaceAround =>
+              onPrintSpaceAroundChange={printSpaceAround => {
+                this.showSetting({ printSpaceAround });
                 this.application
                   .updatePrintSpaceAround(this.props.id, printSpaceAround)
-                  .then(() => this.loadData())
-              }
+                  .then(() => this.loadData());
+              }}
             />
           </div>
         </div>

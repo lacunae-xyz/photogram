@@ -147,6 +147,7 @@ class Configuration extends Component {
             <input
               id="color-distribution"
               type="checkBox"
+              checked={this.props.colorDistribution === 'card'}
               onChange={event =>
                 this.props.onColorDistributionChange(
                   event.target.checked ? 'card' : 'indicator',

@@ -138,3 +138,24 @@ export async function storedProjectKeys(page: Page) {
       }),
   );
 }
+
+/** A project as stored in the app's IndexedDB store, to wait for a save before reloading. */
+export async function storedProject(page: Page, key: string) {
+  return page.evaluate(
+    key =>
+      new Promise<Record<string, unknown> | undefined>((resolve, reject) => {
+        const request = indexedDB.open('projects');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const entry = db.transaction('store').objectStore('store').get(key);
+          entry.onerror = () => reject(entry.error);
+          entry.onsuccess = () => {
+            db.close();
+            resolve(entry.result?.data);
+          };
+        };
+      }),
+    key,
+  );
+}
