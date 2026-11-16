@@ -594,7 +594,7 @@ describe('Application', () => {
       });
 
       test('new label after delete without a JSON round trip gets a new colour', async () => {
-        const project = Object.assign(createProject(), {
+        const project = Object.assign(createProject({ dirLink: null }), {
           data: [
             { id: '1', label: 'A' },
             { id: '2', label: 'B' },
@@ -603,6 +603,7 @@ describe('Application', () => {
           ],
           colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
         });
+        delete project.dirLink;
         const application = Application.createNull({
           dataSource: IndexedDBProjectsDataSource.createNull({
             projects: [project],
