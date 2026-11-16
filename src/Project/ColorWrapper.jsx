@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+// React 19 ignores defaultProps on function components. Sketch's (presets, width) still apply
+// because react-color's ColorWrap class copies them into its own defaultProps. Phase 6.2 step 3
+// replaces react-color.
 import { SketchPicker } from 'react-color';
 class ColorWrapper extends Component {
   constructor(props) {
