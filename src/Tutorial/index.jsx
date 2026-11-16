@@ -190,7 +190,9 @@ class Tutorial extends Component {
               <p>
                 Les images déjà présentes dans le dossier sont prises en compte.
                 Ajoutez les suivantes au fur et à mesure, depuis chaque
-                photogramme.
+                photogramme, ou déposez-les dans le dossier : en le rouvrant, ou
+                en le réimportant avec son <strong>data.json</strong> exporté,
+                les nouvelles images rejoignent leurs photogrammes.
               </p>
               <p>
                 Maintenant que vous êtes sur le site, vous pouvez à votre
