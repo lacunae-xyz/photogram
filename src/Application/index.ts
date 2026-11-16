@@ -14,7 +14,7 @@ import type {
 } from './types';
 import type { ImageUrl } from '../FilesParser/Images';
 
-const colors = [
+export const colors = [
   '#F44336',
   '#E91E63',
   '#9C27B0',

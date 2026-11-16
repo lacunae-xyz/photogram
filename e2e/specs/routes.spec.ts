@@ -27,6 +27,11 @@ test('the privacy policy is linked from /', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'contact@lacunae.xyz' })).toHaveAttribute('href', 'mailto:contact@lacunae.xyz');
 });
 
+test('the tutorial names the file data.csv', async ({ page }) => {
+  await page.goto('/tutorial');
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+});
+
 // B16: no catch-all route, an unknown URL renders an empty app. Phase 6 adds a 404 page.
 test('unknown route renders an empty app (B16)', async ({ page, pageErrors }) => {
   const response = await page.goto('/does-not-exist');
