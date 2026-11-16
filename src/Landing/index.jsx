@@ -60,8 +60,6 @@ export default function Landing() {
 
   async function onLinkProject(key) {
     try {
-      console.log(key);
-      console.log('caca');
       const needsPermission = await application.needsPermission(key);
       if (needsPermission) {
         await application.requestPermission(key);

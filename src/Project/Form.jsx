@@ -85,8 +85,6 @@ class Form extends Component {
     this.close();
   };
 
-  onNewImage = file => {};
-
   mergePropsWithState() {
     const fromState = this.state.data === undefined ? {} : this.state.data;
     const fromProps = this.props.data === undefined ? {} : this.props.data;
