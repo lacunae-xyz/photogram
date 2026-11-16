@@ -1,10 +1,8 @@
 import Application from './index';
 import Csv from '../FilesParser/Csv';
-import ProjectsDataSource from './ProjectsDataSource';
 import Uuidv4 from '../FilesParser/uuidv4';
 import Images from '../FilesParser/Images';
 import IndexedDBProjectsDataSource from './IndexedDBProjectsDataSource';
-import MigrationDataSource from './MigrationDataSource';
 import type { Project, Shot } from './types';
 
 describe('Application', () => {
@@ -178,9 +176,11 @@ describe('Application', () => {
     test('fails if project cannot be saved', async () => {
       const csv = createCsv();
       const source = Application.createNull({
-        dataSource: ProjectsDataSource.createNull({ saveInError: true }),
+        dataSource: IndexedDBProjectsDataSource.createNull({
+          saveInError: true,
+        }),
       });
-      await expect(source.add([csv])).rejects.toThrow('QuotaExceededError');
+      await expect(source.add([csv])).rejects.toThrow('Cannot open database');
     });
   });
 
@@ -336,20 +336,20 @@ describe('Application', () => {
       await expect(application.list()).resolves.toEqual([project]);
     });
 
-    test('opened projects first, then imported ones', async () => {
-      const imported = Object.assign(createProject({ dirLink: null }), {
-        key: 'imported',
+    test('waits for a pending migration', async () => {
+      const dataSource = IndexedDBProjectsDataSource.createNull();
+      const migrated = createUnlinkedProject();
+      let finishMigration = () => {};
+      const migration = new Promise<void>(resolve => {
+        finishMigration = resolve;
       });
-      delete imported.dirLink;
-      const opened = Object.assign(createProject(), { key: 'opened' });
-      const application = Application.createNull({
-        dataSource: new MigrationDataSource(
-          IndexedDBProjectsDataSource.createNull({ projects: [opened] }),
-          ProjectsDataSource.createNull({ projects: [imported] }),
-        ),
-      });
-      const projects = await application.list();
-      expect(projects.map(p => p.key)).toEqual(['opened', 'imported']);
+      const application = Application.createNull({ dataSource, migration });
+
+      const listed = application.list();
+      await dataSource.add(migrated);
+      finishMigration();
+
+      await expect(listed).resolves.toEqual([migrated]);
     });
   });
 
@@ -486,8 +486,8 @@ describe('Application', () => {
 
     test('false if no dirLink present', async () => {
       const application = Application.createNull({
-        dataSource: ProjectsDataSource.createNull({
-          projects: [createProject({ dirLink: null })],
+        dataSource: IndexedDBProjectsDataSource.createNull({
+          projects: [createUnlinkedProject()],
         }),
       });
       await expect(application.needsPermission('key')).resolves.toEqual(false);
@@ -527,8 +527,8 @@ describe('Application', () => {
 
     test('false if no dirLink present', async () => {
       const application = Application.createNull({
-        dataSource: ProjectsDataSource.createNull({
-          projects: [createProject({ dirLink: null })],
+        dataSource: IndexedDBProjectsDataSource.createNull({
+          projects: [createUnlinkedProject()],
         }),
       });
       await expect(application.requestPermission('key')).rejects.toThrow(
@@ -576,25 +576,7 @@ describe('Application', () => {
 
       // B13: deleteColor leaves an undefined key that JSON drops, so the next label reuses a colour.
       test('new label after delete with a JSON round trip reuses a colour (B13)', async () => {
-        const application = Application.createNull();
-        const project = await addProject(
-          application,
-          createCsv({ content: '1;a;A\n2;b;B\n3;c;C\n4;d' }),
-        );
-
-        await application.deleteColor(project.key, 'A');
-        await application.update(project.key, { id: '4', label: 'D' } as Shot);
-
-        const actual = await application.get(project.key);
-        expect(actual.colors).toEqual({
-          B: '#E91E63',
-          C: '#9C27B0',
-          D: '#9C27B0',
-        });
-      });
-
-      test('new label after delete without a JSON round trip gets a new colour', async () => {
-        const project = Object.assign(createProject({ dirLink: null }), {
+        const project = Object.assign(createProject(), {
           data: [
             { id: '1', label: 'A' },
             { id: '2', label: 'B' },
@@ -603,7 +585,34 @@ describe('Application', () => {
           ],
           colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
         });
-        delete project.dirLink;
+        // A linked project: data.json is the round trip.
+        const application = Application.createNull({
+          dataSource: IndexedDBProjectsDataSource.createNull({
+            projects: [project],
+          }),
+        });
+
+        await application.deleteColor('key', 'A');
+        await application.update('key', { id: '4', label: 'D' } as Shot);
+
+        const actual = await application.get('key');
+        expect(actual.colors).toEqual({
+          B: '#E91E63',
+          C: '#9C27B0',
+          D: '#9C27B0',
+        });
+      });
+
+      test('new label after delete without a JSON round trip gets a new colour', async () => {
+        const project = Object.assign(createUnlinkedProject(), {
+          data: [
+            { id: '1', label: 'A' },
+            { id: '2', label: 'B' },
+            { id: '3', label: 'C' },
+            { id: '4' },
+          ],
+          colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
+        });
         const application = Application.createNull({
           dataSource: IndexedDBProjectsDataSource.createNull({
             projects: [project],
@@ -748,82 +757,6 @@ describe('Application', () => {
       });
     });
   });
-
-  describe('legacy localStorage projects', () => {
-    const legacy = {
-      key: 'legacy',
-      name: 'Legacy',
-      data: [
-        {
-          id: '1',
-          sequence: '1',
-          action: 'action',
-          label: 'label',
-          periode: 'matin',
-          fx: '',
-        },
-      ],
-      colors: { label: '#F44336' },
-      template: 'small',
-      mainPicture: '/project/legacy/images/1.jpg/',
-    };
-
-    function createApplication() {
-      return Application.createNull({
-        dataSource: new MigrationDataSource(
-          IndexedDBProjectsDataSource.createNull(),
-          ProjectsDataSource.create(),
-        ),
-      });
-    }
-
-    beforeEach(() => {
-      localStorage.setItem('projects', JSON.stringify([legacy]));
-    });
-
-    afterEach(() => {
-      localStorage.clear();
-    });
-
-    test('list', async () => {
-      await expect(createApplication().list()).resolves.toEqual([legacy]);
-    });
-
-    test('get', async () => {
-      await expect(createApplication().get('legacy')).resolves.toEqual(legacy);
-    });
-
-    test('save keeps the shape', async () => {
-      await createApplication().update('legacy', {
-        id: '1',
-        sequence: '1',
-        action: 'changed',
-        label: 'other',
-      });
-
-      expect(JSON.parse(localStorage.getItem('projects')!)).toEqual([
-        Object.assign({}, legacy, {
-          data: [{ id: '1', sequence: '1', action: 'changed', label: 'other' }],
-          colors: { label: '#F44336', other: '#E91E63' },
-        }),
-      ]);
-    });
-
-    test('delete', async () => {
-      const images = Images.createNull();
-      const application = Application.createNull({
-        images: images,
-        dataSource: new MigrationDataSource(
-          IndexedDBProjectsDataSource.createNull(),
-          ProjectsDataSource.create(),
-        ),
-      });
-      await images.execute('legacy', [createJpg({ name: '1.jpg' })]);
-
-      await expect(application.delete('legacy')).resolves.toEqual([]);
-      expect(JSON.parse(localStorage.getItem('projects')!)).toEqual([]);
-    });
-  });
 });
 
 async function addProject(
@@ -869,6 +802,11 @@ function createDirLink({
     requestPermission: requestPermission,
     queryPermission: queryPermission,
   } as unknown as FileSystemDirectoryHandle;
+}
+
+function createUnlinkedProject() {
+  const { dirLink, ...project } = createProject();
+  return project as Project;
 }
 
 function createProject({

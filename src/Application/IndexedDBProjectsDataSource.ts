@@ -3,7 +3,6 @@ import type {
   PermissionDirectoryHandle,
   PermissionMode,
   Project,
-  ProjectsSource,
 } from './types';
 
 interface Entry {
@@ -24,7 +23,7 @@ interface FileHandle {
 // The stubs call the handlers with a bare `{ target }`, so read the target, not the request.
 const targetOf = <T>(event: Event) => event.target as IDBRequest<T>;
 
-export default class IndexedDBProjectsDataSource implements ProjectsSource {
+export default class IndexedDBProjectsDataSource {
   _indexedDB: IDBFactory;
   _fileHandle: FileHandle;
   _db?: IDBDatabase;
