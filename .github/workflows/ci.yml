@@ -78,8 +78,41 @@ jobs:
           path: dist/
           retention-days: 7
 
+  # Pull requests: the base build, which the Perf step measures the PR's against. Runs alongside build.
+  build-base:
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'update-budgets')
+    runs-on: ubuntu-latest
+    # A base that doesn't build leaves the Perf step on its absolute budgets rather than failing the PR.
+    continue-on-error: true
+    steps:
+      # The merge commit build measures, then its first parent, so A and B differ by exactly the PR's changes.
+      # pull_request.base.sha can lag the base the merge commit was made on.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+      - name: Check out the merge commit's first parent
+        run: |
+          git rev-parse --verify --quiet HEAD^2 >/dev/null || { echo "::error::$(git rev-parse HEAD) is not a merge commit"; exit 1; }
+          git checkout --detach HEAD^1
+          echo "Base: $(git log -1 --format='%H %s')"
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-base
+          path: dist/
+          retention-days: 1
+
   browser:
-    needs: build
+    needs: [build, build-base]
+    # build-base is skipped outside pull requests and may fail: only build is required.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     # Keep the tag in sync with @playwright/test in e2e/package.json. The image ships Node 26, same as .nvmrc.
     container:
@@ -103,21 +136,38 @@ jobs:
         with:
           name: dist
           path: dist
+      - uses: actions/download-artifact@v5
+        if: ${{ needs.build-base.result == 'success' }}
+        # No base build (or expired on a re-run): the Perf step falls back to the absolute budgets.
+        continue-on-error: true
+        with:
+          name: build-base
+          path: base-dist
       - id: install
         run: npm ci
       - run: npm run typecheck
+      - run: npm run test:gate
       - name: Screenshots and e2e
         run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ env.UPDATE_SNAPSHOTS == 'true' && '--update-snapshots' || '' }}
       - name: Perf
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         # Own output dir: a second run wipes test-results/ and the traces of the first.
+        # Pull requests: blocking time against the base build measured in this job (A/B), not against budgets.json,
+        # whose absolute values can't tell a slower runner from a regression. LayoutCount stays on budgets.json.
         run: |
           if [ "$UPDATE_BUDGETS" = true ]; then
             node perf/update-budgets.mjs --output=test-results-perf
+          elif [ -f ../base-dist/index.html ]; then
+            node perf/check-budgets.mjs --baseline ../base-dist --output=test-results-perf
           else
+            if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+              # A failed job with continue-on-error can still report success: the artifact is what counts.
+              echo "::warning::No base build to measure against (build-base job: $BUILD_BASE, no build-base artifact): total blocking time checked against budgets.json"
+            fi
             node perf/check-budgets.mjs --output=test-results-perf
           fi
         env:
+          BUILD_BASE: ${{ needs.build-base.result }}
           PERF_SLOW: ${{ (github.event_name == 'schedule' || env.UPDATE_BUDGETS == 'true') && '1' || '' }}
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-perf
       - uses: actions/upload-artifact@v4
