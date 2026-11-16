@@ -160,12 +160,16 @@ export default class IndexedDBProjectsDataSource {
       if (!projectDb.dirLink) {
         return projectDb;
       }
-      const projectFs = await this._fileHandle.read(
+      const { dirLink, ...projectFs }: Project = await this._fileHandle.read(
         projectDb.dirLink,
         'data.json',
       );
-      projectFs.dirLink = projectDb.dirLink;
-      return projectFs;
+      // data.json may have been edited outside the app: list() reads the DB, so keep it in step.
+      const { dirLink: _, ...stored } = projectDb;
+      if (JSON.stringify(stored) !== JSON.stringify(projectFs)) {
+        await this._save(id, projectFs);
+      }
+      return { ...projectFs, dirLink: projectDb.dirLink };
     } catch (error) {
       throw new Error(`Could not found project with id=${id}`, {
         cause: error,
