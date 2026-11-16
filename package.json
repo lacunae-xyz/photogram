@@ -2,6 +2,7 @@
   "name": "photogram-react",
   "version": "0.2.1",
   "private": true,
+  "type": "module",
   "dependencies": {
     "history": "^4.10.1",
     "npm-run-all": "^4.1.5",
@@ -11,26 +12,21 @@
     "react-dom": "^16.14.0",
     "react-ga": "^2.7.0",
     "react-helmet": "^5.2.1",
-    "react-router-dom": "^5.3.4",
-    "react-scripts": "3.4.4"
+    "react-router-dom": "^5.3.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest",
     "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --project=perf --workers=1",
-    "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots"
+    "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "jest-localstorage-mock": "^2.4.22"
-  },
-  "browserslist": {
-    "production": [
-      "last 5 chrome version"
-    ],
-    "development": [
-      "last 1 chrome version"
-    ]
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.0",
+    "jsdom": "^31.0.1",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
   }
 }

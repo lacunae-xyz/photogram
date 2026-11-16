@@ -3,10 +3,10 @@ import Uuidv4 from './uuidv4';
 describe("Uuidv4", () => {
     describe("create", () => {
         beforeAll(() => {
-            global.crypto = null;
+            vi.stubGlobal('crypto', null);
         })
         afterAll(() => {
-            global.crypto = undefined;
+            vi.unstubAllGlobals();
         })
         test("happy path", () => {
             expect(() => Uuidv4.create()).not.toThrowError();

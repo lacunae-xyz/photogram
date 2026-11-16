@@ -208,7 +208,7 @@ describe('duration', () => {
     [25, 65],
     [30, 80],
     [23.98, 61.94],
-  ])('at %p fps is %p images', (fps, expected) => {
+  ])('at %s fps is %s images', (fps, expected) => {
     expect(line.sourceDuration(fps)).toEqual(expected);
     expect(line.recordDuration(fps)).toEqual(expected);
   })

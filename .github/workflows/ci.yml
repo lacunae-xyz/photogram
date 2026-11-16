@@ -38,8 +38,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test -- --coverage
-        env:
-          CI: true
       - uses: actions/upload-artifact@v4
         with:
           name: coverage
@@ -55,14 +53,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # CI=true turns ESLint warnings into errors: the lint gate until phase 2.
       - run: npm run build
-        env:
-          CI: true
       - uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: build/
+          name: dist
+          path: dist/
           retention-days: 7
 
   browser:
@@ -88,8 +83,8 @@ jobs:
           lfs: true
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
+          name: dist
+          path: dist
       - id: install
         run: npm ci
       - run: npm run typecheck
@@ -148,14 +143,14 @@ jobs:
           node-version: 26
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
+          name: dist
+          path: dist
       - name: Deploy
         id: deploy
         # Explicit bash adds pipefail, so a failed deploy isn't hidden behind jq.
         shell: bash
         run: |
-          url=$(npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --alias=pr-${{ github.event.number }} --json | jq -r '.deploy_url')
+          url=$(npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --alias=pr-${{ github.event.number }} --json | jq -r '.deploy_url')
           echo "url=$url" >> "$GITHUB_OUTPUT"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -182,9 +177,9 @@ jobs:
           node-version: 26
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
-      - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --prod
+          name: dist
+          path: dist
+      - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

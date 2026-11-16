@@ -10,14 +10,12 @@ describe("Application", () => {
 
     describe("create", () => {
         beforeAll(() => {
-            global.crypto = null;
-            global.caches = null;
-            global.indexedDB = null;
+            vi.stubGlobal('crypto', null);
+            vi.stubGlobal('caches', null);
+            vi.stubGlobal('indexedDB', null);
         })
         afterAll(() => {
-            global.crypto = undefined;
-            global.caches = undefined;
-            global.indexedDB = undefined;
+            vi.unstubAllGlobals();
         })
         test("happy path", () => {
             expect(() => Application.create()).not.toThrowError();

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Runs Playwright in the same image as CI, on the host architecture (Chromium crashes under qemu).
-# Screenshot baselines and perf budgets come from here. Needs ../build (CI=true npm run build on Node 16).
+# Screenshot baselines and perf budgets come from here. Needs ../dist (npm run build).
 # Usage: ./docker.sh [playwright test args]
 #        ./docker.sh --budgets    rewrites perf/budgets.json
 set -eu
