@@ -78,6 +78,13 @@ describe('LocalStorageMigration', () => {
     expect(stored(migration)).toBeNull();
   });
 
+  test('projects keep their localStorage order', async () => {
+    const dataSource = IndexedDBProjectsDataSource.createNull();
+    const projects = [legacy('m'), legacy('z'), legacy('a')];
+    await createMigration(projects, dataSource).run();
+    await expect(dataSource.list()).resolves.toEqual(projects);
+  });
+
   test('a project already in IndexedDB is not overwritten', async () => {
     const existing = Object.assign(legacy('a'), { name: 'Already there' });
     const dataSource = IndexedDBProjectsDataSource.createNull({

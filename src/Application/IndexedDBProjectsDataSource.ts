@@ -9,6 +9,8 @@ interface Entry {
   id: string;
   data: Project;
   fileSystemDirectoryHandle?: FileSystemDirectoryHandle;
+  // Absent on entries stored before it existed: they sort first.
+  createdAt?: number;
 }
 
 interface FileHandle {
@@ -27,6 +29,7 @@ export default class IndexedDBProjectsDataSource {
   _indexedDB: IDBFactory;
   _fileHandle: FileHandle;
   _db?: IDBDatabase;
+  _lastCreatedAt = 0;
   dbName: string;
   storeName: string;
 
@@ -78,8 +81,11 @@ export default class IndexedDBProjectsDataSource {
       const store = tx.objectStore(this.storeName);
       const request = store.getAll();
       request.onsuccess = event => {
+        // getAll returns key order, and keys are random uuids.
         resolve(
-          targetOf<Entry[]>(event).result.map(entry => this._transform(entry)),
+          targetOf<Entry[]>(event)
+            .result.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0))
+            .map(entry => this._transform(entry)),
         );
       };
       request.onerror = event => {
@@ -120,7 +126,15 @@ export default class IndexedDBProjectsDataSource {
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction(this.storeName, 'readwrite');
       const store = tx.objectStore(this.storeName);
-      const request = store.put({ id, fileSystemDirectoryHandle, data }, id);
+      const request = store.put(
+        {
+          id,
+          fileSystemDirectoryHandle,
+          data,
+          createdAt: this._nextCreatedAt(),
+        },
+        id,
+      );
       request.onsuccess = () => {
         resolve();
       };
@@ -128,6 +142,12 @@ export default class IndexedDBProjectsDataSource {
         reject(targetOf(event).error);
       };
     });
+  }
+
+  // Strictly increasing, so projects added in the same millisecond (the migration) keep their order.
+  _nextCreatedAt() {
+    this._lastCreatedAt = Math.max(Date.now(), this._lastCreatedAt + 1);
+    return this._lastCreatedAt;
   }
 
   async dirLink(id: string) {
@@ -375,7 +395,9 @@ class StubbedIndexedDB {
             }
           },
           getAll() {
-            const result = Object.values(this.store).map(cloneEntry);
+            const result = Object.keys(this.store)
+              .sort()
+              .map(key => cloneEntry(this.store[key]));
             return SuccessRequest(result);
           },
           count(key: string) {

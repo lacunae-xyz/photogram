@@ -26,6 +26,30 @@ describe('IndexedDBProjectsDataSource', () => {
       await source.add(createProject());
       await expect(source.list()).resolves.toEqual([createProject()]);
     });
+
+    test('follows the order projects were added, not the key order', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(keyed('b'));
+      await source.add(keyed('a'));
+      await source.add(keyed('c'));
+      await expect(keysOf(source)).resolves.toEqual(['b', 'a', 'c']);
+    });
+
+    test('projects stored before the order existed come first, in key order', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        projects: [keyed('z'), keyed('y')],
+      });
+      await source.add(keyed('a'));
+      await expect(keysOf(source)).resolves.toEqual(['y', 'z', 'a']);
+    });
+
+    test('saving keeps the position', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(keyed('b'));
+      await source.add(keyed('a'));
+      await source.save({ ...keyed('b'), name: 'renamed' });
+      await expect(keysOf(source)).resolves.toEqual(['b', 'a']);
+    });
   });
 
   describe('get', () => {
@@ -235,6 +259,14 @@ function createProject({ data }: { data?: unknown[] } = { data: [] }) {
 function createUnlinkedProject({ data }: { data?: unknown[] } = { data: [] }) {
   const { dirLink, ...project } = createProject({ data });
   return project as Project;
+}
+
+function keyed(key: string) {
+  return { ...createUnlinkedProject(), key } as Project;
+}
+
+async function keysOf(source: IndexedDBProjectsDataSource) {
+  return (await source.list()).map(project => project.key);
 }
 
 function failWrites(source: IndexedDBProjectsDataSource) {
