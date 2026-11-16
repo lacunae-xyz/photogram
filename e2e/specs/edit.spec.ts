@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import { Page } from '@playwright/test';
 import { importProject, storedProject } from '../support/projects';
 
@@ -6,7 +6,7 @@ async function openImported(page: Page) {
   const card = await importProject(page);
   await card.click();
   await expect(page).toHaveURL(/\/project\/[\w-]+$/);
-  const tiles = page.locator('.tiles-container .ele');
+  const tiles = page.locator(tileSelector);
   await expect(tiles).toHaveCount(3);
   return tiles;
 }

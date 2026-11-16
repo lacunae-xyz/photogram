@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import { CDPSession, Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -87,7 +87,7 @@ for (const [rows, tag] of [[1000, ''], [3000, ' @slow']] as const) {
       const client = await openLargeProject(page, rows);
       const start = Date.now();
       await page.goto('/project-demo');
-      await expect(page.locator('.tiles-container .ele')).toHaveCount(rows);
+      await expect(page.locator(tileSelector)).toHaveCount(rows);
       await waitForTitleSizing(page, rows * 100);
       report(`load-${rows}`, await snapshot(page, client), Date.now() - start);
     });
@@ -95,7 +95,7 @@ for (const [rows, tag] of [[1000, ''], [3000, ' @slow']] as const) {
     test('change font family re-sizes every tile', async ({ page }) => {
       const client = await openLargeProject(page, rows);
       await page.goto('/project-demo');
-      await expect(page.locator('.tiles-container .ele')).toHaveCount(rows);
+      await expect(page.locator(tileSelector)).toHaveCount(rows);
       await waitForTitleSizing(page, rows * 100);
       const before = await snapshot(page, client);
       const start = Date.now();
@@ -108,9 +108,9 @@ for (const [rows, tag] of [[1000, ''], [3000, ' @slow']] as const) {
     test('edit one action re-sizes only that tile', async ({ page }) => {
       const client = await openLargeProject(page, rows);
       await page.goto('/project-demo');
-      await expect(page.locator('.tiles-container .ele')).toHaveCount(rows);
+      await expect(page.locator(tileSelector)).toHaveCount(rows);
       await waitForTitleSizing(page, rows * 100);
-      const tile = page.locator('.tiles-container .ele').nth(1);
+      const tile = page.locator(tileSelector).nth(1);
       await tile.click();
       await page.locator('#form-action').fill('Une action modifiée, nettement plus longue que la précédente pour forcer un nouveau calcul de taille.');
       const before = await snapshot(page, client);

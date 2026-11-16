@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import './Configuration.css';
 import Colors from './Colors';
-import LargeImage from '../Templates/Large';
-import SmallImage from '../Templates/Small';
+import { tileProps } from './Tiles';
 import ColorWrapper from './ColorWrapper';
 import { palette } from '../Application/colors';
 
@@ -134,7 +133,7 @@ class Configuration extends Component {
             <label htmlFor="layout_small" className="preview">
               <i>Small</i>
               <br />
-              <SmallImage file={this.previewShot()} onTile={() => {}} />
+              <photogram-tile-small {...tileProps(this.previewShot())} />
             </label>
             <input
               type="radio"
@@ -147,7 +146,7 @@ class Configuration extends Component {
             <label htmlFor="layout_large" className="preview">
               <i>Large</i>
               <br />
-              <LargeImage file={this.previewShot()} onTile={() => {}} />
+              <photogram-tile-large {...tileProps(this.previewShot())} />
             </label>
           </form>
         </section>

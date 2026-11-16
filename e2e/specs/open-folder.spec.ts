@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import { addToOpenedFolder, openFolder, openedName, readDataJson, stubDirectoryPicker } from '../support/open-folder';
 import { expectCover, importRows, waitForServiceWorker } from '../support/projects';
 
@@ -16,7 +16,7 @@ test.describe('Chromium', () => {
     expect(json.data).toHaveLength(importRows);
 
     await card.click();
-    await expect(page.locator('.tiles-container .ele')).toHaveCount(importRows);
+    await expect(page.locator(tileSelector)).toHaveCount(importRows);
     expect(pageErrors).toEqual([]);
   });
 
@@ -54,7 +54,7 @@ test.describe('Chromium', () => {
   test('edits are written to data.json', async ({ page }) => {
     const card = await openFolder(page);
     await card.click();
-    const tiles = page.locator('.tiles-container .ele');
+    const tiles = page.locator(tileSelector);
     await tiles.first().click();
     await page.locator('#form-action').fill('Écrit dans le dossier');
     await page.locator('#form button[type=submit]').click();
@@ -66,7 +66,7 @@ test.describe('Chromium', () => {
   test('reopening attaches images added to the folder since (B27)', async ({ page }) => {
     const card = await openFolder(page, { without: ['3.jpg'] });
     await card.click();
-    const image = page.locator('.tiles-container .ele').nth(2).locator('.img');
+    const image = page.locator(tileSelector).nth(2).locator('.img');
     await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
 
     await addToOpenedFolder(page, '3.jpg');
@@ -105,7 +105,7 @@ test.describe('Chromium', () => {
     await expect(page.locator('.tiles-container')).toHaveCount(0);
 
     await button.click();
-    await expect(page.locator('.tiles-container .ele')).toHaveCount(importRows);
+    await expect(page.locator(tileSelector)).toHaveCount(importRows);
   });
 });
 

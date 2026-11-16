@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import useDocumentMeta from '../useDocumentMeta';
 import './index.css';
 import Header from '../Header';
-import TemplateSmall from '../Templates/Small';
+import { tileProps } from '../Project/Tiles';
 import { colors } from '../Application';
 
 class Example extends Component {
@@ -83,7 +83,7 @@ class Example extends Component {
             fontFamily: 'Courier New',
           }}
         >
-          <TemplateSmall file={this.state} onTile={() => {}} />
+          <photogram-tile-small {...tileProps(this.state)} />
         </div>
       </div>
     );

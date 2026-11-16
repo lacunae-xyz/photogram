@@ -26,6 +26,11 @@ export async function waitForTitleSizing(page: Page, timeout = 30_000) {
     .toBe('stable');
 }
 
-export async function waitForImages(page: Page) {
-  await page.waitForFunction(() => Array.from(document.images).every(image => image.complete));
+/** Every `<img>`, including the ones in shadow roots, which `document.images` doesn't list. */
+export async function waitForImages(page: Page, timeout = 30_000) {
+  await expect
+    .poll(() => page.locator('img').evaluateAll(images => images.every(image => (image as HTMLImageElement).complete)), {
+      timeout,
+    })
+    .toBe(true);
 }
