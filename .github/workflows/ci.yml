@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    # Nightly: adds the @slow 3000-row perf scenarios.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: Regenerate screenshot baselines on the CI runner and upload them
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --coverage
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # CI=true turns ESLint warnings into errors: the lint gate until phase 2.
+      - run: npm run build
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build/
+          retention-days: 7
+
+  browser:
+    needs: build
+    runs-on: ubuntu-latest
+    # Keep the tag in sync with @playwright/test in e2e/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: build
+      - id: install
+        run: npm ci
+      - run: npm run typecheck
+      - name: Screenshots and e2e
+        run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ inputs.update-snapshots && '--update-snapshots' || '' }}
+      - name: Perf
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        # Own output dir: a second run wipes test-results/ and the traces of the first.
+        run: npx playwright test --project=perf --workers=1 --output=test-results-perf
+        env:
+          PERF_SLOW: ${{ github.event_name == 'schedule' && '1' || '' }}
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-perf
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/playwright-report-perf/
+            e2e/test-results/
+            e2e/test-results-perf/
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && inputs.update-snapshots }}
+        with:
+          name: screenshot-baselines
+          path: |
+            e2e/screenshots/__screenshots__/
+            e2e/specs/__screenshots__/
+
+  deploy-preview:
+    needs: [unit, build, browser]
+    # Dependabot and fork PRs don't get the Netlify secrets.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+      - uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: build
+      - name: Deploy
+        id: deploy
+        # Explicit bash adds pipefail, so a failed deploy isn't hidden behind jq.
+        shell: bash
+        run: |
+          url=$(npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --alias=pr-${{ github.event.number }} --json | jq -r '.deploy_url')
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      - name: Comment the preview URL
+        run: gh pr comment "$PR" --edit-last --create-if-none --body "Preview: $URL"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.number }}
+          URL: ${{ steps.deploy.outputs.url }}
+
+  deploy-production:
+    needs: [unit, build, browser]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+      - uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: build
+      - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
