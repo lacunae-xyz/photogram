@@ -11,5 +11,5 @@
 }
 
 .dot-darker {
-  background-color: #111111bb;
+  background-color: var(--pg-color-backdrop);
 }

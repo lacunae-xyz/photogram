@@ -2,7 +2,7 @@
   display: inline-block;
   border: 1px solid silver;
   overflow: unset;
-  background-color: #fff;
+  background-color: var(--pg-color-surface);
   text-align: left;
   page-break-inside: avoid;
   box-sizing: border-box;

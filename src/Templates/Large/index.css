@@ -27,7 +27,7 @@
   grid-area: img;
   height: 100%;
   object-fit: contain;
-  background-color: #111;
+  background-color: var(--pg-color-chrome);
 }
 
 .tpl-large .action-container {
