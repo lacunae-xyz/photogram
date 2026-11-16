@@ -5,6 +5,7 @@ import Uuidv4 from "../FilesParser/uuidv4";
 import Images from "../FilesParser/Images";
 import IndexedDBProjectsDataSource from "./IndexedDBProjectsDataSource";
 import MigrationDataSource from "./MigrationDataSource";
+import type { Project, Shot } from "./types";
 
 describe("Application", () => {
 
@@ -37,7 +38,7 @@ describe("Application", () => {
 
         test("empty csv with webkitRelativePath", async () => {
             const csv = createCsv();
-            csv.webkitRelativePath = "csv"
+            Object.defineProperty(csv, "webkitRelativePath", { value: "csv" })
             const expected = {
                 key: Uuidv4.createNull().generate(),
                 name: "csv",
@@ -150,10 +151,10 @@ describe("Application", () => {
 
     describe("open", () => {
 
-        function createDirHandle(files, directories = []) {
+        function createDirHandle(files: File[], directories: string[] = []) {
             return {
                 name: "dir",
-                values: () => directories.map(name => {
+                values: () => directories.map<{ kind: string; name?: string; getFile?: () => File }>(name => {
                     return {
                         kind: "directory",
                         name: name,
@@ -164,7 +165,7 @@ describe("Application", () => {
                         getFile: () => file,
                     }
                 }))
-            };
+            } as unknown as FileSystemDirectoryHandle;
         }
         test("empty csv", async () => {
             const csv = createCsv();
@@ -329,7 +330,7 @@ describe("Application", () => {
         test("found element", async () => {
             const application = Application.createNull();
             const project = await addProject(application, createCsv({ content: "1" }));
-            const changed = { id: "1", action: "action" };
+            const changed = { id: "1", action: "action" } as Shot;
 
             await application.update(project.key, changed);
 
@@ -340,7 +341,7 @@ describe("Application", () => {
         test("new label", async () => {
             const application = Application.createNull();
             const project = await addProject(application, createCsv({ content: "1" }));
-            const changed = { id: "1", label: "label" };
+            const changed = { id: "1", label: "label" } as Shot;
 
             await application.update(project.key, changed);
 
@@ -352,7 +353,7 @@ describe("Application", () => {
         test("do nothing if element not found", async () => {
             const application = Application.createNull();
             const project = await addProject(application, createCsv({ content: "1" }));
-            const changed = { id: "2", action: "action" };
+            const changed = { id: "2", action: "action" } as Shot;
 
             await application.update(project.key, changed);
 
@@ -360,7 +361,7 @@ describe("Application", () => {
         });
 
         test("fails is project not found", async () => {
-            await expect(Application.createNull().update("id", null)).rejects.toThrow("Could not found project with id=id");
+            await expect(Application.createNull().update("id", null!)).rejects.toThrow("Could not found project with id=id");
         });
     });
 
@@ -409,7 +410,7 @@ describe("Application", () => {
                     projects: [createProject({ dirLink: createDirLink({ requestPermission: () => "granted" }) })]
                 })
             });
-            await expect(application.requestPermission("key")).resolves.toEqual();
+            await expect(application.requestPermission("key")).resolves.toEqual(undefined);
         });
 
         test("fails when denied", async () => {
@@ -444,7 +445,7 @@ describe("Application", () => {
                 expect(actual.colors).toEqual(changed);
             });
             test("fails is project not found", async () => {
-                await expect(Application.createNull().updateColor("id", null)).rejects.toThrow("Could not found project with id=id");
+                await expect(Application.createNull().updateColor("id", null!)).rejects.toThrow("Could not found project with id=id");
             });
         });
 
@@ -466,7 +467,7 @@ describe("Application", () => {
                 const project = await addProject(application, createCsv({ content: "1;a;A\n2;b;B\n3;c;C\n4;d" }));
 
                 await application.deleteColor(project.key, "A");
-                await application.update(project.key, { id: "4", label: "D" });
+                await application.update(project.key, { id: "4", label: "D" } as Shot);
 
                 const actual = await application.get(project.key);
                 expect(actual.colors).toEqual({ B: "#E91E63", C: "#9C27B0", D: "#9C27B0" });
@@ -482,7 +483,7 @@ describe("Application", () => {
                 });
 
                 await application.deleteColor("key", "A");
-                await application.update("key", { id: "4", label: "D" });
+                await application.update("key", { id: "4", label: "D" } as Shot);
 
                 const actual = await application.get("key");
                 expect(actual.colors).toEqual({ A: undefined, B: "#E91E63", C: "#9C27B0", D: "#3F51B5" });
@@ -498,7 +499,7 @@ describe("Application", () => {
             });
 
             test("fails is project not found", async () => {
-                await expect(Application.createNull().deleteColor("id", null)).rejects.toThrow();
+                await expect(Application.createNull().deleteColor("id", null!)).rejects.toThrow();
             });
         });
 
@@ -514,7 +515,7 @@ describe("Application", () => {
             });
 
             test("fails is project not found", async () => {
-                await expect(Application.createNull().updateColorDistribution("id", null)).rejects.toThrow("Could not found project with id=id");
+                await expect(Application.createNull().updateColorDistribution("id", null!)).rejects.toThrow("Could not found project with id=id");
             });
         });
     });
@@ -637,7 +638,7 @@ describe("Application", () => {
         test("save keeps the shape", async () => {
             await createApplication().update("legacy", { id: "1", sequence: "1", action: "changed", label: "other" });
 
-            expect(JSON.parse(localStorage.getItem("projects"))).toEqual([Object.assign({}, legacy, {
+            expect(JSON.parse(localStorage.getItem("projects")!)).toEqual([Object.assign({}, legacy, {
                 data: [{ id: "1", sequence: "1", action: "changed", label: "other" }],
                 colors: { label: "#F44336", other: "#E91E63" },
             })]);
@@ -655,17 +656,17 @@ describe("Application", () => {
             await images.execute("legacy", [createJpg({ name: "1.jpg" })]);
 
             await expect(application.delete("legacy")).resolves.toEqual([]);
-            expect(JSON.parse(localStorage.getItem("projects"))).toEqual([]);
+            expect(JSON.parse(localStorage.getItem("projects")!)).toEqual([]);
         });
     });
 });
 
-async function addProject(application, csv = createCsv(), images = [createPng()]) {
+async function addProject(application: Application, csv = createCsv(), images = [createPng()]) {
     const result = await application.add([csv, ...images]);
     return result[result.length - 1];
 }
 
-function imageUrl(name) {
+function imageUrl(name: string) {
     return `/project/${Uuidv4.createNull().generate()}/images/${name}/`;
 }
 
@@ -689,19 +690,19 @@ function createDirLink({
     name = "dir",
     requestPermission = () => "prompt",
     queryPermission = () => "denied",
-} = {}) {
+}: { name?: string; requestPermission?: () => string; queryPermission?: () => string } = {}) {
     return {
         name: name,
         requestPermission: requestPermission,
         queryPermission: queryPermission,
-    }
+    } as unknown as FileSystemDirectoryHandle
 }
 
-function createProject({ data = [], dirLink = createDirLink() } = {}) {
+function createProject({ data = [], dirLink = createDirLink() }: { data?: Partial<Shot>[]; dirLink?: FileSystemDirectoryHandle | null } = {}) {
     return {
         data: data,
         key: "key",
         colors: {},
         dirLink: dirLink,
-    }
+    } as Project
 }

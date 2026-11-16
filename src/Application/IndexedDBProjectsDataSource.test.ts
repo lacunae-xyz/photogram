@@ -1,12 +1,13 @@
 import IndexedDBProjectsDataSource from "./IndexedDBProjectsDataSource";
+import type { Project } from "./types";
 
 describe("IndexedDBProjectsDataSource", () => {
     describe("create", () => {
         beforeAll(() => {
-            global.indexedDB = null;
+            vi.stubGlobal('indexedDB', null);
         })
         afterAll(() => {
-            global.indexedDB = undefined;
+            vi.unstubAllGlobals();
         });
         test("happy path", () => {
             expect(() => IndexedDBProjectsDataSource.create()).not.toThrow();
@@ -125,22 +126,22 @@ describe("IndexedDBProjectsDataSource", () => {
     });
 });
 
-function createProject({ data } = { data: [] }) {
+function createProject({ data }: { data?: unknown[] } = { data: [] }) {
     return {
         data: data,
         key: "key",
         colors: {},
         dirLink: { name: "dir" },
-    }
+    } as unknown as Project
 }
 
-function failWrites(source) {
+function failWrites(source: IndexedDBProjectsDataSource) {
     source._fileHandle.write = async (dirHandle) => {
-        throw Error(`Permission for ${dirHandle.name} was denied`);
+        throw Error(`Permission for ${dirHandle?.name} was denied`);
     };
 }
 
-async function editOutside(source, project) {
+async function editOutside(source: IndexedDBProjectsDataSource, project: Project) {
     const dirLink = project.dirLink;
     delete project.dirLink;
     await source._fileHandle.write(dirLink, "data.json", project);

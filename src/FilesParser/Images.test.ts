@@ -4,10 +4,10 @@ describe("Images", () => {
 
     describe("create", () => {
         beforeAll(() => {
-            global.caches = null;
+            vi.stubGlobal('caches', null);
         })
         afterAll(() => {
-            global.caches = undefined;
+            vi.unstubAllGlobals();
         })
         test("happy path", () => {
             expect(() => Images.create()).not.toThrowError();
@@ -87,6 +87,6 @@ function createPng({ name = "not_data.png", content = "" } = {}) {
     return createFile(name, content, 'image/png')
 }
 
-function createFile(name, content, type) {
+function createFile(name: string, content: string, type: string) {
     return new File([content], name, { type: type })
 }

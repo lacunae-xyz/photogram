@@ -9,7 +9,7 @@ describe("FileReader", () => {
     test("readAsArrayBuffer", async () => {
         const file = createFile({ content: "text" });
         const result = await readAsArrayBuffer(file);
-        expect(String.fromCharCode.apply(null, new Uint8Array(result.result))).toEqual("text");
+        expect(String.fromCharCode(...new Uint8Array(result.result))).toEqual("text");
     });
 });
 

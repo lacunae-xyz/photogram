@@ -37,6 +37,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm test -- --coverage
       - uses: actions/upload-artifact@v4
         with:

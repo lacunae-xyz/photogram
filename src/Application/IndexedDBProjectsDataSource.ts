@@ -1,12 +1,28 @@
 import { readAsText } from "../FilesParser/FileReader";
+import type { PermissionDirectoryHandle, PermissionMode, Project, ProjectsSource } from "./types";
 
-export default class IndexedDBProjectsDataSource {
-    /**
-     * 
-     * @param {IDBFactory} indexedDB 
-     * @param {FileHandleWrapper} fileHandle
-     */
-    constructor(indexedDB, fileHandle) {
+interface Entry {
+    id: string;
+    data: Project;
+    fileSystemDirectoryHandle?: FileSystemDirectoryHandle;
+}
+
+interface FileHandle {
+    write(dirHandle: FileSystemDirectoryHandle | undefined, name: string, data: Project): Promise<void>;
+    read(dirHandle: FileSystemDirectoryHandle | undefined, name: string): Promise<Project>;
+}
+
+// The stubs call the handlers with a bare `{ target }`, so read the target, not the request.
+const targetOf = <T>(event: Event) => event.target as IDBRequest<T>;
+
+export default class IndexedDBProjectsDataSource implements ProjectsSource {
+    _indexedDB: IDBFactory;
+    _fileHandle: FileHandle;
+    _db?: IDBDatabase;
+    dbName: string;
+    storeName: string;
+
+    constructor(indexedDB: IDBFactory, fileHandle: FileHandle) {
         this._indexedDB = indexedDB
         this._fileHandle = fileHandle
         this.dbName = "projects";
@@ -18,9 +34,9 @@ export default class IndexedDBProjectsDataSource {
     }
 
 
-    static createNull({ projects, saveInError } = { projects: undefined, saveInError: false }) {
-        let dbState = {};
-        let fsState = {};
+    static createNull({ projects, saveInError }: { projects?: Project[]; saveInError?: boolean } = { projects: undefined, saveInError: false }) {
+        let dbState: Record<string, Entry> = {};
+        let fsState: Record<string, Project> = {};
 
         if (projects !== undefined) {
             for (const project of projects) {
@@ -31,31 +47,31 @@ export default class IndexedDBProjectsDataSource {
                     data: project,
                     fileSystemDirectoryHandle: dirLink,
                 };
-                fsState[dirLink.name] = project;
+                fsState[dirLink!.name] = project;
             }
         }
         return new IndexedDBProjectsDataSource(
-            saveInError ? new ErrorIndexedDB(dbState) : new StubbedIndexedDB(dbState),
+            (saveInError ? new ErrorIndexedDB() : new StubbedIndexedDB(dbState)) as unknown as IDBFactory,
             new StubbedFileHandle(fsState),
         );
     }
 
-    async list() {
+    async list(): Promise<Project[]> {
         const db = await this.open();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(this.storeName, "readonly");
             const store = tx.objectStore(this.storeName);
             const request = store.getAll();
             request.onsuccess = event => {
-                resolve(event.target.result.map(entry => this._transform(entry)));
+                resolve(targetOf<Entry[]>(event).result.map(entry => this._transform(entry)));
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 
-    async add(data) {
+    async add(data: Project) {
         const fileSystemDirectoryHandle = data.dirLink;
         delete data.dirLink;
         await this._add(data.key, data, fileSystemDirectoryHandle);
@@ -63,9 +79,9 @@ export default class IndexedDBProjectsDataSource {
         return this.list();
     }
 
-    async _add(id, data, fileSystemDirectoryHandle) {
+    async _add(id: string, data: Project, fileSystemDirectoryHandle?: FileSystemDirectoryHandle) {
         const db = await this.open();
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const tx = db.transaction(this.storeName, "readwrite");
             const store = tx.objectStore(this.storeName);
             const request = store.put({ id, fileSystemDirectoryHandle, data }, id);
@@ -73,16 +89,16 @@ export default class IndexedDBProjectsDataSource {
                 resolve();
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 
-    async dirLink(id) {
+    async dirLink(id: string) {
         return (await this._get(id)).dirLink;
     }
 
-    async get(id) {
+    async get(id: string) {
         try {
             const projectDb = await this._get(id);
             const projectFs = await this._fileHandle.read(projectDb.dirLink, "data.json");
@@ -93,68 +109,69 @@ export default class IndexedDBProjectsDataSource {
         }
     }
 
-    async _get(id) {
+    async _get(id: string) {
         const db = await this.open();
-        return new Promise((resolve, reject) => {
+        return new Promise<Project>((resolve, reject) => {
             const tx = db.transaction(this.storeName, "readonly");
             const store = tx.objectStore(this.storeName);
             const request = store.get(id);
             request.onsuccess = event => {
-                if (event.target.result) {
-                    resolve(this._transform(event.target.result));
+                const result = targetOf<Entry | undefined>(event).result;
+                if (result) {
+                    resolve(this._transform(result));
                 } else {
                     reject(new Error(`Could not found project with id=${id}`));
                 }
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 
-    _transform(entry) {
+    _transform(entry: Entry) {
         const project = entry.data;
         project.dirLink = entry.fileSystemDirectoryHandle;
         return project;
     }
 
-    async save(data) {
+    async save(data: Project) {
         const projectDb = await this._save(data.key, data);
         await this._fileHandle.write(projectDb.dirLink, "data.json", data);
         return this.list();
     }
 
-    async _save(id, data) {
+    async _save(id: string, data: Project) {
         const db = await this.open();
-        return new Promise((resolve, reject) => {
+        return new Promise<Project>((resolve, reject) => {
             const tx = db.transaction(this.storeName, "readwrite");
             const store = tx.objectStore(this.storeName);
             const request = store.get(id);
             request.onsuccess = event => {
-                const result = event.target.result;
+                const result = targetOf<Entry>(event).result;
                 const updatedData = { ...result, ...{ data: data } };
                 const updateRequest = store.put(updatedData, id);
                 updateRequest.onsuccess = () => {
                     resolve(this._transform(updatedData));
                 };
                 updateRequest.onerror = event => {
-                    reject(event.target.error);
+                    reject(targetOf(event).error);
                 };
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 
-    async delete(id) {
+    async delete(id: string) {
         await this._delete(id);
         return this.list();
     }
 
-    async _delete(id) {
+    async _delete(id: string) {
         const db = await this.open();
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const tx = db.transaction(this.storeName, "readwrite");
             const store = tx.objectStore(this.storeName);
             const request = store.delete(id);
@@ -162,15 +179,11 @@ export default class IndexedDBProjectsDataSource {
                 resolve();
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 
-    /**
-     * Returns a db request.
-     * @returns {IDBOpenDBRequest} request
-     */
     async open() {
         if (this._db) {
             return this._db;
@@ -182,24 +195,26 @@ export default class IndexedDBProjectsDataSource {
 
 
     async _open() {
-        return new Promise((resolve, reject) => {
+        return new Promise<IDBDatabase>((resolve, reject) => {
             const request = this._indexedDB.open(this.dbName, 1);
             request.onupgradeneeded = event => {
-                const db = event.target.result;
-                db.createObjectStore(this.storeName, { keypath: "id" });
+                const db = targetOf<IDBDatabase>(event).result;
+                db.createObjectStore(this.storeName, { keypath: "id" } as IDBObjectStoreParameters);
             };
             request.onsuccess = event => {
-                resolve(event.target.result);
+                resolve(targetOf<IDBDatabase>(event).result);
             };
             request.onerror = event => {
-                reject(event.target.error);
+                reject(targetOf(event).error);
             };
         });
     }
 }
 
-const ErrorRequest = (error) => new Proxy({}, {
-    set: function (target, name, value, receiver) {
+type Handler = (event: { target: { error?: Error; result?: unknown } }) => void;
+
+const ErrorRequest = (error: Error) => new Proxy({}, {
+    set: function (target, name, value: Handler, receiver) {
         if (name === "onerror") {
             value({ target: { error: error } });
         }
@@ -207,8 +222,8 @@ const ErrorRequest = (error) => new Proxy({}, {
     }
 });
 
-const SuccessRequest = (result) => new Proxy({}, {
-    set: function (target, name, value, receiver) {
+const SuccessRequest = (result: unknown) => new Proxy({}, {
+    set: function (target, name, value: Handler, receiver) {
         if (name === "onsuccess") {
             value({ target: { result: result } });
         }
@@ -216,39 +231,30 @@ const SuccessRequest = (result) => new Proxy({}, {
     }
 });
 
-class StubbedFileHandle {
-    constructor(fsState) {
+class StubbedFileHandle implements FileHandle {
+    store: Record<string, Project>;
+
+    constructor(fsState: Record<string, Project>) {
         this.store = fsState;
     }
-    async write(dirHandle, _, data) {
+    async write(dirHandle: FileSystemDirectoryHandle, _: string, data: Project) {
         this.store[dirHandle.name] = data;
     }
-    async read(dirHandle, _) {
+    async read(dirHandle: FileSystemDirectoryHandle, _: string) {
         return this.store[dirHandle.name];
     }
 }
 
-class FileHandleWrapper {
-    /**
-     * Write data in file
-     * @param {FileSystemDirectoryHandle} dirHandle 
-     * @param {string} name 
-     * @param {object} data
-     */
-    async write(dirHandle, name, data) {
+class FileHandleWrapper implements FileHandle {
+    async write(dirHandle: FileSystemDirectoryHandle, name: string, data: Project) {
         await this._checkPermission(dirHandle, "readwrite");
         const fileHandle = await dirHandle.getFileHandle(name, { create: true })
         const writableStream = await fileHandle.createWritable();
         await writableStream.write(JSON.stringify(data));
         await writableStream.close();
     }
-    /**
-     * Read data from file
-     * @param {FileSystemDirectoryHandle} dirHandle 
-     * @param {string} name 
-     * @param {object} data
-     */
-    async read(dirHandle, name) {
+
+    async read(dirHandle: FileSystemDirectoryHandle, name: string) {
         await this._checkPermission(dirHandle, "read");
         const fileHandle = await dirHandle.getFileHandle(name);
         const file = await fileHandle.getFile();
@@ -256,9 +262,9 @@ class FileHandleWrapper {
         return JSON.parse(result.result);
     }
 
-    async _checkPermission(dirHandle, mode) {
+    async _checkPermission(dirHandle: FileSystemDirectoryHandle, mode: PermissionMode) {
         const options = { mode: mode };
-        const permission = (await dirHandle.requestPermission(options));
+        const permission = (await (dirHandle as PermissionDirectoryHandle).requestPermission(options));
         if (permission !== 'granted') {
             throw Error(`Permission for ${dirHandle.name} was ${permission}`);
         }
@@ -272,7 +278,9 @@ class ErrorIndexedDB {
 }
 
 class StubbedIndexedDB {
-    constructor(initialValue) {
+    store: Record<string, Entry>;
+
+    constructor(initialValue: Record<string, Entry>) {
         this.store = initialValue;
     }
 
@@ -286,7 +294,7 @@ class StubbedIndexedDB {
             objectStore() {
                 return {
                     store: dbStore,
-                    get(key) {
+                    get(key: string) {
                         const result = this.store[key];
                         if (result) {
                             return SuccessRequest(result);
@@ -299,11 +307,11 @@ class StubbedIndexedDB {
                         const result = Object.values(this.store);
                         return SuccessRequest(result);
                     },
-                    put(value, key) {
+                    put(value: Entry, key: string) {
                         this.store[key] = value;
                         return SuccessRequest(undefined);
                     },
-                    delete(key) {
+                    delete(key: string) {
                         if (this.store[key]) {
                             delete this.store[key];
                             return SuccessRequest(undefined);

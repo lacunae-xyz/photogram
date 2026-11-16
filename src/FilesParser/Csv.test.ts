@@ -1,4 +1,5 @@
 import Csv from './Csv';
+import type { Shot } from '../Application/types';
 
 describe("Csv", () => {
     test("parse empty file", async () => {
@@ -131,6 +132,6 @@ function createFile({ name = "not_data.csv", content = "" } = {}) {
     return new File([content], name, { type: 'text/csv' })
 }
 
-function row(id, { action, label = "", periode = "", fx } = {}) {
+function row(id: string, { action, label = "", periode = "", fx }: Partial<Shot> = {}): Shot {
     return { id: id, sequence: id, action: action, label: label, periode: periode, fx: fx };
 }

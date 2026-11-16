@@ -5,6 +5,8 @@ import Uuidv4 from '../FilesParser/uuidv4';
 import IndexedDBProjectsDataSource from './IndexedDBProjectsDataSource';
 import MigrationDataSource from './MigrationDataSource';
 import ProjectsDataSource from './ProjectsDataSource';
+import type { ColorDistribution, Colors, PermissionDirectoryHandle, Project, ProjectsSource, Shot, Template } from './types';
+import type { ImageUrl } from '../FilesParser/Images';
 
 const colors = [
     '#F44336', '#E91E63', '#9C27B0', '#3F51B5',
@@ -14,14 +16,12 @@ const colors = [
 ]
 
 class Application {
+    _csv: Csv;
+    _dataSource: ProjectsSource;
+    _images: Images;
+    _uuidv4: Uuidv4;
 
-    /**
-     * Create Application
-     * @param {MigrationDataSource} dataSource 
-     * @param {Images} images 
-     * @param {Uuidv4} uuidv4 
-     */
-    constructor(dataSource, images, uuidv4) {
+    constructor(dataSource: ProjectsSource, images: Images, uuidv4: Uuidv4) {
         this._csv = new Csv();
         this._dataSource = dataSource;
         this._images = images;
@@ -41,22 +41,22 @@ class Application {
             ProjectsDataSource.createNull(),
         ),
         images = Images.createNull()
-    } = {}) {
+    }: { dataSource?: ProjectsSource; images?: Images } = {}) {
         return new Application(dataSource, images, Uuidv4.createNull());
     }
 
-    async list() {
+    async list(): Promise<Project[]> {
         return await this._dataSource.list();
     }
 
-    async get(id) {
+    async get(id: string): Promise<Project> {
         return await this._dataSource.get(id);
     }
 
-    async requestPermission(id) {
-        const dirHandle = (await this._dataSource.dirLink(id));
+    async requestPermission(id: string) {
+        const dirHandle = (await this._dataSource.dirLink(id)) as PermissionDirectoryHandle | undefined;
         if (dirHandle) {
-            const options = { mode: 'readwrite' };
+            const options = { mode: 'readwrite' } as const;
             const permission = (await dirHandle.requestPermission(options));
             if (permission !== 'granted') {
                 throw new Error(`Permission for ${dirHandle.name} was ${permission}`);
@@ -66,10 +66,10 @@ class Application {
         }
     }
 
-    async needsPermission(id) {
-        const dirHandle = (await this._dataSource.dirLink(id));
+    async needsPermission(id: string) {
+        const dirHandle = (await this._dataSource.dirLink(id)) as PermissionDirectoryHandle | undefined;
         if (dirHandle) {
-            const options = { mode: 'readwrite' };
+            const options = { mode: 'readwrite' } as const;
             const permission = (await dirHandle.queryPermission(options));
             return permission === 'prompt'
         } else {
@@ -77,13 +77,13 @@ class Application {
         }
     }
 
-    async delete(id) {
+    async delete(id: string): Promise<Project[]> {
         const projects = await this._dataSource.delete(id);
         await this._images.clear(id);
         return projects;
     }
 
-    async update(id, data) {
+    async update(id: string, data: Shot) {
         const project = await this.get(id);
         project.data = project.data.map(item => {
             if (item.id === data.id) {
@@ -106,7 +106,7 @@ class Application {
         await this._dataSource.save(project);
     }
 
-    async updateColor(id, colors) {
+    async updateColor(id: string, colors: Colors) {
         const project = await this.get(id);
         Object.keys(colors).forEach((key) => {
             project.colors[key] = colors[key];
@@ -114,13 +114,13 @@ class Application {
         await this._dataSource.save(project);
     }
 
-    async updateDefaultColor(id, color) {
+    async updateDefaultColor(id: string, color: string) {
         const project = await this.get(id);
         project.defaultColor = color
         await this._dataSource.save(project);
     }
 
-    async deleteColor(id, key) {
+    async deleteColor(id: string, key: string) {
         const project = await this.get(id);
         project.colors[key] = undefined;
         project.data = project.data.map(item => {
@@ -135,44 +135,44 @@ class Application {
         await this._dataSource.save(project);
     }
 
-    async updateColorDistribution(id, distribution) {
+    async updateColorDistribution(id: string, distribution: ColorDistribution) {
         const project = await this.get(id);
         project.colorDistribution = distribution;
         await this._dataSource.save(project);
     }
 
-    async updateFontFamily(id, fontFamily) {
+    async updateFontFamily(id: string, fontFamily: string) {
         const project = await this.get(id);
         project.fontFamily = fontFamily;
         await this._dataSource.save(project);
     }
 
-    async updatePrintSpaceAround(id, printSpaceAround) {
+    async updatePrintSpaceAround(id: string, printSpaceAround: boolean) {
         const project = await this.get(id);
         project.printSpaceAround = printSpaceAround;
         await this._dataSource.save(project);
     }
 
-    async updateTemplate(id, template) {
+    async updateTemplate(id: string, template: Template) {
         const project = await this.get(id);
         project.template = template;
         await this._dataSource.save(project);
     }
 
-    async updateMainPicture(id, mainPicture) {
+    async updateMainPicture(id: string, mainPicture: string) {
         const project = await this.get(id);
         project.mainPicture = mainPicture;
         await this._dataSource.save(project);
     }
 
-    async add(files) {
+    async add(files: ArrayLike<File> | Iterable<File>): Promise<Project[]> {
         const fileArray = Array.from(files);
         const projects = await this._dataSource.list();
         const name = this._name(fileArray, `Project (${projects.length})`)
         const identifier = this._uuidv4.generate()
         const images = await this._images.execute(identifier, fileArray);
         const data = await this._csv.execute(fileArray);
-        const project = {
+        const project: Project = {
             key: identifier,
             name: name,
             data: this._mergeDateWithImages(data, images),
@@ -182,18 +182,13 @@ class Application {
         return await this._dataSource.add(project);
     }
 
-    /**
-     * Open a directory.
-     * @param {FileSystemDirectoryHandle} dirHandle 
-     * @returns list of projects
-     */
-    async open(dirHandle) {
+    async open(dirHandle: FileSystemDirectoryHandle): Promise<Project[]> {
         const project = await this._parse(dirHandle);
         return await this._dataSource.add(project);
     }
 
-    async _parse(dirHandle) {
-        const fileArray = [];
+    async _parse(dirHandle: FileSystemDirectoryHandle): Promise<Project> {
+        const fileArray: File[] = [];
         for await (const value of dirHandle.values()) {
             if (value.kind === "file") {
                 fileArray.push(await value.getFile());
@@ -203,7 +198,7 @@ class Application {
 
         if (jsonData) {
             const json = (await readAsText(jsonData)).result;
-            const project = JSON.parse(json);
+            const project: Project = JSON.parse(json);
             project.dirLink = dirHandle;
             await this._images.execute(project.key, fileArray);
             return project;
@@ -214,7 +209,7 @@ class Application {
             const name = dirHandle.name;
             const data = await this._csv.execute(fileArray);
 
-            const project = {
+            const project: Project = {
                 key: identifier,
                 name: name,
                 data: this._mergeDateWithImages(data, urls),
@@ -229,7 +224,7 @@ class Application {
         }
     }
 
-    _mergeDateWithImages(data, images) {
+    _mergeDateWithImages(data: Shot[], images: ImageUrl[]) {
         return data.map(d => {
             let results = images.filter(i => i.name.startsWith(`${d.id}.`))
             if (results.length === 0) {
@@ -242,12 +237,12 @@ class Application {
         });
     }
 
-    static _calculateColors(data) {
-        let unique = [...new Set(data.map(d => d.label).filter(p => p !== null && p !== ""))]
+    static _calculateColors(data: Shot[]): Colors {
+        let unique = [...new Set(data.map(d => d.label).filter(p => p !== null && p !== ""))] as string[]
         return Object.assign({}, ...unique.map((p, i) => ({ [p]: colors[i % colors.length] })))
     }
 
-    _name(files, defaultName) {
+    _name(files: File[], defaultName: string) {
         if (files.length === 0) {
             return defaultName
         }

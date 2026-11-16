@@ -7,6 +7,9 @@ export default class ProjectsDataSource {
         return new ProjectsDataSource(localStorage);
     }
 
+    /**
+     * @param {{ projects?: object[], saveInError?: boolean }} [options]
+     */
     static createNull({ projects, saveInError } = { projects: undefined, saveInError: false }) {
         let initialValue;
         if (projects !== undefined) {

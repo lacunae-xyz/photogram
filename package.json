@@ -18,14 +18,19 @@
     "start": "vite",
     "build": "vite build",
     "test": "vitest",
+    "typecheck": "tsc --noEmit",
     "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --project=perf --workers=1",
     "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^16.14.70",
+    "@types/react-dom": "^16.9.25",
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/coverage-v8": "^5.1.0",
     "jsdom": "^31.0.1",
+    "typescript": "~6.0.3",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
   }

@@ -1,8 +1,9 @@
-import Papa from 'papaparse';
+import Papa, { type ParseResult } from 'papaparse';
+import type { Shot } from '../Application/types';
 
 export default class Csv {
 
-    async execute(files) {
+    async execute(files: ArrayLike<File> | Iterable<File>): Promise<Shot[]> {
         const csv = Array.from(files).find(file => file.name === "data.csv");
         if (csv === undefined) {
             throw new Error('Could not found data.csv');
@@ -28,14 +29,14 @@ export default class Csv {
 
     }
 
-    async parseCsv(file) {
-        return new Promise((resolve, reject) => Papa.parse(file, {
+    async parseCsv(file: File): Promise<ParseResult<string[]>> {
+        return new Promise((resolve, reject) => Papa.parse<string[]>(file, {
             complete: resolve,
             error: reject
         }));
     }
 
-    parseId(id) {
+    parseId(id: string) {
         const trimedId = id.trim()
         const pattern = /^\d/
         if (trimedId.match(pattern) !== null) {
