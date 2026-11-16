@@ -5,6 +5,7 @@
   "scripts": {
     "test": "playwright test",
     "typecheck": "tsc",
+    "test:gate": "node --test perf/gate-test.mjs",
     "screenshots:update": "./docker.sh --project=screenshots --project=e2e --update-snapshots",
     "perf:budgets": "./docker.sh --budgets"
   },
