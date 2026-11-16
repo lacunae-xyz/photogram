@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Router, Route } from "react-router-dom";
+import { Router, Route } from 'react-router-dom';
 import Landing from './Landing';
 import Projects from './Projects';
 import Project from './Project';
@@ -8,7 +8,7 @@ import PrivacyPolicy from './PrivacyPolicy';
 import Tutorial from './Tutorial';
 import Fixor from './Fixor';
 import ReactGA from 'react-ga';
-import {cleanPageName} from './Analytics'
+import { cleanPageName } from './Analytics';
 import history from './history';
 import './App.css';
 
@@ -21,9 +21,8 @@ history.listen(location => {
 });
 
 class App extends Component {
-
   componentDidMount() {
-    ReactGA.pageview(cleanPageName(window.location.pathname))
+    ReactGA.pageview(cleanPageName(window.location.pathname));
   }
 
   render() {

@@ -1,4 +1,3 @@
-
 class Line {
   constructor(
     id,
@@ -10,7 +9,7 @@ class Line {
     sourceIn,
     sourceOut,
     recordIn,
-    recordOut
+    recordOut,
   ) {
     this.id = id;
     this.number = number;
@@ -21,7 +20,7 @@ class Line {
     this.sourceIn = sourceIn;
     this.sourceOut = sourceOut;
     this.recordIn = recordIn;
-    this.recordOut = recordOut
+    this.recordOut = recordOut;
   }
   get key() {
     return `${this.number}_${this.id}`;
@@ -32,7 +31,7 @@ class Line {
   recordDuration(imagePerSeconde) {
     return dateDuration(this.recordIn, this.recordOut, imagePerSeconde);
   }
-};
+}
 
 function parse(rawData) {
   return splitLines(rawData)
@@ -42,7 +41,7 @@ function parse(rawData) {
 
 function splitLines(rawData) {
   let results = [];
-  var group = "";
+  var group = '';
   let lines = rawData.split(/[\n\r]{1,2}/);
   var inComment = false;
   const newComment = new RegExp(/\*\s{0,1}[\w\s]+:/);
@@ -50,15 +49,15 @@ function splitLines(rawData) {
     if (RegExp(/^\w+:/g).test(line)) {
       results.push(line);
     } else if (RegExp(/\s{0,1}\*\s{0,1}.+/g).test(line)) {
-      if(newComment.test(line)){
-        group += "\n"
+      if (newComment.test(line)) {
+        group += '\n';
       }
-      group += line.replace(/\*\s{0,1}/, "");
+      group += line.replace(/\*\s{0,1}/, '');
       inComment = true;
     } else {
       if (inComment) {
-        results.push(group + "\n");
-        group = ""
+        results.push(group + '\n');
+        group = '';
         group += line.trim();
         inComment = false;
       } else {
@@ -76,11 +75,17 @@ function splitLines(rawData) {
 function parseLine(value) {
   let number = value.match(/(^\d+)\s+(\S+)\s+/);
   let dates = value.match(/(\d+:\d+:\d+:\d+)/g);
-  let vfxName = value.match(/.*FROM CLIP NAME:\s*(.*)\s*\n/)
-  let idAndDesc = value.match(/LOC:.*\s([\S]+)\s\/\/\s(.*)\n/)
-  let sourceFile = value.match(/SOURCE FILE: ([\S]+)/)
+  let vfxName = value.match(/.*FROM CLIP NAME:\s*(.*)\s*\n/);
+  let idAndDesc = value.match(/LOC:.*\s([\S]+)\s\/\/\s(.*)\n/);
+  let sourceFile = value.match(/SOURCE FILE: ([\S]+)/);
 
-  if (number === null || dates === null || vfxName === null || idAndDesc === null || sourceFile === null) {
+  if (
+    number === null ||
+    dates === null ||
+    vfxName === null ||
+    idAndDesc === null ||
+    sourceFile === null
+  ) {
     return undefined;
   }
   return new Line(
@@ -93,12 +98,12 @@ function parseLine(value) {
     /*sourceIn*/ toDate(dates[0]),
     /*sourceOut*/ toDate(dates[1]),
     /*recordIn*/ toDate(dates[2]),
-    /*recordOut*/ toDate(dates[3])
+    /*recordOut*/ toDate(dates[3]),
   );
 }
 
 function toDate(value) {
-  let stringValues = value.split(":");
+  let stringValues = value.split(':');
   if (stringValues.length === 4) {
     let values = stringValues.map(s => parseInt(s));
     return {
@@ -106,19 +111,21 @@ function toDate(value) {
       minutes: values[1],
       secondes: values[2],
       images: values[3],
-    }
+    };
   } else {
     return undefined;
   }
 }
 
 function dateDuration(din, dout, numberOfImages) {
-  let duration = ((dout.hours - din.hours) * 3600
-    + (dout.minutes - din.minutes) * 60
-    + (dout.secondes - din.secondes)
-  ) * numberOfImages + (dout.images - din.images);
-  return Math.round((duration + Number.EPSILON) * 100) / 100
+  let duration =
+    ((dout.hours - din.hours) * 3600 +
+      (dout.minutes - din.minutes) * 60 +
+      (dout.secondes - din.secondes)) *
+      numberOfImages +
+    (dout.images - din.images);
+  return Math.round((duration + Number.EPSILON) * 100) / 100;
 }
 
 export default parse;
-export {Line, dateDuration};
+export { Line, dateDuration };

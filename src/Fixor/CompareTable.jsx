@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import './CompareTable.css'
+import './CompareTable.css';
 
 function EmptyTable() {
-  return (
-    <p>No Data</p>
-  )
+  return <p>No Data</p>;
 }
 
 function DataCompareTable(props) {
@@ -22,32 +20,33 @@ function DataCompareTable(props) {
         </tr>
       </thead>
       <tbody>
-        {
-          props.data.map((diffLine) => {
-            let line;
-            if (diffLine.lineB !== undefined) {
-              line = diffLine.lineB;
-            } else {
-              line = diffLine.lineA;
-            }
-            if (diffLine.type === "modify") {
-              return (<HistoryLine
+        {props.data.map(diffLine => {
+          let line;
+          if (diffLine.lineB !== undefined) {
+            line = diffLine.lineB;
+          } else {
+            line = diffLine.lineA;
+          }
+          if (diffLine.type === 'modify') {
+            return (
+              <HistoryLine
                 key={diffLine.type + line.key}
                 diffLine={diffLine}
                 imagePerSeconde={props.imagePerSeconde}
                 source={props.source}
-              />)
-            } else {
-              return (<OneLine
+              />
+            );
+          } else {
+            return (
+              <OneLine
                 key={diffLine.type + line.key}
                 diffLine={diffLine}
                 imagePerSeconde={props.imagePerSeconde}
                 source={props.source}
-              />)
-            }
-
-          })
-        }
+              />
+            );
+          }
+        })}
       </tbody>
     </table>
   );
@@ -73,7 +72,9 @@ function OneLine(props) {
     <tr>
       <td title={props.diffLine.changes}>{props.diffLine.type}</td>
       <td>{line.id}</td>
-      <td><img alt="vfx" src={line.image} /></td>
+      <td>
+        <img alt="vfx" src={line.image} />
+      </td>
       <td>{line.description}</td>
       <td>{line.sourceDuration(props.imagePerSeconde).toString()}</td>
       <td>{line.vfxName}</td>
@@ -83,7 +84,6 @@ function OneLine(props) {
 }
 
 function HistoryLine(props) {
-
   const [history, setHistory] = useState(false);
 
   function onHistory() {
@@ -94,17 +94,35 @@ function HistoryLine(props) {
   let lineB = props.diffLine.lineB;
 
   return (
-    <tr className={history ? "with-history" : "without-history"}>
-      <td title={props.diffLine.changes}><button onClick={onHistory}>{props.diffLine.type}</button></td>
-      <td><del>{lineA.id}</del>{lineB.id}</td>
-      <td><img alt="vfx" src={lineB.image} /></td>
-      <td><del>{lineA.description}</del>{lineB.description}</td>
-      <td><del>{lineA.sourceDuration(props.imagePerSeconde).toString()}</del>
-        {lineB.sourceDuration(props.imagePerSeconde).toString()}</td>
-      <td><del>{lineA.vfxName}</del>{lineB.vfxName}</td>
-      <td><del>{lineA[props.source]}</del>{lineB[props.source]}</td>
+    <tr className={history ? 'with-history' : 'without-history'}>
+      <td title={props.diffLine.changes}>
+        <button onClick={onHistory}>{props.diffLine.type}</button>
+      </td>
+      <td>
+        <del>{lineA.id}</del>
+        {lineB.id}
+      </td>
+      <td>
+        <img alt="vfx" src={lineB.image} />
+      </td>
+      <td>
+        <del>{lineA.description}</del>
+        {lineB.description}
+      </td>
+      <td>
+        <del>{lineA.sourceDuration(props.imagePerSeconde).toString()}</del>
+        {lineB.sourceDuration(props.imagePerSeconde).toString()}
+      </td>
+      <td>
+        <del>{lineA.vfxName}</del>
+        {lineB.vfxName}
+      </td>
+      <td>
+        <del>{lineA[props.source]}</del>
+        {lineB[props.source]}
+      </td>
     </tr>
   );
 }
 
-export default CompareTable
+export default CompareTable;

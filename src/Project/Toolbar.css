@@ -10,14 +10,14 @@
   flex-grow: 1;
   margin: 0;
   text-align: left;
-  font-size: 2rem
+  font-size: 2rem;
 }
 
 .toolbar .button {
   background-color: transparent;
-  margin: 0 .8rem;
+  margin: 0 0.8rem;
   border-radius: 100rem;
-  padding: .8rem;
+  padding: 0.8rem;
 }
 
 .toolbar .button:hover,

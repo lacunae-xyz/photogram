@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from "react-helmet";
-import { useHistory } from "react-router-dom";
+import { Helmet } from 'react-helmet';
+import { useHistory } from 'react-router-dom';
 import Application from '../Application';
 import ProjectsDataSource from '../Application/ProjectsDataSource';
-import Page from '../Project/Page'
+import Page from '../Project/Page';
 import Csv from '../FilesParser/Csv';
 
-
 export default function Project() {
-
   const history = useHistory();
-  const [ application, setApplication ] = useState(undefined);
+  const [application, setApplication] = useState(undefined);
 
   useEffect(() => {
     async function createApplication() {
@@ -19,42 +17,54 @@ export default function Project() {
       const base = new URL(window.location.href);
       data.map(d => {
         return Object.assign(d, {
-          url: new URL(`/demo/${d.id}.jpg`, base)
-        })
-      })
+          url: new URL(`/demo/${d.id}.jpg`, base),
+        });
+      });
       const project = {
-        key: "demo",
-        name: "Le fardeau (démo)",
+        key: 'demo',
+        name: 'Le fardeau (démo)',
         data: data,
         colors: Application._calculateColors(data),
-        template: "small",
-      }
+        template: 'small',
+      };
       return Application.createNull({
-        dataSource: ProjectsDataSource.createNull({ projects: [project] })
+        dataSource: ProjectsDataSource.createNull({ projects: [project] }),
       });
     }
-    createApplication().then(app => setApplication(app)).catch(err => console.error(err));
+    createApplication()
+      .then(app => setApplication(app))
+      .catch(err => console.error(err));
   }, []);
 
   async function createDataCsv() {
-    let response = await fetch(new URL("demo/data.csv", new URL(window.location.href)));
+    let response = await fetch(
+      new URL('demo/data.csv', new URL(window.location.href)),
+    );
     let data = await response.blob();
     let metadata = {
-      type: 'text/csv'
+      type: 'text/csv',
     };
-    return new File([data], "data.csv", metadata);
+    return new File([data], 'data.csv', metadata);
   }
 
   return (
     <div>
       <Helmet>
         <title>Photogram - Try the tool for assistant editors</title>
-        <meta name="description" content="Learn and play with our demo data set" />
+        <meta
+          name="description"
+          content="Learn and play with our demo data set"
+        />
       </Helmet>
-      {application
-        ? <Page application={application} id="demo" onBack={() => history.goBack()} />
-        : <div />}
+      {application ? (
+        <Page
+          application={application}
+          id="demo"
+          onBack={() => history.goBack()}
+        />
+      ) : (
+        <div />
+      )}
     </div>
   );
 }
-

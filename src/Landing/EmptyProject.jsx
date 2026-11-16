@@ -11,10 +11,9 @@ class EmptyCell extends Component {
           <span>{this.props.desc}</span>
         </div>
       </section>
-    )
+    );
   }
 }
-
 
 class EmptyProject extends Component {
   render() {
@@ -22,23 +21,28 @@ class EmptyProject extends Component {
       <div className="empty-project-layout">
         <h2>How to start</h2>
         <a href="/tutorial">
-          <EmptyCell className="empty-project-item"
+          <EmptyCell
+            className="empty-project-item"
             src="illus/undraw_learning_2q1h.svg"
             title="Learn"
             desc="Read our tutorial to learn how to create a new project"
           />
         </a>
         <form>
-          <input type="file" id="new-project-file"
+          <input
+            type="file"
+            id="new-project-file"
             webkitdirectory={true.toString()}
             directory={true.toString()}
             multiple={true}
-            onChange={(event) => {
-              this.props.onImportProject(event.target.files)
-              event.target.form.reset()
-            }} />
+            onChange={event => {
+              this.props.onImportProject(event.target.files);
+              event.target.form.reset();
+            }}
+          />
           <label htmlFor="new-project-file">
-            <EmptyCell className="empty-project-item"
+            <EmptyCell
+              className="empty-project-item"
               src="/illus/undraw_upload_image_iwej.svg"
               title="Create"
               desc="Import your pictures and csv file"
@@ -46,15 +50,16 @@ class EmptyProject extends Component {
           </label>
         </form>
         <a href="/project-demo">
-          <EmptyCell className="empty-project-item"
+          <EmptyCell
+            className="empty-project-item"
             src="/illus/undraw_Presentation_62e1.svg"
             title="Try"
             desc="See a live demo of Photogram"
           />
         </a>
       </div>
-    )
+    );
   }
 }
 
-export default EmptyProject
+export default EmptyProject;

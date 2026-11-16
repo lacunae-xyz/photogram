@@ -4,17 +4,19 @@
   border-collapse: collapse;
 }
 
-.edl-table, .edl-table th, .edl-table td{
+.edl-table,
+.edl-table th,
+.edl-table td {
   border: 1px solid #111;
 }
 
-.edl-table thead th{
-  padding-top:1.6rem;
-  padding-bottom:1.6rem;
-  background-color: #BBB;
+.edl-table thead th {
+  padding-top: 1.6rem;
+  padding-bottom: 1.6rem;
+  background-color: #bbb;
 }
 
-.edl-table tbody tr:nth-child(2n){
+.edl-table tbody tr:nth-child(2n) {
   background-color: #eee;
 }
 

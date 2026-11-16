@@ -12,13 +12,29 @@ class Header extends Component {
         </a>
         <nav className="header-nav">
           <ul>
-            <li><a href="/projects" className={`${this.props.nav === "projects" ? "selected" : ""}`}>Projects</a></li>
-            <li><a href="/tutorial" className={`${this.props.nav === "tutorial" ? "selected" : ""}`}>Tutorial</a></li>
-            <li><a href="/project-demo">Demo</a></li>
+            <li>
+              <a
+                href="/projects"
+                className={`${this.props.nav === 'projects' ? 'selected' : ''}`}
+              >
+                Projects
+              </a>
+            </li>
+            <li>
+              <a
+                href="/tutorial"
+                className={`${this.props.nav === 'tutorial' ? 'selected' : ''}`}
+              >
+                Tutorial
+              </a>
+            </li>
+            <li>
+              <a href="/project-demo">Demo</a>
+            </li>
           </ul>
         </nav>
       </header>
-    )
+    );
   }
 }
 

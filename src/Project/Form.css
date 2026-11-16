@@ -19,7 +19,7 @@
 /* Modal Content/Box */
 .modal-content {
   box-sizing: border-box;
-  background-color: rgba(255, 255, 255, .98);
+  background-color: rgba(255, 255, 255, 0.98);
   margin: 4% auto;
   padding: 20px;
   border: 1px solid #888;
@@ -32,7 +32,8 @@
   width: 100%;
 }
 
-#form-meta-datas {}
+#form-meta-datas {
+}
 
 #form-sequence,
 #form-action,
@@ -40,10 +41,10 @@
 #periode,
 #fx {
   border-radius: 2px;
-  background-color: #EEE;
+  background-color: #eee;
   border: none;
-  margin-bottom: .8rem;
-  font-family: "Courier New", Courier, monospace;
+  margin-bottom: 0.8rem;
+  font-family: 'Courier New', Courier, monospace;
   font-size: 2.4rem;
 }
 
@@ -83,8 +84,8 @@
   padding: 0;
   position: relative;
   text-align: center;
-  opacity: .7;
-  transition: opacity .4s;
+  opacity: 0.7;
+  transition: opacity 0.4s;
 }
 
 .photogram-form-container #photogram-label:hover {
@@ -101,7 +102,6 @@
   left: 50%;
   transform: translate(-50%, -50%);
   color: #2228;
-
 }
 
 .button-container {
@@ -109,7 +109,7 @@
   width: 100%;
   position: absolute;
   min-height: 4.8rem;
-  bottom: .4rem;
+  bottom: 0.4rem;
   background: rgba(0, 0, 0, 0.25);
   text-align: start;
 }

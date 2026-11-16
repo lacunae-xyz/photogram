@@ -1,10 +1,8 @@
 import React from 'react';
-import './Table.css'
+import './Table.css';
 
 function EmptyTable() {
-  return (
-    <p>No Data</p>
-  );
+  return <p>No Data</p>;
 }
 
 function DataTable(props) {
@@ -21,20 +19,20 @@ function DataTable(props) {
         </tr>
       </thead>
       <tbody>
-        {
-          props.data.map((line) => {
-            return (
-              <tr key={line.key}>
-                <td>{line.id}</td>
-                <td><img alt="vfx" src={line.image} /></td>
-                <td>{line.description}</td>
-                <td>{line.sourceDuration(props.imagePerSeconde).toString()}</td>
-                <td>{line.vfxName}</td>
-                <td>{line[props.source]}</td>
-              </tr>
-            )
-          })
-        }
+        {props.data.map(line => {
+          return (
+            <tr key={line.key}>
+              <td>{line.id}</td>
+              <td>
+                <img alt="vfx" src={line.image} />
+              </td>
+              <td>{line.description}</td>
+              <td>{line.sourceDuration(props.imagePerSeconde).toString()}</td>
+              <td>{line.vfxName}</td>
+              <td>{line[props.source]}</td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -42,10 +40,10 @@ function DataTable(props) {
 
 function Table(props) {
   if (props.data.length > 0) {
-    return DataTable(props)
+    return DataTable(props);
   } else {
-    return EmptyTable()
+    return EmptyTable();
   }
 }
 
-export default Table
+export default Table;

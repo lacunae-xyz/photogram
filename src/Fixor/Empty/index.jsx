@@ -1,5 +1,5 @@
 import React from 'react';
-import ImportButton from '../ImportButton'
+import ImportButton from '../ImportButton';
 import './index.css';
 
 function Empty(props) {
@@ -14,10 +14,13 @@ function Empty(props) {
       <div className="empty-button">
         <ImportButton onFiles={props.onFiles}>Add first project</ImportButton>
       </div>
-      <img className="projects-empty" src="/illus/undraw_empty_street_sfxm.svg" alt="No project" />
+      <img
+        className="projects-empty"
+        src="/illus/undraw_empty_street_sfxm.svg"
+        alt="No project"
+      />
     </div>
   );
 }
-
 
 export default Empty;

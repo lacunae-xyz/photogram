@@ -1,45 +1,45 @@
 .tpl-large.ele {
-    width: 80rem;
-    height: 23.6rem;
-    margin: .8rem;
-    padding: .8rem;
-    display: inline-grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 3fr 7fr;
-    grid-template-areas: "img indicators" "img action";
-    grid-column-gap: .8rem;
-    page-break-inside: avoid;
-    box-sizing: border-box;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  width: 80rem;
+  height: 23.6rem;
+  margin: 0.8rem;
+  padding: 0.8rem;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 3fr 7fr;
+  grid-template-areas: 'img indicators' 'img action';
+  grid-column-gap: 0.8rem;
+  page-break-inside: avoid;
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 @media print {
-    .print-space-around > .tpl-large-ele {
-        margin: 2.0rem;
-    }
-    .print-no-space > .tpl-large-ele {
-        margin: 0rem;
-    }
+  .print-space-around > .tpl-large-ele {
+    margin: 2rem;
+  }
+  .print-no-space > .tpl-large-ele {
+    margin: 0rem;
+  }
 }
 
 .tpl-large .img {
-    grid-area: img;
-    height: 100%;
-    object-fit: contain;
-    background-color: #111;
+  grid-area: img;
+  height: 100%;
+  object-fit: contain;
+  background-color: #111;
 }
 
 .tpl-large .action-container {
-    overflow: hidden;
+  overflow: hidden;
 
-    grid-area: action;
+  grid-area: action;
 }
 
 .tpl-large .indicators {
-    grid-area: indicators;
-    display: flex;
-    align-items: center;
-    align-content: flex-start;
-    margin-bottom: .8rem;
+  grid-area: indicators;
+  display: flex;
+  align-items: center;
+  align-content: flex-start;
+  margin-bottom: 0.8rem;
 }
