@@ -82,7 +82,6 @@ function parseLine(value) {
   if (
     number === null ||
     dates === null ||
-    vfxName === null ||
     idAndDesc === null ||
     sourceFile === null
   ) {
@@ -93,7 +92,7 @@ function parseLine(value) {
     /*number*/ number[1],
     /*reelName*/ number[2],
     /*description*/ idAndDesc[2].trim().toLowerCase(),
-    /*vfxName*/ vfxName[1].trim(),
+    /*vfxName*/ vfxName === null ? '' : vfxName[1].trim(),
     /*fileName*/ sourceFile[1].trim(),
     /*sourceIn*/ toDate(dates[0]),
     /*sourceOut*/ toDate(dates[1]),

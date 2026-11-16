@@ -205,11 +205,13 @@ it('parse CRLF line endings', () => {
   expect(result).toStrictEqual(parser([oneEvent, otherEvent].join('\n')));
 });
 
-it('skip an event without FROM CLIP NAME', () => {
+it('keep an event without FROM CLIP NAME, with an empty clip name (B26)', () => {
   let result = parser(
     oneEvent.replace('* FROM CLIP NAME:  210/01-03* CAMA\n', ''),
   );
-  expect(result).toEqual([]);
+  expect(result).toStrictEqual([
+    Object.assign(parser(oneEvent)[0], { vfxName: '' }),
+  ]);
 });
 
 it('parse drop-frame timecodes (B23)', () => {
