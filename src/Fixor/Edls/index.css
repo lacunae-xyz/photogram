@@ -16,8 +16,9 @@
     'Open Sans',
     'Helvetica Neue',
     sans-serif;
-  font-size: 1.4rem;
   /* stylelint-enable declaration-property-value-disallowed-list */
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
+  font-size: 1.4rem;
 }
 
 .fixor-tool-header > form {
