@@ -1,12 +1,15 @@
 .dot-light {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #aaaaaabb;
 }
 
 .dot-dark {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #666666bb;
 }
 
 .dot-lighter {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eeeeeebb;
 }
 

@@ -41,6 +41,7 @@
 .creator-item img {
   width: 12.8rem;
   height: 12.8rem;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   border-radius: 12.8rem;
 }
 

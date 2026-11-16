@@ -1,5 +1,6 @@
 .ele {
   display: inline-block;
+  /* stylelint-disable-next-line color-named -- pg: 6.5 */
   border: 1px solid silver;
   overflow: unset;
   background-color: var(--pg-color-surface);

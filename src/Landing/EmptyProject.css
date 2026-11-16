@@ -19,6 +19,7 @@
 
 .empty-project-item {
   display: flex;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   border-radius: 0.8rem;
   transition-property: transform background-color;
   transition-duration: 0.5s;
@@ -29,6 +30,7 @@
 
 .empty-project-item:hover {
   transform: scale(1.05);
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eee;
   cursor: pointer;
 }

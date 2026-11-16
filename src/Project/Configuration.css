@@ -7,11 +7,13 @@
 }
 
 .configuration h1 {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 2.4rem;
   margin: 1.6rem;
 }
 
 .configuration h2 {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 2rem;
   margin: 1.6rem;
 }
@@ -36,6 +38,7 @@
 }
 
 .configuration .template input[type='radio']:checked + label {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eee;
 }
 

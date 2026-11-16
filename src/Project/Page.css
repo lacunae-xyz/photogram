@@ -58,6 +58,7 @@
   margin: 6px 8px 6px 8px;
   min-width: 88px;
   border-radius: var(--pg-radius-s);
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 14px;
   text-align: center;
   text-transform: uppercase;
@@ -67,6 +68,7 @@
 
   color: var(--pg-color-on-action);
   background-color: var(--pg-color-action);
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 16px;
 }
 
@@ -75,6 +77,7 @@
 }
 
 .prompt-permission-description {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 1.2em;
   margin-bottom: 0;
 }

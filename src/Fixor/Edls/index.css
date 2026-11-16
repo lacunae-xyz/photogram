@@ -1,7 +1,9 @@
 .fixor-tool-header {
   display: flex;
   align-items: center;
+  /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
   border-bottom: 1px solid rgba(200, 200, 200, 0.5);
+  /* stylelint-disable declaration-property-value-disallowed-list -- pg: 6.5 */
   font-family:
     system-ui,
     -apple-system,
@@ -15,6 +17,7 @@
     'Helvetica Neue',
     sans-serif;
   font-size: 1.4rem;
+  /* stylelint-enable declaration-property-value-disallowed-list */
 }
 
 .fixor-tool-header > form {
@@ -23,11 +26,13 @@
 }
 
 .fixor-tool-header-button {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   border-radius: 3.2rem;
 }
 
 .fixor-tool-header-button:hover,
 .fixor-tool-header-button:focus {
+  /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
   background-color: rgba(200, 200, 200, 0.3);
 }
 
@@ -49,6 +54,7 @@
 
 .fixor-tool-action:hover,
 .fixor-tool-action:focus {
+  /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
   background-color: rgba(200, 200, 200, 0.3);
 }
 

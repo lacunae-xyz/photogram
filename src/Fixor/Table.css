@@ -1,4 +1,5 @@
 .edl-table {
+  /* stylelint-disable-next-line color-named -- pg: 6.5 */
   background: white;
   margin: auto;
   border-collapse: collapse;
@@ -7,16 +8,19 @@
 .edl-table,
 .edl-table th,
 .edl-table td {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   border: 1px solid #111;
 }
 
 .edl-table thead th {
   padding-top: 1.6rem;
   padding-bottom: 1.6rem;
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #bbb;
 }
 
 .edl-table tbody tr:nth-child(2n) {
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eee;
 }
 

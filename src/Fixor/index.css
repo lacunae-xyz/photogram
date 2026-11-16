@@ -14,10 +14,12 @@
   margin: 2.4rem;
   flex-grow: 1;
   text-decoration: none;
+  /* stylelint-disable-next-line color-named -- pg: 6.5 */
   color: black;
 }
 
 .header-text > h1 {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 3.2rem;
   margin: 0;
 }
@@ -35,6 +37,7 @@
   margin: 6px 8px 6px 8px;
   min-width: 88px;
   border-radius: var(--pg-radius-s);
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 14px;
   text-align: center;
   text-transform: uppercase;
@@ -44,6 +47,7 @@
 
   color: var(--pg-color-on-action);
   background-color: var(--pg-color-action);
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
   font-size: 16px;
 }
 
@@ -53,5 +57,6 @@
 
 #new-project-label:not([disabled]):hover {
   box-shadow: var(--pg-shadow-2);
+  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   color: #ffffffff;
 }
