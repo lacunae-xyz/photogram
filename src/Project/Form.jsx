@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Form.css';
-import empty from '../Templates/Image/empty.svg';
+import empty from '../Templates/empty.svg';
 
 class FormImage extends React.Component {
   render() {

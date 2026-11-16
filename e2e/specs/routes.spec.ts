@@ -1,10 +1,10 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 
 const routes = [
   { path: '/', ready: '.landing-container' },
   { path: '/tutorial', ready: 'h1' },
   { path: '/projects', ready: '.projects-container' },
-  { path: '/project-demo', ready: '.tiles-container .ele' },
+  { path: '/project-demo', ready: tileSelector },
   { path: '/privacy-policy', ready: 'h1' },
   { path: '/fixor', ready: '.fixor-empty-container' },
 ];

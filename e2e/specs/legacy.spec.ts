@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import {
   createLegacyProject,
   expectCover,
@@ -21,7 +21,7 @@ test('legacy localStorage project: migrated to IndexedDB, opens, edit survives r
 
   await card.click();
   await expect(page).toHaveURL(/\/project\/legacy-project$/);
-  const tiles = page.locator('.tiles-container .ele');
+  const tiles = page.locator(tileSelector);
   await expect(tiles).toHaveCount(legacyProject.data.length);
 
   await tiles.first().click();

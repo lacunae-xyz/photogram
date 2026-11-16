@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import type { Page } from '@playwright/test';
 import {
   demoRows,
@@ -28,7 +28,7 @@ for (const template of ['small', 'large'] as const) {
       });
 
       test('screen', async ({ page }) => {
-        const tiles = page.locator('.tiles-container .ele');
+        const tiles = page.locator(tileSelector);
         for (const [i, row] of demoRows.entries()) {
           await expect(tiles.nth(i)).toHaveScreenshot(`${template}-${distribution}-tile-${row.replace(' ', '-')}.png`);
         }
@@ -57,7 +57,7 @@ const printClip = {
 };
 
 async function firstTwoTiles(page: Page, template: keyof typeof printClip) {
-  const box = await page.locator('.tiles-container .ele').first().boundingBox();
+  const box = await page.locator(tileSelector).first().boundingBox();
   if (!box) throw new Error('first tile has no bounding box');
   const pad = 48;
   return { x: Math.max(0, Math.floor(box.x) - pad), y: Math.max(0, Math.floor(box.y) - pad), ...printClip[template] };
@@ -77,7 +77,7 @@ for (const template of ['small', 'large'] as const) {
       await setPrintSpaceAround(page, spaceAround);
       await page.emulateMedia({ media: 'print' });
       await settle(page);
-      const marginRem = await page.locator('.tiles-container .ele').first().evaluate((tile) => {
+      const marginRem = await page.locator(tileSelector).first().evaluate((tile) => {
         const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
         return parseFloat(getComputedStyle(tile).marginTop) / rootPx;
       });
@@ -123,7 +123,7 @@ for (const template of ['small', 'large'] as const) {
       await setTemplate(page, template);
       await setDefaultColor(page, '#3F51B5');
       await settle(page);
-      const tiles = page.locator('.tiles-container .ele');
+      const tiles = page.locator(tileSelector);
       for (const row of ['6', '7']) {
         await expect(tiles.nth(demoRows.indexOf(row))).toHaveScreenshot(`${template}-default-colour-tile-${row}.png`);
       }

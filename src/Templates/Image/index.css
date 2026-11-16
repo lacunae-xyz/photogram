@@ -1,6 +1,0 @@
-.img {
-  width: 100%;
-  object-fit: contain;
-  background-color: var(--pg-color-chrome);
-  aspect-ratio: 16/9;
-}

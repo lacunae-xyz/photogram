@@ -1,5 +1,6 @@
 import { expect, Page } from '@playwright/test';
 import { routeDemo } from './demo';
+import { tileSelector } from './test';
 import { waitForImages, waitForTitleSizing } from './sizing';
 
 export const demoRows = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11 bis'];
@@ -7,7 +8,7 @@ export const demoRows = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11 
 export async function openDemo(page: Page) {
   await routeDemo(page);
   await page.goto('/project-demo');
-  await expect(page.locator('.tiles-container .ele')).toHaveCount(demoRows.length);
+  await expect(page.locator(tileSelector)).toHaveCount(demoRows.length);
 }
 
 async function pickColor(page: Page, button: ReturnType<Page['locator']>, hex: string) {
@@ -32,7 +33,7 @@ export async function setDefaultColor(page: Page, hex: string) {
 
 export async function setTemplate(page: Page, template: 'small' | 'large') {
   await page.locator(`label[for="layout_${template}"]`).click();
-  await expect(page.locator(`.tiles-container .tpl-${template}`)).toHaveCount(demoRows.length);
+  await expect(page.locator(`.tiles-container > photogram-tile-${template}`)).toHaveCount(demoRows.length);
 }
 
 export async function setColorDistribution(page: Page, distribution: 'indicator' | 'card') {
@@ -59,7 +60,7 @@ async function parkMouse(page: Page) {
   const { width, height } = viewport;
   for (const [x, y] of [[width - 1, 0], [width - 1, height - 1], [0, height - 1], [0, 0]]) {
     const hoversNothing = await page.evaluate(
-      ([x, y]) => !document.elementFromPoint(x, y)?.closest('.ele, .preview'),
+      ([x, y]) => !document.elementFromPoint(x, y)?.closest('photogram-tile-small, photogram-tile-large, .preview'),
       [x, y],
     );
     if (hoversNothing) {

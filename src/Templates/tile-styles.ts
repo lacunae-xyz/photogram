@@ -1,0 +1,28 @@
+import { css } from 'lit';
+
+// The tile is the host, so it stays a box that print can keep on one page. Print margins are in Tiles.css.
+export const tileStyles = css`
+  :host {
+    display: inline-block;
+    /* stylelint-disable-next-line color-named -- pg: 6.5 */
+    border: 1px solid silver;
+    overflow: unset;
+    background-color: var(--pg-color-surface-raised);
+    text-align: left;
+    page-break-inside: avoid;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 200ms ease-out;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  :host(:hover) {
+    transform: scale(1.05);
+  }
+
+  :host(:active) {
+    transition-delay: 100ms;
+    transform: scale(1.06);
+  }
+`;

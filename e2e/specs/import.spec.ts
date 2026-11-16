@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -19,7 +19,7 @@ test('import a folder: card with cover, open, reload', async ({ page, pageErrors
   const key = page.url().split('/').pop();
   expect(await storedProjectKeys(page)).toEqual([key]);
   expect(await legacyKey(page)).toBeNull();
-  const tiles = page.locator('.tiles-container .ele');
+  const tiles = page.locator(tileSelector);
   await expect(tiles).toHaveCount(importRows);
   await expect(page.locator('.toolbar h1')).toHaveText('Projet import');
 
@@ -32,7 +32,7 @@ test('import a folder: card with cover, open, reload', async ({ page, pageErrors
 test('export data.json, then import it back with the edits', async ({ page, browserName, pageErrors }, testInfo) => {
   const card = await importProject(page);
   await card.click();
-  const tiles = page.locator('.tiles-container .ele');
+  const tiles = page.locator(tileSelector);
   await tiles.first().click();
   await page.locator('#form-action').fill('Plan exporté');
   await page.locator('#form button[type=submit]').click();
@@ -65,7 +65,7 @@ test('re-importing an exported data.json attaches images added since (B27)', asy
   fs.rmSync(path.join(withoutImage, '3.jpg'));
   const card = await importProject(page, withoutImage);
   await card.click();
-  const tiles = page.locator('.tiles-container .ele');
+  const tiles = page.locator(tileSelector);
   await expect(tiles.nth(2).locator('.img')).toHaveAttribute('src', /empty\.\w+\.svg$/);
 
   const download = page.waitForEvent('download');

@@ -57,7 +57,8 @@
   background-color: var(--pg-color-hover);
 }
 
-.preview .ele {
+.preview photogram-tile-small,
+.preview photogram-tile-large {
   transform: scale(0.25) !important;
   transform-origin: top left;
 }

@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, tileSelector } from '../support/test';
 import path from 'node:path';
 import { Page } from '@playwright/test';
 import { fixtures } from '../support/demo';
@@ -56,7 +56,7 @@ test('page views and events reach Umami without project ids', async ({ page }) =
 test('the app works with Umami blocked', async ({ page, pageErrors }) => {
   const card = await importProject(page);
   await card.click();
-  await expect(page.locator('.tiles-container .ele')).toHaveCount(3);
+  await expect(page.locator(tileSelector)).toHaveCount(3);
   expect(await page.evaluate(() => 'umami' in window)).toBe(false);
   expect(pageErrors).toEqual([]);
 });

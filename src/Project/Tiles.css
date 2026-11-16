@@ -3,3 +3,18 @@
   /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
   background-color: #eee;
 }
+
+@media print {
+  .print-space-around > photogram-tile-small {
+    margin: 2.2rem;
+  }
+  .print-no-space > photogram-tile-small {
+    margin: 0rem;
+  }
+  .print-space-around > photogram-tile-large {
+    margin: 2rem;
+  }
+  .print-no-space > photogram-tile-large {
+    margin: 0rem;
+  }
+}

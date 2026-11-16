@@ -1,9 +1,3 @@
-import svgN from './weather-night.svg';
-import svgJ from './weather-sunny.svg';
-import svgM from './weather-sunset-up.svg';
-import svgS from './weather-sunset-down.svg';
-import svgNull from './weather-none.svg';
-
 export function periodToClassName(value) {
   switch (toSingleLetter(value)) {
     case 'm':
@@ -19,18 +13,18 @@ export function periodToClassName(value) {
   }
 }
 
-export function periodToSrc(value) {
+export function periodToIcon(value) {
   switch (toSingleLetter(value)) {
     case 'm':
-      return svgM;
+      return 'weather-sunset-up';
     case 's':
-      return svgS;
+      return 'weather-sunset-down';
     case 'j':
-      return svgJ;
+      return 'weather-sunny';
     case 'n':
-      return svgN;
+      return 'weather-night';
     default:
-      return svgNull;
+      return 'weather-none';
   }
 }
 

@@ -1,10 +1,28 @@
 import React from 'react';
 
-import TemplateFactory from '../Templates/Factory';
+import '../Templates/photogram-tile-large';
+import '../Templates/photogram-tile-small';
 import './Tiles.css';
 
+const tileElements = {
+  small: 'photogram-tile-small',
+  large: 'photogram-tile-large',
+};
+
+export function tileProps(shot) {
+  return {
+    sequence: shot.sequence,
+    action: shot.action,
+    period: shot.periode,
+    fx: shot.fx,
+    url: shot.url,
+    color: shot.color,
+    colorDistribution: shot.colorDistribution,
+  };
+}
+
 export default function Tiles(props) {
-  let type = props.type;
+  const Tile = tileElements[props.type];
   if (props.value) {
     const images = props.value.map(image => {
       let i;
@@ -19,14 +37,13 @@ export default function Tiles(props) {
           colorDistribution: props.colorDistribution,
         });
       }
-      return (
-        <TemplateFactory
+      return Tile ? (
+        <Tile
           key={image.id}
-          type={type}
-          file={i}
-          onTile={data => props.onTile(Object.assign({}, data))}
+          {...tileProps(i)}
+          onClick={() => props.onTile(Object.assign({}, i))}
         />
-      );
+      ) : null;
     });
     return (
       // key is set as fontFamily to update all tiles if font changes.
