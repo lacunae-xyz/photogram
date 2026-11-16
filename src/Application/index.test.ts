@@ -19,6 +19,19 @@ describe('Application', () => {
       expect(() => Application.create()).not.toThrowError();
     });
 
+    test('every page shares one migration run', async () => {
+      vi.resetModules();
+      const { default: FreshApplication } = await import('./index');
+      const getItem = vi.spyOn(Storage.prototype, 'getItem');
+
+      await FreshApplication.create().ready();
+      await FreshApplication.create().ready();
+
+      expect(
+        getItem.mock.calls.filter(([key]) => key === 'projects'),
+      ).toHaveLength(1);
+      getItem.mockRestore();
+    });
   });
 
   describe('add', () => {
