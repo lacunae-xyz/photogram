@@ -1,6 +1,5 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 import { observeTitle, unobserveTitle } from './titleSizing';
 
 // Fits `.action` to `.action-container` with an inline font-size, which e2e's waitForTitleSizing reads. titleSizing
@@ -20,31 +19,34 @@ export class PhotogramAction extends LitElement {
 
   @property() accessor value: string | undefined;
 
-  #title = createRef<HTMLElement>();
+  // Not a `ref()`: Lit clears those on disconnect, before `disconnectedCallback` could unobserve the title.
+  #title: HTMLElement | null = null;
 
   connectedCallback() {
     super.connectedCallback();
-    if (this.hasUpdated && this.#title.value) {
-      observeTitle(this.#title.value);
+    if (this.#title) {
+      observeTitle(this.#title);
     }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.#title.value) {
-      unobserveTitle(this.#title.value);
+    if (this.#title) {
+      unobserveTitle(this.#title);
     }
   }
 
   protected firstUpdated() {
-    if (this.#title.value) {
-      observeTitle(this.#title.value);
+    this.#title = this.renderRoot.querySelector<HTMLElement>('.action');
+    // Lit still renders an element removed before its first update: it is observed once connected.
+    if (this.isConnected && this.#title) {
+      observeTitle(this.#title);
     }
   }
 
   render() {
     return html`<div part="container" class="action-container">
-      <p class="action" ${ref(this.#title)}>${this.value}</p>
+      <p class="action">${this.value}</p>
     </div>`;
   }
 }

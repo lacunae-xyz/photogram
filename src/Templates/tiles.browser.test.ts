@@ -16,6 +16,12 @@ const shot = {
 
 afterEach(() => render(null, document.body));
 
+async function frames(count: number) {
+  for (let i = 0; i < count; i++) {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+  }
+}
+
 function part<T extends Element = HTMLElement>(tile: Tile, path: string[]) {
   let root: ParentNode | null | undefined = tile.shadowRoot;
   let found: Element | null | undefined;
@@ -122,8 +128,34 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       const sized = action.style.fontSize;
       tile.action = `${shot.action} `.repeat(40);
       await tile.updateComplete;
-      await part<LitElement>(tile, ['photogram-action']).updateComplete;
-      expect(action.style.fontSize).not.toBe(sized);
+      await vi.waitFor(() => expect(action.style.fontSize).not.toBe(sized));
+    });
+
+    it('stops sizing the action once the tile is removed', async () => {
+      const tile = await renderTile({
+        ...shot,
+        action: `${shot.action} `.repeat(40),
+      });
+      const action = part(tile, ['photogram-action', '.action']);
+      await vi.waitFor(() => expect(action.style.fontSize).toMatch(/rem$/));
+      const sized = action.style.fontSize;
+      expect(sized).not.toBe('2rem');
+      document.createElement('div').append(tile);
+      tile.action = shot.action;
+      await frames(20);
+      expect(action.style.fontSize).toBe(sized);
+    });
+
+    it('sizes the action again once the tile is put back', async () => {
+      const tile = await renderTile(shot);
+      const action = part(tile, ['photogram-action', '.action']);
+      await vi.waitFor(() => expect(action.style.fontSize).toMatch(/rem$/));
+      const sized = action.style.fontSize;
+      const holder = document.createElement('div');
+      holder.append(tile);
+      document.body.append(holder);
+      tile.action = `${shot.action} `.repeat(40);
+      await vi.waitFor(() => expect(action.style.fontSize).not.toBe(sized));
     });
   });
 }
