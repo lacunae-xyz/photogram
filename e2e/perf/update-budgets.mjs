@@ -2,7 +2,8 @@
 // LayoutCount worst × 1.3, total blocking time worst group median × 1.3 with a floor.
 // Run it on the CI runner (update-budgets label) or in the Playwright Docker image (../docker.sh --budgets).
 import fs from 'node:fs';
-import { budgetsFile, measure, median, samples } from './measures.mjs';
+import { median } from './gate.mjs';
+import { budgetsFile, measure, samples } from './measures.mjs';
 
 const groups = 3;
 const margin = 1.3;
