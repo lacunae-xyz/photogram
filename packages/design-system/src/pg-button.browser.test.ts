@@ -57,12 +57,39 @@ for (const tag of ['pg-button', 'pg-big-button'] as const) {
 
     it('takes no click when disabled', async () => {
       const host = await renderButton(button('Save'));
+      const onClick = vi.fn();
+      host.addEventListener('click', onClick);
       host.disabled = true;
       await host.updateComplete;
       expect(host.hasAttribute('disabled')).toBe(true);
-      await expect
-        .element(page.getByRole('button', { name: 'Save' }))
-        .toBeDisabled();
+      const save = page.getByRole('button', { name: 'Save' });
+      await expect.element(save).toBeDisabled();
+      await userEvent.click(save, { force: true });
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('is disabled by a disabled fieldset', async () => {
+      const onSubmit = vi.fn((event: SubmitEvent) => event.preventDefault());
+      render(
+        html`<form @submit=${onSubmit}>
+          <fieldset disabled>
+            ${
+              tag === 'pg-button'
+                ? html`<pg-button type="submit">Save</pg-button>`
+                : html`<pg-big-button type="submit">Save</pg-big-button>`
+            }
+          </fieldset>
+        </form>`,
+        document.body,
+      );
+      const host = document.body.querySelector(tag)!;
+      await host.updateComplete;
+      const save = page.getByRole('button', { name: 'Save' });
+      await expect.element(save).toBeDisabled();
+      document.body.querySelector('fieldset')!.disabled = false;
+      await expect.element(save).toBeEnabled();
+      await userEvent.click(save);
+      expect(onSubmit).toHaveBeenCalledOnce();
     });
 
     it('is focused with Tab and clicked with Enter and Space', async () => {

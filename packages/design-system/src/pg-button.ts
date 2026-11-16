@@ -1,5 +1,5 @@
 import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 /**
  * A flat button: a real `<button>` in its shadow root, so it takes focus and the keyboard.
@@ -54,7 +54,14 @@ export class PgButton extends LitElement {
 
   @property({ type: Boolean, reflect: true }) accessor disabled = false;
 
+  /** Set by a disabled `<fieldset>` around it. */
+  @state() private accessor formDisabled = false;
+
   #internals = this.attachInternals();
+
+  formDisabledCallback(disabled: boolean) {
+    this.formDisabled = disabled;
+  }
 
   #onClick() {
     const form = this.#internals.form;
@@ -70,7 +77,7 @@ export class PgButton extends LitElement {
       part="button"
       type=${this.type}
       aria-label=${this.label || nothing}
-      ?disabled=${this.disabled}
+      ?disabled=${this.disabled || this.formDisabled}
       @click=${this.#onClick}
     >
       <slot></slot>
