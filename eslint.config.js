@@ -1,11 +1,12 @@
 import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import eslintReact from '@eslint-react/eslint-plugin';
 import prettier from 'eslint-config-prettier';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   // serviceWorker.js: CRA leftover, never imported, deleted in phase 3.
   { ignores: ['dist', 'coverage', 'e2e', 'public', 'src/serviceWorker.js'] },
   js.configs.recommended,
