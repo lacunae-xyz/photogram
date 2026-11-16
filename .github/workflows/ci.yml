@@ -4,6 +4,8 @@ on:
   push:
     branches: [master]
   pull_request:
+    # labeled: the update-snapshots / update-budgets labels. Dispatch only works once ci.yml is on master.
+    types: [opened, synchronize, reopened, labeled]
   schedule:
     # Nightly: adds the @slow 3000-row perf scenarios.
     - cron: '0 3 * * *'
@@ -11,6 +13,10 @@ on:
     inputs:
       update-snapshots:
         description: Regenerate screenshot baselines on the CI runner and upload them
+        type: boolean
+        default: false
+      update-budgets:
+        description: Measure perf budgets on the CI runner (5 runs, slow scenarios included) and upload budgets.json
         type: boolean
         default: false
 
@@ -68,6 +74,8 @@ jobs:
       options: --ipc=host
     env:
       HOME: /root
+      UPDATE_SNAPSHOTS: ${{ inputs.update-snapshots || contains(github.event.pull_request.labels.*.name, 'update-snapshots') }}
+      UPDATE_BUDGETS: ${{ inputs.update-budgets || contains(github.event.pull_request.labels.*.name, 'update-budgets') }}
     defaults:
       run:
         working-directory: e2e
@@ -86,13 +94,18 @@ jobs:
         run: npm ci
       - run: npm run typecheck
       - name: Screenshots and e2e
-        run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ inputs.update-snapshots && '--update-snapshots' || '' }}
+        run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ env.UPDATE_SNAPSHOTS == 'true' && '--update-snapshots' || '' }}
       - name: Perf
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         # Own output dir: a second run wipes test-results/ and the traces of the first.
-        run: npx playwright test --project=perf --workers=1 --output=test-results-perf
+        run: |
+          if [ "$UPDATE_BUDGETS" = true ]; then
+            node perf/update-budgets.mjs --output=test-results-perf
+          else
+            npx playwright test --project=perf --workers=1 --output=test-results-perf
+          fi
         env:
-          PERF_SLOW: ${{ github.event_name == 'schedule' && '1' || '' }}
+          PERF_SLOW: ${{ (github.event_name == 'schedule' || env.UPDATE_BUDGETS == 'true') && '1' || '' }}
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-perf
       - uses: actions/upload-artifact@v4
         if: ${{ failure() }}
@@ -105,12 +118,17 @@ jobs:
             e2e/test-results-perf/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: ${{ always() && inputs.update-snapshots }}
+        if: ${{ always() && env.UPDATE_SNAPSHOTS == 'true' }}
         with:
           name: screenshot-baselines
           path: |
             e2e/screenshots/__screenshots__/
             e2e/specs/__screenshots__/
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && env.UPDATE_BUDGETS == 'true' }}
+        with:
+          name: perf-budgets
+          path: e2e/perf/budgets.json
 
   deploy-preview:
     needs: [unit, build, browser]
