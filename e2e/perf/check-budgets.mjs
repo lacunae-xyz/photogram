@@ -7,12 +7,14 @@
 // A/B mode (pull requests): node perf/check-budgets.mjs --baseline <base dist> [playwright args]
 //   Runner speed moves the median from one job to the next by more than any budget margin, so the PR's dist and the
 //   base commit's dist are served side by side and measured interleaved (PR, base, PR, base…) in the same job. A
-//   scenario fails if the PR median exceeds base median × 1.2 + 50 ms. A scenario the base didn't record falls back
-//   to the absolute budget.
+//   scenario fails if the PR median exceeds base median × 1.2 + 50 ms. Only the PR side fails the gate: a base that
+//   isn't served, or base runs that fail (the PR changed the spec's flow, say), are logged and the scenarios without
+//   all their base runs fall back to the absolute budget.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { decide } from './gate.mjs';
+import { abRatio, abSlackMs, decide } from './gate.mjs';
 import { budgetsFile, measure, samples } from './measures.mjs';
 
 const e2eDir = path.join(import.meta.dirname, '..');
@@ -43,6 +45,7 @@ for (const [scenario, runs] of Object.entries(byScenario)) {
     ms(result.limit),
     pr.map(ms).join(', '),
     base?.map(ms).join(', ') ?? '',
+    note(result, pr, base),
   ]);
 }
 if (rows.length === 0) {
@@ -50,8 +53,12 @@ if (rows.length === 0) {
   failed = true;
 } else {
   console.log(`\nTotal blocking time (ms), median of ${samples} runs${baseline ? ' per side' : ''}`);
-  const table = [['', 'scenario', 'gate', 'median', 'base median', 'limit', 'runs', 'base runs'], ...rows];
-  printTable(baseline ? table : table.map(row => row.filter((_, column) => column !== 4 && column !== 7)));
+  if (baseline) {
+    printTable([['', 'scenario', 'gate', 'PR median', 'base median', 'limit', 'PR runs', 'base runs', ''], ...rows]);
+    console.log(`A/B limit: base median × ${abRatio} + ${abSlackMs} ms. budget: perf/budgets.json.`);
+  } else {
+    printTable([['', 'scenario', 'median', 'budget', 'runs', ''], ...rows.map(row => [0, 1, 3, 5, 6, 8].map(column => row[column]))]);
+  }
 }
 process.exit(failed ? 1 : 0);
 
@@ -73,8 +80,20 @@ async function measureAB(baseDir) {
     fs.writeFileSync(side.record, '');
   }
   const servers = sides.map(side => serve(side.dir, side.port));
+  // A cancelled run (CI cancel, ^C) mustn't leave the servers behind or start the next run.
+  const stop = signal => {
+    servers.forEach(server => server.kill());
+    process.exit(128 + os.constants.signals[signal]);
+  };
+  process.once('SIGINT', stop).once('SIGTERM', stop);
   try {
-    await Promise.all(sides.map(side => waitForServer(side.port)));
+    await waitForServer(sides[0].port);
+    try {
+      await waitForServer(sides[1].port);
+    } catch (error) {
+      console.log(`⚠ base not served (${error.message}): every scenario falls back to the absolute budget`);
+      sides.pop();
+    }
     const htmlOutput = process.env.PLAYWRIGHT_HTML_OUTPUT_DIR ?? 'playwright-report';
     const measures = { pr: {}, base: {} };
     let status = 0;
@@ -92,12 +111,22 @@ async function measureAB(baseDir) {
           },
           side.record,
         );
-        if (side.check && result.status !== 0) {
-          status = result.status ?? 1;
+        if (result.status !== 0) {
+          if (side.check) {
+            status = result.status ?? 1;
+          } else {
+            const recorded = Object.keys(result.byScenario).join(', ') || 'none';
+            // stdout, like the run headers: stderr would print out of order.
+            console.log(
+              `⚠ base run ${run} failed (exit ${result.status}), recorded: ${recorded}. Scenarios without ${samples} base runs fall back to the absolute budget.`,
+            );
+          }
         }
         for (const [scenario, runs] of Object.entries(result.byScenario)) {
           (measures[side.name][scenario] ??= []).push(...runs);
         }
+        // spawnSync blocks the event loop: let a signal received meanwhile reach stop before the next run.
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
     }
     for (const side of sides) {
@@ -105,10 +134,24 @@ async function measureAB(baseDir) {
     }
     return { byScenario: measures.pr, baseByScenario: measures.base, status };
   } finally {
+    process.off('SIGINT', stop).off('SIGTERM', stop);
     for (const server of servers) {
       server.kill();
     }
   }
+}
+
+function note(result, pr, base) {
+  if (pr.length !== samples) {
+    return `${pr.length}/${samples} PR runs`;
+  }
+  if (result.limit === undefined) {
+    return 'no budget in budgets.json';
+  }
+  if (baseline && result.mode === 'absolute') {
+    return `fallback: ${base?.length ?? 0}/${samples} base runs`;
+  }
+  return '';
 }
 
 /** Removes `--name=value` or `--name value` from args and returns the value. */
@@ -126,6 +169,7 @@ function serve(dir, port) {
   const server = spawn(path.join(e2eDir, 'node_modules', '.bin', 'serve'), ['-s', dir, '-l', String(port), '--no-request-logging'], {
     stdio: ['ignore', 'ignore', 'inherit'],
   });
+  server.on('error', error => console.error(`✘ serve ${dir} on port ${port}: ${error.message}`));
   server.on('exit', code => {
     if (code) {
       console.error(`✘ serve ${dir} on port ${port} exited with ${code}`);

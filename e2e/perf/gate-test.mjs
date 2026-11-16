@@ -29,6 +29,7 @@ test('A/B passes at the limit and fails above it', () => {
 test('A/B ignores the absolute budget', () => {
   assert.equal(decide({ pr: [900, 900, 900], base: [800, 800, 800], budget: 100, samples: 3 }).ok, true);
   assert.equal(decide({ pr: [60, 60, 60], base: [0, 0, 0], budget: 1000, samples: 3 }).ok, false);
+  assert.equal(decide({ pr: [60, 60, 60], base: [50, 50, 50], samples: 3 }).ok, true);
 });
 
 test('missing PR runs fail', () => {
