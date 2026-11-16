@@ -26,18 +26,23 @@ function Edls(props) {
     let value = event.target.value;
     setSource(value);
   };
-  const onCopy = event => {
+  const onCopy = async event => {
     event.preventDefault();
     const table = document.getElementById('fixor-table');
     if (!table) {
       return;
     }
-    navigator.clipboard.write([
-      new ClipboardItem({
-        'text/html': new Blob([table.outerHTML], { type: 'text/html' }),
-        'text/plain': new Blob([table.innerText], { type: 'text/plain' }),
-      }),
-    ]);
+    // Denied permission, or no ClipboardItem: nothing is copied, the page keeps working.
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([table.outerHTML], { type: 'text/html' }),
+          'text/plain': new Blob([table.innerText], { type: 'text/plain' }),
+        }),
+      ]);
+    } catch (error) {
+      console.error('Could not copy the table', error);
+    }
   };
 
   let edl = props.edls.find(edl => edl.name === selected);

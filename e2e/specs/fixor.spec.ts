@@ -64,3 +64,18 @@ test('Copy puts the table on the clipboard as HTML and text (B10)', async ({ pag
     });
   expect(pageErrors).toEqual([]);
 });
+
+test('Copy fails quietly when the clipboard refuses (B10)', async ({ page, pageErrors, consoleErrors }) => {
+  await page.addInitScript(() => {
+    navigator.clipboard.write = () => Promise.reject(new DOMException('Write permission denied.', 'NotAllowedError'));
+  });
+  await page.goto('/fixor');
+  await page.locator('#import-button').setInputFiles(edl('v1'));
+  await expect(page.locator('#fixor-table tbody tr')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'Copy' }).click();
+
+  await expect.poll(() => consoleErrors).toEqual([expect.stringContaining('Could not copy the table')]);
+  expect(pageErrors).toEqual([]);
+  await expect(page.locator('#fixor-table tbody tr')).toHaveCount(3);
+});
