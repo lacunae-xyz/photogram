@@ -188,6 +188,77 @@ describe('Application', () => {
       );
     });
 
+    test('data.json: images added since are attached to their rows (B27)', async () => {
+      const application = Application.createNull();
+      await application.add([
+        createCsv(),
+        createJson({ content: JSON.stringify(exportedWithRows()) }),
+        createJpg({ name: '1.jpg' }),
+        createJpg({ name: '2.jpg' }),
+        createJpg({ name: '3.jpg' }),
+      ]);
+      const imported = await application.get('key');
+      expect(imported.data.map(d => d.url)).toEqual([
+        '/project/key/images/1.jpg/',
+        '/project/key/images/2.jpg/',
+        null,
+      ]);
+    });
+
+    describe('data.json with the key of an existing project (B28)', () => {
+      test('linked: the import gets a new key, the linked project is untouched', async () => {
+        const linked = createProject({ data: [{ id: '1', action: 'linked' }] });
+        const dataSource = IndexedDBProjectsDataSource.createNull({
+          projects: [linked],
+        });
+        const images = Images.createNull();
+        const application = Application.createNull({ dataSource, images });
+
+        const projects = await application.add([
+          createCsv(),
+          createJson({ content: JSON.stringify(exportedWithRows()) }),
+          createJpg({ name: '1.jpg' }),
+          createJpg({ name: '2.jpg' }),
+        ]);
+
+        const newKey = Uuidv4.createNull().generate();
+        expect(projects.map(p => p.key)).toEqual(['key', newKey]);
+        await expect(application.get('key')).resolves.toEqual(linked);
+        const imported = await application.get(newKey);
+        expect(imported.dirLink).toBeUndefined();
+        expect(imported.mainPicture).toEqual(
+          `/project/${newKey}/images/1.jpg/`,
+        );
+        expect(imported.data.map(d => d.url)).toEqual([
+          `/project/${newKey}/images/1.jpg/`,
+          `/project/${newKey}/images/2.jpg/`,
+          null,
+        ]);
+        await expect(images.has(newKey)).resolves.toEqual(true);
+      });
+
+      test('unlinked: the import replaces it in place', async () => {
+        const dataSource = IndexedDBProjectsDataSource.createNull({
+          projects: [
+            { ...createUnlinkedProject(), name: 'before' },
+            { ...createUnlinkedProject(), key: 'other' },
+          ],
+        });
+        const application = Application.createNull({ dataSource });
+        const exported = { ...exportedWithRows(), name: 'after' };
+
+        const projects = await application.add([
+          createCsv(),
+          createJson({ content: JSON.stringify(exported) }),
+        ]);
+
+        expect(projects.map(p => [p.key, p.name])).toEqual([
+          ['key', 'after'],
+          ['other', undefined],
+        ]);
+      });
+    });
+
     test('invalid data.json rejects', async () => {
       await expect(
         Application.createNull().add([
@@ -313,6 +384,20 @@ describe('Application', () => {
       ]);
     });
 
+    test('from data.json: images added since are attached to their rows (B27)', async () => {
+      const dirHandle = createDirHandle([
+        createJson({ content: JSON.stringify(exportedWithRows()) }),
+        createJpg({ name: '2.jpg' }),
+        createJpg({ name: '3.jpg' }),
+      ]);
+      const projects = await Application.createNull().open(dirHandle);
+      expect(projects[0].data.map(d => d.url)).toEqual([
+        '/project/key/images/1.jpg/',
+        '/project/key/images/2.jpg/',
+        null,
+      ]);
+    });
+
     test('subdirectories are ignored', async () => {
       const csv = createCsv({ content: '1;action' });
       const dirHandle = createDirHandle([csv], ['sub']);
@@ -385,6 +470,7 @@ describe('Application', () => {
         sequence: '1',
         action: 'edited',
         label: 'other',
+        url: project.data[0].url,
       });
       await application.updateTemplate(project.key, 'large');
       const edited = await application.get(project.key);
@@ -957,4 +1043,17 @@ function createProject({
     colors: {},
     dirLink: dirLink,
   } as Project;
+}
+
+/** An exported project: row 1 has its image, row 2 had none yet, row 3's image was removed in the app. */
+function exportedWithRows() {
+  return {
+    ...createUnlinkedProject(),
+    mainPicture: '/project/key/images/1.jpg/',
+    data: [
+      { id: '1', sequence: '1', url: '/project/key/images/1.jpg/' },
+      { id: '2', sequence: '2' },
+      { id: '3', sequence: '3', url: null },
+    ],
+  } as unknown as Project;
 }

@@ -117,26 +117,40 @@ export default class IndexedDBProjectsDataSource {
     return this.list();
   }
 
+  // Adding a key that is already stored replaces that project in place: it keeps its position.
   async _add(
     id: string,
     data: Project,
     fileSystemDirectoryHandle?: FileSystemDirectoryHandle,
   ) {
+    const createdAt = (await this.has(id))
+      ? await this._createdAt(id)
+      : this._nextCreatedAt();
     const db = await this.open();
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction(this.storeName, 'readwrite');
       const store = tx.objectStore(this.storeName);
       const request = store.put(
-        {
-          id,
-          fileSystemDirectoryHandle,
-          data,
-          createdAt: this._nextCreatedAt(),
-        },
+        { id, fileSystemDirectoryHandle, data, createdAt },
         id,
       );
       request.onsuccess = () => {
         resolve();
+      };
+      request.onerror = event => {
+        reject(targetOf(event).error);
+      };
+    });
+  }
+
+  async _createdAt(id: string) {
+    const db = await this.open();
+    return new Promise<number | undefined>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.get(id);
+      request.onsuccess = event => {
+        resolve(targetOf<Entry | undefined>(event).result?.createdAt);
       };
       request.onerror = event => {
         reject(targetOf(event).error);
