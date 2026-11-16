@@ -214,8 +214,9 @@ class Application {
   }
 
   async add(files: ArrayLike<File> | Iterable<File>): Promise<Project[]> {
-    await this.ready();
+    // Copy before awaiting: callers reset the form, which empties a live FileList.
     const fileArray = Array.from(files);
+    await this.ready();
     const projects = await this._dataSource.list();
     const name = this._name(fileArray, `Project (${projects.length})`);
     const identifier = this._uuidv4.generate();

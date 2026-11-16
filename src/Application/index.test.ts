@@ -167,6 +167,13 @@ describe('Application', () => {
       ]);
     });
 
+    test('reads the files before waiting: the form resets its FileList', async () => {
+      const files = [createCsv({ content: '1;action' })];
+      const added = Application.createNull().add(files);
+      files.length = 0;
+      await expect(added).resolves.toHaveLength(1);
+    });
+
     test('fails if no data.csv is present', async () => {
       await expect(Application.createNull().add([])).rejects.toThrow(
         'Could not found data.csv',
