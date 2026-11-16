@@ -1,6 +1,7 @@
 import { test, expect, tileSelector } from '../support/test';
 import { Page } from '@playwright/test';
-import { importProject, storedProject } from '../support/projects';
+import path from 'node:path';
+import { importFolder, importProject, storedProject } from '../support/projects';
 
 async function openImported(page: Page) {
   const card = await importProject(page);
@@ -95,6 +96,45 @@ test('deleted image shows empty.svg and survives reload', async ({ page }) => {
   await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
   await page.reload();
   await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
+});
+
+test('a new image replaces a deleted one and survives reload', async ({ page }) => {
+  const tiles = await openImported(page);
+  await tiles.first().click();
+  const form = page.locator('#form');
+  await form.getByRole('button', { name: 'Delete' }).click();
+  await form.locator('input[type=file]').setInputFiles(path.join(importFolder, '3.jpg'));
+  await expect(form.getByAltText('Photogram')).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
+  await save(page);
+
+  const image = tiles.first().locator('.img');
+  await expect(image).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
+  await page.reload();
+  await expect(image).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
+});
+
+test('a new image stored after the form closed does not reopen it', async ({ page, pageErrors }) => {
+  const tiles = await openImported(page);
+  await tiles.first().click();
+  const form = page.locator('#form');
+  await form.getByRole('button', { name: 'Delete' }).click();
+  await page.evaluate(() => {
+    const put = Cache.prototype.put;
+    Cache.prototype.put = async function (...args) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await put.apply(this, args);
+      (window as unknown as { imageStored: boolean }).imageStored = true;
+    };
+  });
+  await form.locator('input[type=file]').setInputFiles(path.join(importFolder, '3.jpg'));
+  await page.keyboard.press('Escape');
+  await expect(form).toHaveCount(0);
+
+  await page.waitForFunction(() => (window as unknown as { imageStored?: boolean }).imageStored);
+  // A macrotask for React to render whatever the stored image led to.
+  await page.evaluate(() => new Promise(requestAnimationFrame).then(() => new Promise(requestAnimationFrame)));
+  await expect(form).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });
 
 test('background colour checkbox shows the saved setting after reload (B3)', async ({ page }) => {

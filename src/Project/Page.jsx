@@ -91,13 +91,18 @@ class Page extends Component {
               .then(reload);
           }}
           onnew-image={event => {
+            const shotId = this.state.data.id;
             Image.create()
               .execute(this.props.id, event.detail.files)
-              .then(result => {
-                this.setState({
-                  data: { ...this.state.data, url: result[0].url },
-                });
-              });
+              .then(([image]) =>
+                // The form may have closed, or moved to another shot, while the image was stored.
+                this.setState(({ data }) =>
+                  image && data?.id === shotId
+                    ? { data: { ...data, url: image.url } }
+                    : null,
+                ),
+              )
+              .catch(e => console.error(e));
           }}
           ondelete-image={() =>
             this.setState({ data: { ...this.state.data, url: null } })
