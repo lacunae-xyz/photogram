@@ -50,13 +50,10 @@ class Images {
     );
   }
 
+  // Projects without images have no cache: nothing to delete is not an error.
   async clear(identifier: string) {
-    const result = await this._caches.delete(this._name(identifier));
-    if (result) {
-      return null;
-    } else {
-      throw Error(`Cannot delete the cache: ${identifier}`);
-    }
+    await this._caches.delete(this._name(identifier));
+    return null;
   }
 
   async has(identifier: string) {

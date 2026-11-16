@@ -79,19 +79,14 @@ describe('Images', () => {
       await expect(images.clear('id')).resolves.toEqual(null);
     });
 
-    // B1: clear rejects when there is no cache, the fix resolves instead.
-    test('fails if not present', async () => {
-      await expect(Images.createNull().clear('id')).rejects.toThrow(
-        'Cannot delete the cache: id',
-      );
+    test('resolves if not present (B1)', async () => {
+      await expect(Images.createNull().clear('id')).resolves.toEqual(null);
     });
 
-    test('fails if if empty', async () => {
+    test('resolves if empty (B1)', async () => {
       const images = Images.createNull();
       await images.execute('id', []);
-      await expect(Images.createNull().clear('id')).rejects.toThrow(
-        'Cannot delete the cache: id',
-      );
+      await expect(images.clear('id')).resolves.toEqual(null);
     });
   });
 

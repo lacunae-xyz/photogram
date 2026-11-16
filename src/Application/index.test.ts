@@ -448,17 +448,13 @@ describe('Application', () => {
       await expect(Application.createNull().delete('id')).rejects.toThrow('');
     });
 
-    // B1: the project is removed, then clearing the missing cache rejects. The fix resolves with [].
-    test('project without image cache rejects after removing it (B1)', async () => {
+    test('project without image cache resolves with the updated list (B1)', async () => {
       const images = Images.createNull();
       const application = Application.createNull({ images: images });
       const project = await addProject(application, createCsv(), []);
       await expect(images.has(project.key)).resolves.toEqual(false);
 
-      await expect(application.delete(project.key)).rejects.toThrow(
-        `Cannot delete the cache: ${project.key}`,
-      );
-      await expect(application.list()).resolves.toEqual([]);
+      await expect(application.delete(project.key)).resolves.toEqual([]);
     });
   });
 
