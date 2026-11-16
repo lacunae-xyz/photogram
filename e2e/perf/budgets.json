@@ -1,23 +1,23 @@
 {
   "load-1000": {
     "layoutCount": 163,
-    "totalBlockingTimeMs": 397
+    "totalBlockingTimeMs": 614
   },
   "font-family-1000": {
     "layoutCount": 162,
-    "totalBlockingTimeMs": 168
+    "totalBlockingTimeMs": 212
   },
   "edit-one-1000": {
-    "layoutCount": 16,
+    "layoutCount": 17,
     "totalBlockingTimeMs": 100
   },
   "load-3000": {
-    "layoutCount": 423,
-    "totalBlockingTimeMs": 1572
+    "layoutCount": 426,
+    "totalBlockingTimeMs": 1545
   },
   "font-family-3000": {
     "layoutCount": 474,
-    "totalBlockingTimeMs": 803
+    "totalBlockingTimeMs": 968
   },
   "edit-one-3000": {
     "layoutCount": 17,
