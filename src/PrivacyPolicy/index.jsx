@@ -1,20 +1,18 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import useDocumentMeta from '../useDocumentMeta';
 import Header from '../Header';
 import './index.css';
 
 const contactEmail = 'contact@lacunae.xyz';
 
 export default function PrivacyPolicy() {
+  useDocumentMeta({
+    title: 'Photogram · Privacy policy',
+    description:
+      'Photogram keeps your projects on your device. What it counts, and who hosts it.',
+  });
   return (
     <div className="privacy-layout">
-      <Helmet>
-        <title>Photogram · Privacy policy</title>
-        <meta
-          name="description"
-          content="Photogram keeps your projects on your device. What it counts, and who hosts it."
-        />
-      </Helmet>
       <Header />
       <article>
         <h1>Privacy policy</h1>

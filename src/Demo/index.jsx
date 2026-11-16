@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
+import useDocumentMeta from '../useDocumentMeta';
 import { useHistory } from 'react-router-dom';
 import Application from '../Application';
 import IndexedDBProjectsDataSource from '../Application/IndexedDBProjectsDataSource';
@@ -7,6 +7,10 @@ import Page from '../Project/Page';
 import Csv from '../FilesParser/Csv';
 
 export default function Project() {
+  useDocumentMeta({
+    title: 'Photogram - Try the tool for assistant editors',
+    description: 'Learn and play with our demo data set',
+  });
   const history = useHistory();
   const [application, setApplication] = useState(undefined);
 
@@ -51,13 +55,6 @@ export default function Project() {
 
   return (
     <div>
-      <Helmet>
-        <title>Photogram - Try the tool for assistant editors</title>
-        <meta
-          name="description"
-          content="Learn and play with our demo data set"
-        />
-      </Helmet>
       {application ? (
         <Page
           application={application}

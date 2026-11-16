@@ -95,3 +95,14 @@ test('Escape closes the form (B9)', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('#form')).toHaveCount(0);
 });
+
+test('the colour picker changes a label colour', async ({ page, pageErrors }) => {
+  const tiles = await openImported(page);
+  const row = page.locator('.configuration tr').filter({ has: page.locator('td', { hasText: /^salon$/ }) });
+  await row.getByRole('button').first().click();
+  const picker = page.locator('.sketch-picker');
+  await expect(picker).toBeVisible();
+  await picker.locator('[title="#4A90E2"]').click();
+  await expect(tiles.first().locator('.sequence')).toHaveCSS('background-color', 'rgb(74, 144, 226)');
+  expect(pageErrors).toEqual([]);
+});
