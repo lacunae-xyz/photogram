@@ -111,7 +111,7 @@ class StubbedCaches implements ImageCaches {
     this.factory = factory;
   }
 
-  // Always a new cache: the JS version checked `this.has[cacheName]`, which is always undefined.
+  // Unlike CacheStorage.open, replaces a cache already open under that name.
   open(cacheName: string) {
     this.caches[cacheName] = this.factory(cacheName);
     return Promise.resolve(this.caches[cacheName]);
