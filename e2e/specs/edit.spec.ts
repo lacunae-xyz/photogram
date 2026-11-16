@@ -11,6 +11,31 @@ async function openImported(page: Page) {
   return tiles;
 }
 
+/** Keeps a readwrite transaction on the projects store open for `ms`, which delays every other access to it. */
+async function holdStore(page: Page, ms: number) {
+  await page.evaluate(
+    ms =>
+      new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open('projects');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const store = db.transaction('store', 'readwrite').objectStore('store');
+          const end = Date.now() + ms;
+          const spin = () => {
+            if (Date.now() < end) {
+              store.count().onsuccess = spin;
+            }
+          };
+          spin();
+          store.transaction.oncomplete = () => db.close();
+          resolve();
+        };
+      }),
+    ms,
+  );
+}
+
 async function save(page: Page) {
   await page.locator('#form button[type=submit]').click();
   await expect(page.locator('#form')).toHaveCount(0);
@@ -49,8 +74,12 @@ test('period and fx survive reload', async ({ page }) => {
 test('set as main changes the cover', async ({ page }) => {
   const tiles = await openImported(page);
   await tiles.nth(1).click();
+  // A slow IndexedDB: the form must stay open until the cover is saved, or leaving the page right away loses it.
+  await holdStore(page, 1_000);
   await page.getByRole('button', { name: 'Set as main' }).click();
   await expect(page.locator('#form')).toHaveCount(0);
+  const key = page.url().split('/').pop()!;
+  expect((await storedProject(page, key))?.mainPicture).toMatch(/\/images\/2\.jpg\/$/);
 
   await page.goto('/projects');
   await expect(page.locator('.projects-card .img-project-cover')).toHaveAttribute('src', /\/images\/2\.jpg\/$/);

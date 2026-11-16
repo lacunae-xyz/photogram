@@ -109,10 +109,14 @@ class Page extends Component {
               ),
             );
           }}
-          setAsMain={url => {
-            this.application.updateMainPicture(this.props.id, url);
-            this.setState(Object.assign(this.state, { data: undefined }));
-          }}
+          setAsMain={url =>
+            this.application
+              .updateMainPicture(this.props.id, url)
+              .then(() =>
+                this.setState(Object.assign(this.state, { data: undefined })),
+              )
+              .catch(e => console.error(e))
+          }
         />
         <div className="layout-parent">
           <div className="layout-top">
