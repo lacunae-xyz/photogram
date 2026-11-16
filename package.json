@@ -19,7 +19,7 @@
     "build": "vite build",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --max-warnings 0 .",
+    "lint": "eslint --max-warnings 0 . && prettier --check .",
     "format": "prettier --write .",
     "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --project=perf --workers=1",
     "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots",
