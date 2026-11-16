@@ -198,11 +198,13 @@ export default class IndexedDBProjectsDataSource {
     return { ...entry.data, dirLink: entry.fileSystemDirectoryHandle };
   }
 
+  // The folder first: if the write fails (permission revoked), the DB still matches data.json.
   async save({ dirLink, ...data }: Project) {
-    const projectDb = await this._save(data.key, data);
-    if (projectDb.dirLink) {
-      await this._fileHandle.write(projectDb.dirLink, 'data.json', data);
+    const storedDirLink = await this.dirLink(data.key);
+    if (storedDirLink) {
+      await this._fileHandle.write(storedDirLink, 'data.json', data);
     }
+    await this._save(data.key, data);
     return this.list();
   }
 

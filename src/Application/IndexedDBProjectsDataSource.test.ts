@@ -178,8 +178,7 @@ describe('IndexedDBProjectsDataSource', () => {
       );
     });
 
-    // B14: the DB is updated before data.json is written, so a failed write leaves them out of sync.
-    test('when data.json cannot be written, the DB is already updated (B14)', async () => {
+    test('when data.json cannot be written, the DB is left unchanged (B14)', async () => {
       const source = IndexedDBProjectsDataSource.createNull();
       await source.add(createProject());
       failWrites(source);
@@ -188,9 +187,7 @@ describe('IndexedDBProjectsDataSource', () => {
         source.save(createProject({ data: ['new'] })),
       ).rejects.toThrow('Permission for dir was denied');
 
-      await expect(source.list()).resolves.toEqual([
-        createProject({ data: ['new'] }),
-      ]);
+      await expect(source.list()).resolves.toEqual([createProject()]);
       await expect(source.get('key')).resolves.toEqual(createProject());
     });
   });
