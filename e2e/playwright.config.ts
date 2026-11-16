@@ -52,6 +52,8 @@ export default defineConfig({
         viewport: { width: 1280, height: 800 },
         deviceScaleFactor: 1,
         serviceWorkers: 'block',
+        // Trace snapshots run in the page on every action and serialise each shadow root's styles: on 1000 tiles they add long tasks to the measure.
+        trace: 'off',
       },
     },
     {
