@@ -28,25 +28,17 @@ function Edls(props) {
   };
   const onCopy = event => {
     event.preventDefault();
-    selectElementContents(document.getElementById('fixor-table'), () =>
-      document.execCommand('copy'),
-    );
-  };
-
-  function selectElementContents(el, callback) {
-    var range = document.createRange();
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    try {
-      range.selectNodeContents(el);
-      sel.addRange(range);
-    } catch (e) {
-      range.selectNode(el);
-      sel.addRange(range);
+    const table = document.getElementById('fixor-table');
+    if (!table) {
+      return;
     }
-    callback();
-    sel.removeAllRanges();
-  }
+    navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([table.outerHTML], { type: 'text/html' }),
+        'text/plain': new Blob([table.innerText], { type: 'text/plain' }),
+      }),
+    ]);
+  };
 
   let edl = props.edls.find(edl => edl.name === selected);
   let compareTo = props.edls.find(edl => edl.name === compareValue);

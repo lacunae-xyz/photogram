@@ -40,3 +40,27 @@ test('the FPS label names the FPS input (B7)', async ({ page }) => {
   await expect(page.getByLabel('FPS')).toHaveId('fps-input');
   await expect(page.getByLabel('Compare')).toHaveId('compare-button');
 });
+
+test('Copy puts the table on the clipboard as HTML and text (B10)', async ({ page, context, pageErrors }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/fixor');
+  await page.locator('#import-button').setInputFiles(edl('v1'));
+  await expect(page.locator('#fixor-table tbody tr')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'Copy' }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const items = await navigator.clipboard.read();
+        const read = (type: string) =>
+          items[0]?.types.includes(type) ? items[0].getType(type).then(blob => blob.text()) : '';
+        return { html: await read('text/html'), text: await read('text/plain') };
+      }),
+    )
+    .toEqual({
+      html: expect.stringMatching(/<table[^>]*id="fixor-table"[\s\S]*204_020/),
+      text: expect.stringMatching(/id\timage\tdescription[\s\S]*204_020/),
+    });
+  expect(pageErrors).toEqual([]);
+});
