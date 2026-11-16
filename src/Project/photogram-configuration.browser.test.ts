@@ -86,12 +86,18 @@ describe('photogram-configuration', () => {
     expect(colorDistribution()).toEqual([{ colorDistribution: 'card' }]);
   });
 
-  it('lets the colour events out', async () => {
+  it('tells the colour changes', async () => {
     const element = await renderConfiguration();
+    const defaultColor = listen(element, 'default-color-change');
+    const color = listen(element, 'color-change');
     const deleted = listen(element, 'color-delete');
+    await userEvent.fill(page.getByLabelText('Default colour'), '#123456');
+    await userEvent.fill(page.getByLabelText('salon colour'), '#00ff00');
     await userEvent.click(
       page.getByRole('button', { name: 'Delete label salon' }),
     );
+    expect(defaultColor().at(-1)).toEqual({ color: '#123456' });
+    expect(color().at(-1)).toEqual({ label: 'salon', color: '#00ff00' });
     expect(deleted()).toEqual([{ label: 'salon' }]);
   });
 

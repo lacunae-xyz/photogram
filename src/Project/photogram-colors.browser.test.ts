@@ -73,14 +73,14 @@ describe('photogram-colors', () => {
     expect(onDelete.mock.calls[0][0].detail).toEqual({ label: 'salon' });
   });
 
-  it('lets its events out of the shadow roots it sits in', async () => {
-    const element = await renderColors({ salon: '#F44336' });
+  it('keeps its events on itself', async () => {
+    await renderColors({ salon: '#F44336' });
     const onDelete = vi.fn();
     document.body.addEventListener('color-delete', onDelete, { once: true });
     await userEvent.click(
       page.getByRole('button', { name: 'Delete label salon' }),
     );
-    expect(onDelete).toHaveBeenCalledOnce();
-    expect(element).toBeTruthy();
+    expect(onDelete).not.toHaveBeenCalled();
+    document.body.removeEventListener('color-delete', onDelete);
   });
 });

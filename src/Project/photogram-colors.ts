@@ -10,8 +10,7 @@ const defaultColorFallback = '#ffffff';
  * The default colour and the label colours, each with a native colour input.
  * Saves on `change` (the picker closed), not on every `input`.
  *
- * Events, bubbling and composed: `default-color-change` ({ color }), `color-change` ({ label, color }),
- * `color-delete` ({ label }).
+ * Events: `default-color-change` ({ color }), `color-change` ({ label, color }), `color-delete` ({ label }).
  */
 @customElement('photogram-colors')
 export class PhotogramColors extends LitElement {
@@ -77,9 +76,7 @@ export class PhotogramColors extends LitElement {
   @property({ attribute: false }) accessor colors: Colors | undefined;
 
   #emit(type: string, detail: object) {
-    this.dispatchEvent(
-      new CustomEvent(type, { detail, bubbles: true, composed: true }),
-    );
+    this.dispatchEvent(new CustomEvent(type, { detail }));
   }
 
   #colorInput(

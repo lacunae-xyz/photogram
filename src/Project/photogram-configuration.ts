@@ -52,7 +52,7 @@ const preventSubmit = (event: Event) => event.preventDefault();
  *
  * Events: `print-space-around-change` ({ printSpaceAround }), `font-family-change` ({ fontFamily }),
  * `template-change` ({ template }), `color-distribution-change` ({ colorDistribution }),
- * plus the colour events of `photogram-colors`, which bubble out of it.
+ * plus the colour events of `photogram-colors`, dispatched again from here.
  */
 @customElement('photogram-configuration')
 export class PhotogramConfiguration extends LitElement {
@@ -140,6 +140,10 @@ export class PhotogramConfiguration extends LitElement {
 
   #emit(type: string, detail: object) {
     this.dispatchEvent(new CustomEvent(type, { detail }));
+  }
+
+  #forward(event: Event) {
+    this.#emit(event.type, (event as CustomEvent<object>).detail);
   }
 
   #onTemplate(event: Event) {
@@ -246,6 +250,9 @@ export class PhotogramConfiguration extends LitElement {
           class="labels"
           .defaultColor=${this.defaultColor}
           .colors=${this.colors}
+          @default-color-change=${this.#forward}
+          @color-change=${this.#forward}
+          @color-delete=${this.#forward}
         ></photogram-colors>
       </section>
     </div>`;
