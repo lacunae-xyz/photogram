@@ -86,3 +86,12 @@ test('background colour checkbox shows the saved setting after reload (B3)', asy
   await expect(tiles.first()).not.toHaveCSS('background-color', 'rgb(244, 67, 54)');
   await expect(checkbox).not.toBeChecked();
 });
+
+// B9: Form listens for keyCode 27, which still works. Phase 6 moves to a native <dialog>; this guards Escape.
+test('Escape closes the form (B9)', async ({ page }) => {
+  const tiles = await openImported(page);
+  await tiles.first().click();
+  await expect(page.locator('#form')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#form')).toHaveCount(0);
+});
