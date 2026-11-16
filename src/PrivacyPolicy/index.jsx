@@ -23,9 +23,9 @@ export default function PrivacyPolicy() {
           open is uploaded.
         </p>
         <p>
-          Imported projects live in your browser: their data in IndexedDB, their
-          images in Cache Storage. An opened folder stays where it is. Photogram
-          reads it and writes your changes to <code>data.json</code> in that
+          Every project lives in your browser: its data in IndexedDB, its images
+          in Cache Storage. An opened folder also stays where it is, and
+          Photogram writes your changes to <code>data.json</code> in that
           folder. Deleting a project, or clearing this site&apos;s data in your
           browser, removes it from the browser.
         </p>
@@ -37,7 +37,9 @@ export default function PrivacyPolicy() {
           We count visits with Umami Cloud. It sets no cookies and stores no
           personal data. It records the pages you open, with project ids removed
           from the addresses, and four actions: creating, deleting, leaving and
-          printing a project, with the number of tiles printed. See{' '}
+          printing a project, with the number of tiles printed. With each, it
+          records the referring site, your browser, operating system, device
+          type, screen size, language and country. See{' '}
           <a href="https://umami.is/privacy">Umami&apos;s privacy policy</a>.
         </p>
         <p>
@@ -49,8 +51,8 @@ export default function PrivacyPolicy() {
           .
         </p>
         <p>
-          There are no accounts, no emails and no ads, and no Google sign-in.
-          Umami and Netlify are the only third parties.
+          Photogram has no accounts, sends no emails, shows no ads and has no
+          Google sign-in. Umami and Netlify are the only third parties.
         </p>
         <p>
           Questions: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
