@@ -1,6 +1,6 @@
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import IndexedDBProjectsDataSource from "./IndexedDBProjectsDataSource";
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import ProjectsDataSource from "./ProjectsDataSource";
 
 export default class MigrationDataSource {

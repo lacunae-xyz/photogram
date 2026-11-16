@@ -35,8 +35,8 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
 
 
     static createNull({ projects, saveInError }: { projects?: Project[]; saveInError?: boolean } = { projects: undefined, saveInError: false }) {
-        let dbState: Record<string, Entry> = {};
-        let fsState: Record<string, Project> = {};
+        const dbState: Record<string, Entry> = {};
+        const fsState: Record<string, Project> = {};
 
         if (projects !== undefined) {
             for (const project of projects) {

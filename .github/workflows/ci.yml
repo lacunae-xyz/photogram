@@ -45,6 +45,17 @@ jobs:
           path: coverage/
           retention-days: 7
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -127,7 +138,7 @@ jobs:
           path: e2e/perf/budgets.json
 
   deploy-preview:
-    needs: [unit, build, browser]
+    needs: [unit, lint, build, browser]
     # Dependabot and fork PRs don't get the Netlify secrets.
     if: >-
       github.event_name == 'pull_request' &&
@@ -165,7 +176,7 @@ jobs:
           URL: ${{ steps.deploy.outputs.url }}
 
   deploy-production:
-    needs: [unit, build, browser]
+    needs: [unit, lint, build, browser]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     concurrency:

@@ -19,19 +19,33 @@
     "build": "vite build",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings 0 .",
+    "format": "prettier --write .",
     "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --project=perf --workers=1",
     "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@eslint-react/eslint-plugin": "^5.30.3",
+    "@eslint/js": "^10.0.1",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^16.14.70",
     "@types/react-dom": "^16.9.25",
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "jsdom": "^31.0.1",
+    "prettier": "^3.10.1",
     "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
   }
 }

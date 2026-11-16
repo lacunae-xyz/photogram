@@ -226,7 +226,7 @@ class Application {
 
     _mergeDateWithImages(data: Shot[], images: ImageUrl[]) {
         return data.map(d => {
-            let results = images.filter(i => i.name.startsWith(`${d.id}.`))
+            const results = images.filter(i => i.name.startsWith(`${d.id}.`))
             if (results.length === 0) {
                 return d
             } else {
@@ -238,7 +238,7 @@ class Application {
     }
 
     static _calculateColors(data: Shot[]): Colors {
-        let unique = [...new Set(data.map(d => d.label).filter(p => p !== null && p !== ""))] as string[]
+        const unique = [...new Set(data.map(d => d.label).filter(p => p !== null && p !== ""))] as string[]
         return Object.assign({}, ...unique.map((p, i) => ({ [p]: colors[i % colors.length] })))
     }
 
@@ -246,7 +246,7 @@ class Application {
         if (files.length === 0) {
             return defaultName
         }
-        let relativePath = files[0].webkitRelativePath
+        const relativePath = files[0].webkitRelativePath
         if (relativePath) {
             return relativePath.split('/')[0];
         }

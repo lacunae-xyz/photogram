@@ -1,5 +1,5 @@
 import compare from "./compare"
-import parser from "./parser"
+import parser, { dateDuration } from "./parser"
 
 let baseline = line("id", "number", "description", "vfxName", "fileName", "sourceIn", "sourceOut", "recordIn", "recordOut")
 
