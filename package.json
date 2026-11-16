@@ -18,7 +18,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --project=perf --workers=1",
+    "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots"
   },
   "devDependencies": {
     "jest-localstorage-mock": "^2.4.22"
