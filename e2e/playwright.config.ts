@@ -26,7 +26,7 @@ export default defineConfig({
   webServer: process.env.BASE_URL
     ? undefined
     : {
-        command: 'npx serve -s ../build -l 5000 --no-request-logging',
+        command: 'npx serve -s ../dist -l 5000 --no-request-logging',
         url: baseURL,
         reuseExistingServer: !ci,
       },

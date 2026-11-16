@@ -19,7 +19,7 @@
 
 .empty-project-item:hover {
   transform: scale(1.05);
-  background-color: #EEE;
+  background-color: #eee;
   cursor: pointer;
 }
 
@@ -32,8 +32,8 @@
   height: 12.8rem;
   grid-column: 1;
   grid-row: 1;
-  margin: .8rem 3.2rem;
-  opacity: .8;
+  margin: 0.8rem 3.2rem;
+  opacity: 0.8;
   transition-property: opacity;
   transition-duration: 0.5s;
 }

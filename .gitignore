@@ -7,7 +7,7 @@
 /coverage
 
 # production
-/build
+/dist
 
 # deploy
 /.netlify/
@@ -24,3 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 
 .idea
+.env.production

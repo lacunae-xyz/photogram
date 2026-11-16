@@ -1,0 +1,8 @@
+dist
+coverage
+e2e
+public
+index.html
+package-lock.json
+*.md
+.github

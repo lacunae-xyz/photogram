@@ -1,6 +1,6 @@
-# Deploys run from GitHub Actions (netlify-cli deploy --dir=build). Netlify auto-builds are off.
+# Deploys run from GitHub Actions (netlify-cli deploy --dir=dist). Netlify auto-builds are off.
 [build]
-  publish = "build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
@@ -15,6 +15,6 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [[headers]]
-  for = "/static/*"
+  for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

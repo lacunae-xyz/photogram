@@ -37,14 +37,28 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm test -- --coverage
-        env:
-          CI: true
       - uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/
           retention-days: 7
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - name: actionlint
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: -color
 
   build:
     runs-on: ubuntu-latest
@@ -55,20 +69,17 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # CI=true turns ESLint warnings into errors: the lint gate until phase 2.
       - run: npm run build
-        env:
-          CI: true
       - uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: build/
+          name: dist
+          path: dist/
           retention-days: 7
 
   browser:
     needs: build
     runs-on: ubuntu-latest
-    # Keep the tag in sync with @playwright/test in e2e/package.json.
+    # Keep the tag in sync with @playwright/test in e2e/package.json. The image ships Node 26, same as .nvmrc.
     container:
       image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
@@ -88,8 +99,8 @@ jobs:
           lfs: true
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
+          name: dist
+          path: dist
       - id: install
         run: npm ci
       - run: npm run typecheck
@@ -131,7 +142,7 @@ jobs:
           path: e2e/perf/budgets.json
 
   deploy-preview:
-    needs: [unit, build, browser]
+    needs: [unit, lint, build, browser]
     # Dependabot and fork PRs don't get the Netlify secrets.
     if: >-
       github.event_name == 'pull_request' &&
@@ -145,17 +156,17 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version-file: .nvmrc
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
+          name: dist
+          path: dist
       - name: Deploy
         id: deploy
         # Explicit bash adds pipefail, so a failed deploy isn't hidden behind jq.
         shell: bash
         run: |
-          url=$(npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --alias=pr-${{ github.event.number }} --json | jq -r '.deploy_url')
+          url=$(npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --alias=pr-${{ github.event.number }} --json | jq -r '.deploy_url')
           echo "url=$url" >> "$GITHUB_OUTPUT"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -169,7 +180,7 @@ jobs:
           URL: ${{ steps.deploy.outputs.url }}
 
   deploy-production:
-    needs: [unit, build, browser]
+    needs: [unit, lint, build, browser]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     concurrency:
@@ -179,12 +190,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version-file: .nvmrc
       - uses: actions/download-artifact@v5
         with:
-          name: build
-          path: build
-      - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=build --prod
+          name: dist
+          path: dist
+      - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

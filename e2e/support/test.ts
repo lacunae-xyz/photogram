@@ -1,7 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 
-// What an ad blocker does. GA loads until phase 3, the Google API script until the Fixor export is removed.
-export const blockedHosts = ['www.google-analytics.com', 'apis.google.com', 'cloud.umami.is'];
+// What an ad blocker does. GA loads until phase 3.
+export const blockedHosts = ['www.google-analytics.com', 'cloud.umami.is'];
 
 const isBlocked = (url: string) => blockedHosts.some(host => url.includes(`//${host}/`));
 
