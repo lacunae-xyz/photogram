@@ -89,6 +89,9 @@ export default function Landing() {
       />
       <QuotaProgress value={quotas.value} max={quotas.max} />
       <Creators />
+      <footer className="landing-footer">
+        <a href="/privacy-policy">Privacy policy</a>
+      </footer>
     </div>
   );
 }
