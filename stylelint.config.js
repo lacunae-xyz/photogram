@@ -10,6 +10,7 @@ export default {
     'e2e/**',
     'public/**',
   ],
+  overrides: [{ files: ['**/*.ts'], customSyntax: 'postcss-lit' }],
   reportNeedlessDisables: true,
   reportDescriptionlessDisables: true,
   rules: {

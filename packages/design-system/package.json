@@ -8,5 +8,8 @@
   },
   "files": [
     "tokens.css"
-  ]
+  ],
+  "dependencies": {
+    "lit": "^3.3.3"
+  }
 }

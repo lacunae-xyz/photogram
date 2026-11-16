@@ -5,6 +5,8 @@
 
 # testing
 /coverage
+# Vitest browser mode failure screenshots
+/.vitest
 
 # production
 /dist
