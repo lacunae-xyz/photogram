@@ -7,8 +7,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  // serviceWorker.js: CRA leftover, never imported, deleted in phase 3.
-  { ignores: ['dist', 'coverage', 'e2e', 'public', 'src/serviceWorker.js'] },
+  { ignores: ['dist', 'coverage', 'e2e', 'public'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   {

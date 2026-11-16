@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactGA from 'react-ga';
+import track from '../track';
 import Image from '../FilesParser/Images';
 import Toolbar from './Toolbar';
 import Configuration from './Configuration';
@@ -47,24 +47,30 @@ class Page extends Component {
   }
 
   back() {
-    ReactGA.event({
-      category: 'Project',
-      action: 'back',
-    });
+    track('project-back');
     this.props.onBack();
   }
 
   print() {
-    let projectSize = this.state.project.data.length;
-    ReactGA.event({
-      category: 'Project',
-      action: 'print',
-      value: projectSize,
-    });
+    track('project-print', { tiles: this.state.project.data.length });
     window.print();
   }
 
+  async exportDataJson() {
+    const json = await this.application.exportDataJson(this.props.id);
+    const url = URL.createObjectURL(
+      new Blob([json], { type: 'application/json' }),
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url));
+  }
+
   render() {
+    const project = this.state.project;
+    const unlinked = project.key !== undefined && !project.dirLink;
     return (
       <div>
         <Form
@@ -109,6 +115,11 @@ class Page extends Component {
               title={this.state.project.name}
               onPrint={() => this.print()}
               onBack={() => this.back()}
+              onExport={
+                unlinked
+                  ? () => this.exportDataJson().catch(e => console.error(e))
+                  : undefined
+              }
             />
           </div>
           <div className="layout-left">

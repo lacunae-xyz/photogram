@@ -62,13 +62,13 @@ export default defineConfig({
     {
       name: 'e2e-firefox',
       testDir: './specs',
-      testMatch: /(import|open-folder)\.spec\.ts/,
+      testMatch: /(import|open-folder|edit|legacy|routes)\.spec\.ts/,
       use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'e2e-webkit',
       testDir: './specs',
-      testMatch: /(import|open-folder)\.spec\.ts/,
+      testMatch: /(import|open-folder|edit|legacy|routes)\.spec\.ts/,
       use: { ...devices['Desktop Safari'] },
     },
   ],

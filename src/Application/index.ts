@@ -3,20 +3,18 @@ import { readAsText } from '../FilesParser/FileReader';
 import Images from '../FilesParser/Images';
 import Uuidv4 from '../FilesParser/uuidv4';
 import IndexedDBProjectsDataSource from './IndexedDBProjectsDataSource';
-import MigrationDataSource from './MigrationDataSource';
-import ProjectsDataSource from './ProjectsDataSource';
+import LocalStorageMigration from './LocalStorageMigration';
 import type {
   ColorDistribution,
   Colors,
   PermissionDirectoryHandle,
   Project,
-  ProjectsSource,
   Shot,
   Template,
 } from './types';
 import type { ImageUrl } from '../FilesParser/Images';
 
-const colors = [
+export const colors = [
   '#F44336',
   '#E91E63',
   '#9C27B0',
@@ -35,49 +33,70 @@ const colors = [
   '#795548',
 ];
 
+// Every page builds its own Application: they share one migration so it runs once.
+let migration: Promise<void> | undefined;
+
 class Application {
   _csv: Csv;
-  _dataSource: ProjectsSource;
+  _dataSource: IndexedDBProjectsDataSource;
   _images: Images;
   _uuidv4: Uuidv4;
+  _migration: Promise<void>;
 
-  constructor(dataSource: ProjectsSource, images: Images, uuidv4: Uuidv4) {
+  constructor(
+    dataSource: IndexedDBProjectsDataSource,
+    images: Images,
+    uuidv4: Uuidv4,
+    migration: Promise<void>,
+  ) {
     this._csv = new Csv();
     this._dataSource = dataSource;
     this._images = images;
     this._uuidv4 = uuidv4;
+    this._migration = migration;
   }
 
   static create() {
+    migration ??= LocalStorageMigration.create(
+      IndexedDBProjectsDataSource.create(),
+    ).run();
     return new Application(
-      new MigrationDataSource(
-        IndexedDBProjectsDataSource.create(),
-        ProjectsDataSource.create(),
-      ),
+      IndexedDBProjectsDataSource.create(),
       Images.create(),
       Uuidv4.create(),
+      migration,
     );
   }
 
   static createNull({
-    dataSource = new MigrationDataSource(
-      IndexedDBProjectsDataSource.createNull(),
-      ProjectsDataSource.createNull(),
-    ),
+    dataSource = IndexedDBProjectsDataSource.createNull(),
     images = Images.createNull(),
-  }: { dataSource?: ProjectsSource; images?: Images } = {}) {
-    return new Application(dataSource, images, Uuidv4.createNull());
+    migration = Promise.resolve(),
+  }: {
+    dataSource?: IndexedDBProjectsDataSource;
+    images?: Images;
+    migration?: Promise<void>;
+  } = {}) {
+    return new Application(dataSource, images, Uuidv4.createNull(), migration);
+  }
+
+  /** Resolves once projects from older releases are in IndexedDB. Never rejects. */
+  ready() {
+    return this._migration;
   }
 
   async list(): Promise<Project[]> {
+    await this.ready();
     return await this._dataSource.list();
   }
 
   async get(id: string): Promise<Project> {
+    await this.ready();
     return await this._dataSource.get(id);
   }
 
   async requestPermission(id: string) {
+    await this.ready();
     const dirHandle = (await this._dataSource.dirLink(id)) as
       PermissionDirectoryHandle | undefined;
     if (dirHandle) {
@@ -92,6 +111,7 @@ class Application {
   }
 
   async needsPermission(id: string) {
+    await this.ready();
     const dirHandle = (await this._dataSource.dirLink(id)) as
       PermissionDirectoryHandle | undefined;
     if (dirHandle) {
@@ -104,6 +124,7 @@ class Application {
   }
 
   async delete(id: string): Promise<Project[]> {
+    await this.ready();
     const projects = await this._dataSource.delete(id);
     await this._images.clear(id);
     return projects;
@@ -192,8 +213,20 @@ class Application {
     await this._dataSource.save(project);
   }
 
+  /** data.json for an unlinked project: Import reads it back, edits included. */
+  async exportDataJson(id: string): Promise<string> {
+    const { dirLink, ...project } = await this.get(id);
+    return JSON.stringify(project);
+  }
+
   async add(files: ArrayLike<File> | Iterable<File>): Promise<Project[]> {
+    // Copy before awaiting: callers reset the form, which empties a live FileList.
     const fileArray = Array.from(files);
+    await this.ready();
+    const exported = await this._readDataJson(fileArray);
+    if (exported) {
+      return await this._dataSource.add(exported);
+    }
     const projects = await this._dataSource.list();
     const name = this._name(fileArray, `Project (${projects.length})`);
     const identifier = this._uuidv4.generate();
@@ -210,6 +243,7 @@ class Application {
   }
 
   async open(dirHandle: FileSystemDirectoryHandle): Promise<Project[]> {
+    await this.ready();
     const project = await this._parse(dirHandle);
     return await this._dataSource.add(project);
   }
@@ -221,14 +255,11 @@ class Application {
         fileArray.push(await value.getFile());
       }
     }
-    const jsonData = fileArray.find(file => file.name === 'data.json');
+    const exported = await this._readDataJson(fileArray);
 
-    if (jsonData) {
-      const json = (await readAsText(jsonData)).result;
-      const project: Project = JSON.parse(json);
-      project.dirLink = dirHandle;
-      await this._images.execute(project.key, fileArray);
-      return project;
+    if (exported) {
+      exported.dirLink = dirHandle;
+      return exported;
     } else {
       const identifier = this._uuidv4.generate();
 
@@ -249,6 +280,20 @@ class Application {
       }
       return project;
     }
+  }
+
+  /** The project in data.json, with its images cached under its own key. */
+  async _readDataJson(fileArray: File[]): Promise<Project | undefined> {
+    const jsonData = fileArray.find(file => file.name === 'data.json');
+    if (!jsonData) {
+      return undefined;
+    }
+    // Older saves wrote the folder handle into data.json, where JSON turned it into {}.
+    const { dirLink, ...project }: Project = JSON.parse(
+      (await readAsText(jsonData)).result,
+    );
+    await this._images.execute(project.key, fileArray);
+    return project;
   }
 
   _mergeDateWithImages(data: Shot[], images: ImageUrl[]) {

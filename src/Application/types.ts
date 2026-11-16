@@ -37,12 +37,3 @@ export interface PermissionDirectoryHandle extends FileSystemDirectoryHandle {
     mode: PermissionMode;
   }): Promise<PermissionState>;
 }
-
-export interface ProjectsSource {
-  list(): Promise<Project[]>;
-  get(id: string): Promise<Project>;
-  dirLink(id: string): Promise<FileSystemDirectoryHandle | undefined>;
-  add(project: Project): Promise<Project[]>;
-  save(project: Project): Promise<Project[]>;
-  delete(id: string): Promise<Project[]>;
-}

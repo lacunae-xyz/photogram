@@ -3,34 +3,33 @@ import type {
   PermissionDirectoryHandle,
   PermissionMode,
   Project,
-  ProjectsSource,
 } from './types';
 
 interface Entry {
   id: string;
   data: Project;
   fileSystemDirectoryHandle?: FileSystemDirectoryHandle;
+  // Absent on entries stored before it existed: they sort first.
+  createdAt?: number;
 }
 
 interface FileHandle {
   write(
-    dirHandle: FileSystemDirectoryHandle | undefined,
+    dirHandle: FileSystemDirectoryHandle,
     name: string,
     data: Project,
   ): Promise<void>;
-  read(
-    dirHandle: FileSystemDirectoryHandle | undefined,
-    name: string,
-  ): Promise<Project>;
+  read(dirHandle: FileSystemDirectoryHandle, name: string): Promise<Project>;
 }
 
 // The stubs call the handlers with a bare `{ target }`, so read the target, not the request.
 const targetOf = <T>(event: Event) => event.target as IDBRequest<T>;
 
-export default class IndexedDBProjectsDataSource implements ProjectsSource {
+export default class IndexedDBProjectsDataSource {
   _indexedDB: IDBFactory;
   _fileHandle: FileHandle;
   _db?: IDBDatabase;
+  _lastCreatedAt = 0;
   dbName: string;
   storeName: string;
 
@@ -55,18 +54,16 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
     },
   ) {
     const dbState: Record<string, Entry> = {};
-    const fsState: Record<string, Project> = {};
+    const fsState: Record<string, string> = {};
 
-    if (projects !== undefined) {
-      for (const project of projects) {
-        const dirLink = project.dirLink;
-        delete project.dirLink;
-        dbState[project.key] = {
-          id: project.key,
-          data: project,
-          fileSystemDirectoryHandle: dirLink,
-        };
-        fsState[dirLink!.name] = project;
+    for (const { dirLink, ...project } of projects ?? []) {
+      dbState[project.key] = {
+        id: project.key,
+        data: structuredClone(project),
+        fileSystemDirectoryHandle: dirLink,
+      };
+      if (dirLink) {
+        fsState[dirLink.name] = JSON.stringify(project);
       }
     }
     return new IndexedDBProjectsDataSource(
@@ -84,8 +81,11 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
       const store = tx.objectStore(this.storeName);
       const request = store.getAll();
       request.onsuccess = event => {
+        // getAll returns key order, and keys are random uuids.
         resolve(
-          targetOf<Entry[]>(event).result.map(entry => this._transform(entry)),
+          targetOf<Entry[]>(event)
+            .result.sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0))
+            .map(entry => this._transform(entry)),
         );
       };
       request.onerror = event => {
@@ -94,11 +94,26 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
     });
   }
 
-  async add(data: Project) {
-    const fileSystemDirectoryHandle = data.dirLink;
-    delete data.dirLink;
-    await this._add(data.key, data, fileSystemDirectoryHandle);
-    await this._fileHandle.write(fileSystemDirectoryHandle, 'data.json', data);
+  async has(id: string) {
+    const db = await this.open();
+    return new Promise<boolean>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.count(id);
+      request.onsuccess = event => {
+        resolve(targetOf<number>(event).result > 0);
+      };
+      request.onerror = event => {
+        reject(targetOf(event).error);
+      };
+    });
+  }
+
+  async add({ dirLink, ...data }: Project) {
+    await this._add(data.key, data, dirLink);
+    if (dirLink) {
+      await this._fileHandle.write(dirLink, 'data.json', data);
+    }
     return this.list();
   }
 
@@ -111,7 +126,15 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction(this.storeName, 'readwrite');
       const store = tx.objectStore(this.storeName);
-      const request = store.put({ id, fileSystemDirectoryHandle, data }, id);
+      const request = store.put(
+        {
+          id,
+          fileSystemDirectoryHandle,
+          data,
+          createdAt: this._nextCreatedAt(),
+        },
+        id,
+      );
       request.onsuccess = () => {
         resolve();
       };
@@ -121,6 +144,12 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
     });
   }
 
+  // Strictly increasing, so projects added in the same millisecond (the migration) keep their order.
+  _nextCreatedAt() {
+    this._lastCreatedAt = Math.max(Date.now(), this._lastCreatedAt + 1);
+    return this._lastCreatedAt;
+  }
+
   async dirLink(id: string) {
     return (await this._get(id)).dirLink;
   }
@@ -128,6 +157,9 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
   async get(id: string) {
     try {
       const projectDb = await this._get(id);
+      if (!projectDb.dirLink) {
+        return projectDb;
+      }
       const projectFs = await this._fileHandle.read(
         projectDb.dirLink,
         'data.json',
@@ -161,15 +193,16 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
     });
   }
 
-  _transform(entry: Entry) {
-    const project = entry.data;
-    project.dirLink = entry.fileSystemDirectoryHandle;
-    return project;
+  // A copy: save() writes entry.data to data.json afterwards, and the handle must stay out of it.
+  _transform(entry: Entry): Project {
+    return { ...entry.data, dirLink: entry.fileSystemDirectoryHandle };
   }
 
-  async save(data: Project) {
+  async save({ dirLink, ...data }: Project) {
     const projectDb = await this._save(data.key, data);
-    await this._fileHandle.write(projectDb.dirLink, 'data.json', data);
+    if (projectDb.dirLink) {
+      await this._fileHandle.write(projectDb.dirLink, 'data.json', data);
+    }
     return this.list();
   }
 
@@ -230,6 +263,8 @@ export default class IndexedDBProjectsDataSource implements ProjectsSource {
       const request = this._indexedDB.open(this.dbName, 1);
       request.onupgradeneeded = event => {
         const db = targetOf<IDBDatabase>(event).result;
+        // `keypath` is a typo for `keyPath`, so the store uses out-of-line keys: every put passes one.
+        // Harmless, and fixing it needs a DB version bump.
         db.createObjectStore(this.storeName, {
           keypath: 'id',
         } as IDBObjectStoreParameters);
@@ -272,17 +307,18 @@ const SuccessRequest = (result: unknown) =>
     },
   );
 
+// Keeps data.json as text, so values JSON can't hold are lost as they would be on disk.
 class StubbedFileHandle implements FileHandle {
-  store: Record<string, Project>;
+  store: Record<string, string>;
 
-  constructor(fsState: Record<string, Project>) {
+  constructor(fsState: Record<string, string>) {
     this.store = fsState;
   }
   async write(dirHandle: FileSystemDirectoryHandle, _: string, data: Project) {
-    this.store[dirHandle.name] = data;
+    this.store[dirHandle.name] = JSON.stringify(data);
   }
   async read(dirHandle: FileSystemDirectoryHandle, _: string) {
-    return this.store[dirHandle.name];
+    return JSON.parse(this.store[dirHandle.name]);
   }
 }
 
@@ -327,6 +363,12 @@ class ErrorIndexedDB {
   }
 }
 
+const cloneEntry = (entry: Entry): Entry => ({
+  ...entry,
+  data: structuredClone(entry.data),
+});
+
+// Clones on the way in and out, like IndexedDB's structured clone.
 class StubbedIndexedDB {
   store: Record<string, Entry>;
 
@@ -347,17 +389,22 @@ class StubbedIndexedDB {
           get(key: string) {
             const result = this.store[key];
             if (result) {
-              return SuccessRequest(result);
+              return SuccessRequest(cloneEntry(result));
             } else {
               return ErrorRequest(new Error(`Cannot found ${key}`));
             }
           },
           getAll() {
-            const result = Object.values(this.store);
+            const result = Object.keys(this.store)
+              .sort()
+              .map(key => cloneEntry(this.store[key]));
             return SuccessRequest(result);
           },
+          count(key: string) {
+            return SuccessRequest(key in this.store ? 1 : 0);
+          },
           put(value: Entry, key: string) {
-            this.store[key] = value;
+            this.store[key] = cloneEntry(value);
             return SuccessRequest(undefined);
           },
           delete(key: string) {

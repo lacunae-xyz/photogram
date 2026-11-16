@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
 import Application from '../Application';
-import ProjectsDataSource from '../Application/ProjectsDataSource';
+import IndexedDBProjectsDataSource from '../Application/IndexedDBProjectsDataSource';
 import Page from '../Project/Page';
 import Csv from '../FilesParser/Csv';
 
@@ -17,7 +17,7 @@ export default function Project() {
       const base = new URL(window.location.href);
       data.map(d => {
         return Object.assign(d, {
-          url: new URL(`/demo/${d.id}.jpg`, base),
+          url: new URL(`/demo/${d.id}.jpg`, base).href,
         });
       });
       const project = {
@@ -28,7 +28,9 @@ export default function Project() {
         template: 'small',
       };
       return Application.createNull({
-        dataSource: ProjectsDataSource.createNull({ projects: [project] }),
+        dataSource: IndexedDBProjectsDataSource.createNull({
+          projects: [project],
+        }),
       });
     }
     createApplication()

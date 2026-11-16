@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import ReactGA from 'react-ga';
+import track from '../track';
+import { Helmet } from 'react-helmet';
 import Header from '../Header';
 import Creators from './Creators';
 import EmptyProject from './EmptyProject';
@@ -32,10 +33,7 @@ export default function Landing() {
   }
 
   function onImportProject(files) {
-    ReactGA.event({
-      category: 'Project',
-      action: 'create',
-    });
+    track('project-create');
     application
       .add(files)
       .then(projects => setProjects(projects))
@@ -43,11 +41,17 @@ export default function Landing() {
       .catch(error => console.log(error));
   }
 
+  function onOpenProject(dirHandle) {
+    track('project-create');
+    application
+      .open(dirHandle)
+      .then(projects => setProjects(projects))
+      .then(_ => _checkQuotas())
+      .catch(error => console.log(error));
+  }
+
   function onDeleteProject(key) {
-    ReactGA.event({
-      category: 'Project',
-      action: 'delete',
-    });
+    track('project-delete');
     application
       .delete(key)
       .then(projects => setProjects(projects))
@@ -57,8 +61,6 @@ export default function Landing() {
 
   async function onLinkProject(key) {
     try {
-      console.log(key);
-      console.log('caca');
       const needsPermission = await application.needsPermission(key);
       if (needsPermission) {
         await application.requestPermission(key);
@@ -71,6 +73,13 @@ export default function Landing() {
 
   return (
     <div className="landing-container">
+      <Helmet>
+        <title>Photogram · A tool for editor assistants</title>
+        <meta
+          name="description"
+          content="Create a board of photograms ready to print and cut, from a CSV file and your stills. Your projects stay on your device."
+        />
+      </Helmet>
       <Header />
       {projects.length <= 0 ? null : (
         <div>
@@ -82,9 +91,15 @@ export default function Landing() {
           />
         </div>
       )}
-      <EmptyProject onImportProject={files => onImportProject(files)} />
+      <EmptyProject
+        onImportProject={files => onImportProject(files)}
+        onOpenProject={dirHandle => onOpenProject(dirHandle)}
+      />
       <QuotaProgress value={quotas.value} max={quotas.max} />
       <Creators />
+      <footer className="landing-footer">
+        <a href="/privacy-policy">Privacy policy</a>
+      </footer>
     </div>
   );
 }

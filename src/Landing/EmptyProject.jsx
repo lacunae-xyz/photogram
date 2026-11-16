@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { canOpenFolder, pickFolder } from '../OpenProject';
 import './EmptyProject.css';
 
 class EmptyCell extends Component {
@@ -49,6 +50,25 @@ class EmptyProject extends Component {
             />
           </label>
         </form>
+        {canOpenFolder() ? (
+          <button
+            type="button"
+            className="empty-project-open"
+            onClick={async () => {
+              const dirHandle = await pickFolder();
+              if (dirHandle) {
+                this.props.onOpenProject(dirHandle);
+              }
+            }}
+          >
+            <EmptyCell
+              className="empty-project-item"
+              src="/illus/undraw_folder_x4ft.svg"
+              title="Open"
+              desc="Open a folder and save your changes back to it"
+            />
+          </button>
+        ) : null}
         <a href="/project-demo">
           <EmptyCell
             className="empty-project-item"

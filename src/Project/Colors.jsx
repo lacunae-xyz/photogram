@@ -3,8 +3,6 @@ import ColorWrapper from './ColorWrapper';
 import './Colors.css';
 
 class Colors extends Component {
-  handleChangeComplete;
-
   render() {
     if (this.props.colors) {
       return (

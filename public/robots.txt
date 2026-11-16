@@ -1,2 +1,5 @@
 User-agent: *
 Disallow: /project/*
+Disallow: /fixor
+
+Sitemap: https://photogram.app/sitemap.xml

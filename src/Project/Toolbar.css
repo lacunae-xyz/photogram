@@ -24,3 +24,19 @@
 .toolbar .button:focus {
   background-color: rgba(180, 220, 220, 0.5);
 }
+
+.toolbar .button-export {
+  margin: 0 0.8rem;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 0.4rem;
+  background-color: transparent;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.toolbar .button-export:hover,
+.toolbar .button-export:focus {
+  background-color: rgba(180, 220, 220, 0.5);
+}

@@ -1,5 +1,5 @@
 import { test, expect } from '../support/test';
-import { importProject, legacyProject, seedLegacyProject } from '../support/projects';
+import { importProject, legacyProject, seedLegacyProject, storedProjectKeys } from '../support/projects';
 import { openFolder, openedName } from '../support/open-folder';
 
 test('delete a legacy project', async ({ page }) => {
@@ -8,7 +8,7 @@ test('delete a legacy project', async ({ page }) => {
   const card = page.locator('.projects-card', { hasText: legacyProject.name });
   await card.locator('.btn-delete').click();
   await expect(card).toHaveCount(0);
-  expect(await page.evaluate(() => localStorage.getItem('projects'))).toBe('[]');
+  expect(await page.evaluate(() => localStorage.getItem('projects'))).toBeNull();
   expect(await page.evaluate(key => caches.has(`image-cache-${key}`), legacyProject.key)).toBe(false);
 });
 
@@ -46,6 +46,8 @@ test.describe('project without image cache (B1)', () => {
   test('project is gone after reload', async ({ page }) => {
     const card = page.locator('.projects-card', { hasText: legacyProject.name });
     await card.locator('.btn-delete').click();
+    // The card stays (B1), so wait for the IndexedDB delete itself.
+    await expect.poll(() => storedProjectKeys(page)).toEqual([]);
     await page.reload();
     await expect(page.locator('#grid')).toBeAttached();
     await expect(card).toHaveCount(0);

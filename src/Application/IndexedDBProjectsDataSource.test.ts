@@ -26,6 +26,30 @@ describe('IndexedDBProjectsDataSource', () => {
       await source.add(createProject());
       await expect(source.list()).resolves.toEqual([createProject()]);
     });
+
+    test('follows the order projects were added, not the key order', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(keyed('b'));
+      await source.add(keyed('a'));
+      await source.add(keyed('c'));
+      await expect(keysOf(source)).resolves.toEqual(['b', 'a', 'c']);
+    });
+
+    test('projects stored before the order existed come first, in key order', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        projects: [keyed('z'), keyed('y')],
+      });
+      await source.add(keyed('a'));
+      await expect(keysOf(source)).resolves.toEqual(['y', 'z', 'a']);
+    });
+
+    test('saving keeps the position', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(keyed('b'));
+      await source.add(keyed('a'));
+      await source.save({ ...keyed('b'), name: 'renamed' });
+      await expect(keysOf(source)).resolves.toEqual(['b', 'a']);
+    });
   });
 
   describe('get', () => {
@@ -56,6 +80,66 @@ describe('IndexedDBProjectsDataSource', () => {
       });
       await expect(source.add(createProject({}))).rejects.toThrow();
     });
+
+    test('leaves its input untouched', async () => {
+      const project = createProject();
+      await IndexedDBProjectsDataSource.createNull().add(project);
+      expect(project).toEqual(createProject());
+    });
+  });
+
+  describe('has', () => {
+    test('true when stored', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        projects: [createProject()],
+      });
+      await expect(source.has('key')).resolves.toEqual(true);
+    });
+
+    test('false when missing', async () => {
+      await expect(
+        IndexedDBProjectsDataSource.createNull().has('key'),
+      ).resolves.toEqual(false);
+    });
+
+    test('rejects when IndexedDB fails', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        saveInError: true,
+      });
+      await expect(source.has('key')).rejects.toThrow('Cannot open database');
+    });
+  });
+
+  describe('unlinked project', () => {
+    test('createNull accepts it', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        projects: [createUnlinkedProject()],
+      });
+      await expect(source.list()).resolves.toEqual([createUnlinkedProject()]);
+    });
+
+    test('get returns the stored project', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(createUnlinkedProject());
+      await expect(source.get('key')).resolves.toEqual(createUnlinkedProject());
+    });
+
+    test('add and save write no folder', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      failWrites(source);
+      await source.add(createUnlinkedProject());
+      await source.save(createUnlinkedProject({ data: ['new'] }));
+      await expect(source.get('key')).resolves.toEqual(
+        createUnlinkedProject({ data: ['new'] }),
+      );
+    });
+
+    test('dirLink is undefined', async () => {
+      const source = IndexedDBProjectsDataSource.createNull({
+        projects: [createUnlinkedProject()],
+      });
+      await expect(source.dirLink('key')).resolves.toEqual(undefined);
+    });
   });
 
   describe('save', () => {
@@ -78,6 +162,19 @@ describe('IndexedDBProjectsDataSource', () => {
       await source.save(createProject({ data: ['new'] }));
       await expect(source.get('key')).resolves.toEqual(
         createProject({ data: ['new'] }),
+      );
+    });
+
+    test('data.json holds no dirLink', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      const dirLink = createProject().dirLink!;
+      await source.add(createProject());
+      expect(await source._fileHandle.read(dirLink, 'data.json')).toEqual(
+        createUnlinkedProject(),
+      );
+      await source.save(createProject({ data: ['new'] }));
+      expect(await source._fileHandle.read(dirLink, 'data.json')).toEqual(
+        createUnlinkedProject({ data: ['new'] }),
       );
     });
 
@@ -159,6 +256,19 @@ function createProject({ data }: { data?: unknown[] } = { data: [] }) {
   } as unknown as Project;
 }
 
+function createUnlinkedProject({ data }: { data?: unknown[] } = { data: [] }) {
+  const { dirLink, ...project } = createProject({ data });
+  return project as Project;
+}
+
+function keyed(key: string) {
+  return { ...createUnlinkedProject(), key } as Project;
+}
+
+async function keysOf(source: IndexedDBProjectsDataSource) {
+  return (await source.list()).map(project => project.key);
+}
+
 function failWrites(source: IndexedDBProjectsDataSource) {
   source._fileHandle.write = async dirHandle => {
     throw Error(`Permission for ${dirHandle?.name} was denied`);
@@ -169,7 +279,6 @@ async function editOutside(
   source: IndexedDBProjectsDataSource,
   project: Project,
 ) {
-  const dirLink = project.dirLink;
-  delete project.dirLink;
-  await source._fileHandle.write(dirLink, 'data.json', project);
+  const { dirLink, ...data } = project;
+  await source._fileHandle.write(dirLink!, 'data.json', data);
 }

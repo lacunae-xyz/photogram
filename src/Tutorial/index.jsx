@@ -3,25 +3,7 @@ import { Helmet } from 'react-helmet';
 import './index.css';
 import Header from '../Header';
 import TemplateSmall from '../Templates/Small';
-
-const colors = [
-  '#F44336',
-  '#E91E63',
-  '#9C27B0',
-  '#3F51B5',
-  '#2196F3',
-  '#03A9F4',
-  '#00BCD4',
-  '#009688',
-  '#4CAF50',
-  '#8BC34A',
-  '#CDDC39',
-  '#FFEB3B',
-  '#FFC107',
-  '#FF9800',
-  '#FF5722',
-  '#795548',
-];
+import { colors } from '../Application';
 
 class Example extends Component {
   constructor(props) {
@@ -113,12 +95,10 @@ class Tutorial extends Component {
     return (
       <div className="tutorial-container">
         <Helmet>
-          <title>
-            Photogram - Learn more about the tool for assistant editors
-          </title>
+          <title>Photogram · Comment utiliser Photogram</title>
           <meta
             name="description"
-            content="Discover all the features of Photogram and learn how to build your own data set"
+            content="Préparer le tableau et les photogrammes de votre projet, puis les ajouter à Photogram"
           />
         </Helmet>
 
@@ -157,7 +137,8 @@ class Tutorial extends Component {
                 </li>
                 <li>
                   Périodes : 4 mots possibles : <em>Matin, soir, jour, nuit</em>
-                  . A choisir en fonction de la temporalité souhaitée.
+                  . A choisir en fonction de la temporalité souhaitée. Ces mots
+                  restent en français, même si l'interface est en anglais.
                 </li>
                 <li>
                   FX : Pour indiquer une séquence truquée, il suffit de mettre
@@ -171,37 +152,45 @@ class Tutorial extends Component {
               </p>
               <p>
                 Une fois ce tableau complété, il doit être enregistré au format{' '}
-                <strong>.csv</strong>, et être nommé <strong>data</strong>.
+                <strong>.csv</strong>, et être nommé <strong>data.csv</strong>.
               </p>
             </section>
             <section>
               <h1>2. Exporter des photogrammes</h1>
               <p>
-                Votre tableau « data » complété, et déplacé dans un dossier
+                Votre tableau « data.csv » complété, et déplacé dans un dossier
                 dédié à votre projet, vous pouvez maintenant exporter vos
                 photogrammes, au fur et à mesure de l'avancée du tournage.
                 <br />
                 Il suffit de les exporter au format .jpeg, de les nommer{' '}
                 <em>exactement</em> comme les numéros de séquence utilisés dans
-                votre tableau, et de les mettre dans le même dossier que le{' '}
-                <strong>data</strong>.
+                votre tableau, et de les mettre dans le même dossier que{' '}
+                <strong>data.csv</strong>.
               </p>
             </section>
             <section>
-              <h1>3. Et la magie fût...</h1>
+              <h1>3. Et la magie fut...</h1>
               <Example />
               <p>
-                Une fois la première étape terminée, vous pouvez d'ors et déjà
-                importer votre projet sur Photogram, et importer manuellement
-                vos images au fur et à mesure.
-                <br />
-                Si des images sont déjà présentes dans le dossier, elles seront
-                automatiquement prises en compte.
+                Une fois la première étape terminée, vous pouvez d'ores et déjà
+                ajouter votre projet à Photogram, avec l'un de ces deux boutons
+                :
               </p>
+              <ul>
+                <li>
+                  <strong>Import project</strong> copie le dossier dans votre
+                  navigateur. Fonctionne dans tous les navigateurs.
+                </li>
+                <li>
+                  <strong>Open project</strong> lie le dossier à Photogram, dans
+                  Chrome et Edge. Vos modifications sont enregistrées dans un
+                  fichier <strong>data.json</strong>, dans ce même dossier.
+                </li>
+              </ul>
               <p>
-                Vous avez aussi une option vous permettant de synchroniser votre
-                projet avec les images rajoutées au fur et à mesure dans le
-                dossier.
+                Les images déjà présentes dans le dossier sont prises en compte.
+                Ajoutez les suivantes au fur et à mesure, depuis chaque
+                photogramme.
               </p>
               <p>
                 Maintenant que vous êtes sur le site, vous pouvez à votre
@@ -215,8 +204,10 @@ class Tutorial extends Component {
               <h1>À savoir :</h1>
               <ul>
                 <li>
-                  Vous pouvez maintenant exporter votre projet au format .zip
-                  afin de le travailler sur un autre ordinateur.
+                  Pour travailler sur un autre ordinateur, exportez un projet
+                  importé avec <strong>Export data.json</strong>. Placez ce
+                  fichier dans le dossier du projet, avec les images, puis
+                  importez le dossier : vos modifications sont conservées.
                 </li>
                 <li>
                   Toutes les données de vos projets sont traitées en local, et

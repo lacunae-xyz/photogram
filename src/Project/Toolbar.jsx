@@ -14,6 +14,15 @@ class Toolbar extends Component {
           src={back}
         />
         <h1>{this.props.title}</h1>
+        {this.props.onExport ? (
+          <button
+            type="button"
+            className="button-export"
+            onClick={this.props.onExport}
+          >
+            Export data.json
+          </button>
+        ) : null}
         <img
           alt="Print"
           className={'button button-print'}

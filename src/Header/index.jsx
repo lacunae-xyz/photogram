@@ -8,7 +8,7 @@ class Header extends Component {
         <img src={logo} className="header-logo" alt="logo of Photogram" />
         <a className="header-text" href="/">
           <h1 className="App-title">Photogram</h1>
-          <p>A tool for assistant editor</p>
+          <p>A tool for editor assistants</p>
         </a>
         <nav className="header-nav">
           <ul>

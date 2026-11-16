@@ -13,7 +13,7 @@ export async function waitForServiceWorker(page: Page) {
   });
 }
 
-const mimeTypes: Record<string, string> = { '.jpg': 'image/jpeg', '.csv': 'text/csv' };
+const mimeTypes: Record<string, string> = { '.jpg': 'image/jpeg', '.csv': 'text/csv', '.json': 'application/json' };
 
 /**
  * Playwright's Firefox directory upload gives every file an empty MIME type, which a real picker doesn't.
@@ -51,43 +51,90 @@ export async function importProject(page: Page, folder = importFolder) {
   return card;
 }
 
-export async function expectCover(card: ReturnType<Page['locator']>, image: RegExp) {
+/**
+ * `served: false` checks the src only. Under Playwright, Firefox and WebKit pages reached by navigation or reload
+ * aren't reliably controlled by image-worker.js (Firefox reports no controller after a reload).
+ */
+export async function expectCover(card: ReturnType<Page['locator']>, image: RegExp, { served = true } = {}) {
   const cover = card.locator('.img-project-cover');
   await expect(cover).toHaveAttribute('src', image);
+  if (!served) {
+    return;
+  }
   await expect.poll(() => cover.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth)).toBeGreaterThan(0);
 }
 
-export const legacyProject = {
-  key: 'legacy-project',
-  name: 'Ancien projet',
-  data: [
-    { id: '1', sequence: '1', action: 'Premier plan', label: 'salon', periode: 'matin', fx: 'x', url: '/project/legacy-project/images/1.jpg/' },
-    { id: '2', sequence: '2', action: 'Deuxième plan', label: '', periode: '', fx: '', url: '/project/legacy-project/images/2.jpg/' },
-  ],
-  colors: { salon: '#F44336' },
-  template: 'small',
-};
+export function createLegacyProject(key: string, name: string) {
+  return {
+    key,
+    name,
+    data: [
+      { id: '1', sequence: '1', action: 'Premier plan', label: 'salon', periode: 'matin', fx: 'x', url: `/project/${key}/images/1.jpg/` },
+      { id: '2', sequence: '2', action: 'Deuxième plan', label: '', periode: '', fx: '', url: `/project/${key}/images/2.jpg/` },
+    ],
+    colors: { salon: '#F44336' },
+    template: 'small',
+  };
+}
 
-/** A project imported before Open project existed: JSON in `localStorage.projects`, images in Cache Storage. */
-export async function seedLegacyProject(page: Page, { project = legacyProject, withImages = true } = {}) {
-  await page.goto('/');
+export const legacyProject = createLegacyProject('legacy-project', 'Ancien projet');
+
+type LegacyProject = ReturnType<typeof createLegacyProject>;
+
+/**
+ * Projects imported by older releases: JSON in `localStorage.projects`, images in Cache Storage.
+ * The app reads the key synchronously on start, so the page has already looked for it when this writes it.
+ */
+export async function seedLegacyProjects(page: Page, projects: LegacyProject[], { withImages = true } = {}) {
+  await page.goto('/projects');
+  // Later navigations then start controlled by image-worker.js, which serves the covers.
+  await waitForServiceWorker(page);
   const images = withImages
     ? ['1.jpg', '2.jpg'].map(name => ({ name, bytes: Array.from(fs.readFileSync(path.join(importFolder, name))) }))
     : [];
   await page.evaluate(
-    async ({ project, images }) => {
-      const projects = JSON.parse(localStorage.getItem('projects') ?? '[]');
-      localStorage.setItem('projects', JSON.stringify([...projects, project]));
-      if (images.length > 0) {
-        const cache = await caches.open(`image-cache-${project.key}`);
-        for (const image of images) {
-          await cache.put(
-            new Request(`/project/${project.key}/images/${image.name}/`),
-            new Response(new Uint8Array(image.bytes), { headers: { 'Content-Type': 'image/jpeg' } }),
-          );
+    async ({ projects, images }) => {
+      localStorage.setItem('projects', JSON.stringify(projects));
+      for (const project of projects) {
+        if (images.length > 0) {
+          const cache = await caches.open(`image-cache-${project.key}`);
+          for (const image of images) {
+            await cache.put(
+              new Request(`/project/${project.key}/images/${image.name}/`),
+              new Response(new Uint8Array(image.bytes), { headers: { 'Content-Type': 'image/jpeg' } }),
+            );
+          }
         }
       }
     },
-    { project, images },
+    { projects, images },
+  );
+}
+
+export async function seedLegacyProject(page: Page, { project = legacyProject, withImages = true } = {}) {
+  await seedLegacyProjects(page, [project], { withImages });
+}
+
+export async function legacyKey(page: Page) {
+  return page.evaluate(() => localStorage.getItem('projects'));
+}
+
+/** Keys in the app's IndexedDB store. Call it once the app has opened the database. */
+export async function storedProjectKeys(page: Page) {
+  return page.evaluate(
+    () =>
+      new Promise<string[]>((resolve, reject) => {
+        const request = indexedDB.open('projects');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          const keys = db.transaction('store').objectStore('store').getAllKeys();
+          keys.onerror = () => reject(keys.error);
+          keys.onsuccess = () => {
+            db.close();
+            resolve(keys.result as string[]);
+          };
+        };
+      }),
   );
 }
