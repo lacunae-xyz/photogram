@@ -86,6 +86,16 @@ describe('pg-dialog', () => {
     expect(nativeDialog(host).open).toBe(false);
   });
 
+  it('gives focus back on close', async () => {
+    const host = await renderDialog(false);
+    document.getElementById('outside')?.focus();
+    host.open = true;
+    await host.updateComplete;
+    expect(document.activeElement?.id).toBe('focused');
+    await userEvent.keyboard('{Escape}');
+    await expect.poll(() => document.activeElement?.id).toBe('outside');
+  });
+
   it('closes on a backdrop click', async () => {
     const host = await renderDialog(true);
     const onClose = vi.fn();

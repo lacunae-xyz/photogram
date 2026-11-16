@@ -141,6 +141,11 @@ describe('photogram-tile-form', () => {
     const file = new File(['x'], 'shot.jpg', { type: 'image/jpeg' });
     await userEvent.upload(page.getByLabelText('Add new photogram'), file);
     expect(added()).toHaveLength(1);
+    expect(Array.isArray(added()[0].files)).toBe(true);
     expect(added()[0].files[0].name).toBe('shot.jpg');
+    // Cleared, so picking the same file again is a change too.
+    const input =
+      element.shadowRoot!.querySelector<HTMLInputElement>('input[type=file]')!;
+    expect(input.value).toBe('');
   });
 });
