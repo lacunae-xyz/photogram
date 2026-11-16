@@ -173,10 +173,9 @@ export default class IndexedDBProjectsDataSource {
     });
   }
 
-  _transform(entry: Entry) {
-    const project = entry.data;
-    project.dirLink = entry.fileSystemDirectoryHandle;
-    return project;
+  // A copy: save() writes entry.data to data.json afterwards, and the handle must stay out of it.
+  _transform(entry: Entry): Project {
+    return { ...entry.data, dirLink: entry.fileSystemDirectoryHandle };
   }
 
   async save({ dirLink, ...data }: Project) {

@@ -288,7 +288,10 @@ class Application {
     if (!jsonData) {
       return undefined;
     }
-    const project: Project = JSON.parse((await readAsText(jsonData)).result);
+    // Older saves wrote the folder handle into data.json, where JSON turned it into {}.
+    const { dirLink, ...project }: Project = JSON.parse(
+      (await readAsText(jsonData)).result,
+    );
     await this._images.execute(project.key, fileArray);
     return project;
   }

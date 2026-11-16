@@ -141,6 +141,19 @@ describe('IndexedDBProjectsDataSource', () => {
       );
     });
 
+    test('data.json holds no dirLink', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      const dirLink = createProject().dirLink!;
+      await source.add(createProject());
+      expect(await source._fileHandle.read(dirLink, 'data.json')).toEqual(
+        createUnlinkedProject(),
+      );
+      await source.save(createProject({ data: ['new'] }));
+      expect(await source._fileHandle.read(dirLink, 'data.json')).toEqual(
+        createUnlinkedProject({ data: ['new'] }),
+      );
+    });
+
     // B14: the DB is updated before data.json is written, so a failed write leaves them out of sync.
     test('when data.json cannot be written, the DB is already updated (B14)', async () => {
       const source = IndexedDBProjectsDataSource.createNull();

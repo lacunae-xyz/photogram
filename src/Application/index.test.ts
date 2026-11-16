@@ -18,6 +18,7 @@ describe('Application', () => {
     test('happy path', () => {
       expect(() => Application.create()).not.toThrowError();
     });
+
   });
 
   describe('add', () => {
@@ -157,6 +158,21 @@ describe('Application', () => {
       ]);
       expect(projects).toEqual([exported]);
       await expect(images.has(exported.key)).resolves.toEqual(true);
+    });
+
+    test('data.json written by an opened folder imports unlinked', async () => {
+      // Saves used to write the folder handle, which JSON turns into {}.
+      const written = { ...createUnlinkedProject(), dirLink: {} };
+      const application = Application.createNull();
+      await application.add([
+        createCsv(),
+        createJson({ content: JSON.stringify(written) }),
+      ]);
+      const imported = await application.get(written.key);
+      expect(imported.dirLink).toBeUndefined();
+      await expect(application.needsPermission(written.key)).resolves.toBe(
+        false,
+      );
     });
 
     test('invalid data.json rejects', async () => {
