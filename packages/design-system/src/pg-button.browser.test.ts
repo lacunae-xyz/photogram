@@ -1,12 +1,13 @@
 import { html, render } from 'lit';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
+import './pg-big-button';
 import './pg-button';
 import '../tokens.css';
 
 afterEach(() => render(null, document.body));
 
-for (const tag of ['pg-button'] as const) {
+for (const tag of ['pg-button', 'pg-big-button'] as const) {
   describe(tag, () => {
     async function renderButton(template: ReturnType<typeof html>) {
       render(template, document.body);
@@ -152,5 +153,15 @@ describe('pg-button variant="icon"', () => {
     await expect
       .element(page.getByRole('button', { name: 'Print' }))
       .toBeVisible();
+  });
+});
+
+describe('pg-big-button', () => {
+  it('is raised', async () => {
+    render(html`<pg-big-button>Open</pg-big-button>`, document.body);
+    const host = document.body.querySelector('pg-big-button')!;
+    await host.updateComplete;
+    const inner = host.shadowRoot!.querySelector('button')!;
+    expect(getComputedStyle(inner).boxShadow).not.toBe('none');
   });
 });
