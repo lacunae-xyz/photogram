@@ -123,8 +123,7 @@ it('compare with several changes', () => {
   ]);
 });
 
-// Timecodes are objects, so toString() gives "[object Object]" on both sides and a changed timecode is missed.
-it('compare misses a changed timecode', () => {
+it('compare finds a changed timecode (B22)', () => {
   const edl = sourceOut =>
     parser(`000001  A003C003_190318BQ                V     C        16:51:25:10 ${sourceOut} 01:00:00:00 01:00:02:15
 * FROM CLIP NAME:  210/01-03* CAMA
@@ -132,6 +131,17 @@ it('compare misses a changed timecode', () => {
 * SOURCE FILE: A003C003_190318BQ`);
   let result = compare(edl('16:51:28:00'), edl('16:51:29:00'));
   expect(result.map(diff => [diff.type, diff.changes])).toStrictEqual([
-    ['identity', []],
+    ['modify', ['sourceOut']],
+  ]);
+});
+
+it('compare finds no change in equal timecodes (B22)', () => {
+  const edl = () =>
+    parser(`000001  A003C003_190318BQ                V     C        16:51:25:10 16:51:28:00 01:00:00:00 01:00:02:15
+* FROM CLIP NAME:  210/01-03* CAMA
+* LOC: 01:00:01:00 CYAN    208_050 // SPLIT SCREEN
+* SOURCE FILE: A003C003_190318BQ`);
+  expect(compare(edl(), edl()).map(diff => diff.type)).toStrictEqual([
+    'identity',
   ]);
 });

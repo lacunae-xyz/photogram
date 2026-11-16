@@ -1,3 +1,9 @@
+// Timecodes are objects: compare their values, not "[object Object]".
+const valueOf = value =>
+  typeof value === 'object' && value !== null
+    ? JSON.stringify(value)
+    : String(value);
+
 function parse(edl1, edl2) {
   let ids = [
     ...new Set(edl1.map(line => line.id).concat(edl2.map(line => line.id))),
@@ -20,7 +26,7 @@ function parse(edl1, edl2) {
         'recordOut',
       ]
         .map(key => {
-          if (line1[key].toString() !== line2[key].toString()) {
+          if (valueOf(line1[key]) !== valueOf(line2[key])) {
             return key;
           } else {
             return undefined;
