@@ -116,7 +116,7 @@ test('background colour checkbox shows the saved setting after reload (B3)', asy
   await expect(checkbox).not.toBeChecked();
 });
 
-// B9: Form listens for keyCode 27, which still works. Phase 6 moves to a native <dialog>; this guards Escape.
+// B9: Form listened for the deprecated keyCode 27. The native <dialog> handles Escape now.
 test('Escape closes the form (B9)', async ({ page }) => {
   const tiles = await openImported(page);
   await tiles.first().click();
@@ -128,10 +128,12 @@ test('Escape closes the form (B9)', async ({ page }) => {
 test('the colour picker changes a label colour', async ({ page, pageErrors }) => {
   const tiles = await openImported(page);
   const row = page.locator('.configuration tr').filter({ has: page.locator('td', { hasText: /^salon$/ }) });
-  await row.getByRole('button').first().click();
-  const picker = page.locator('.sketch-picker');
-  await expect(picker).toBeVisible();
-  await picker.locator('[title="#4A90E2"]').click();
-  await expect(tiles.first().locator('.sequence')).toHaveCSS('background-color', 'rgb(74, 144, 226)');
+  await row.locator('input[type=color]').fill('#00ff00');
+  const sequence = tiles.first().locator('.sequence');
+  await expect(sequence).toHaveCSS('background-color', 'rgb(0, 255, 0)');
+
+  await page.reload();
+  await expect(sequence).toHaveCSS('background-color', 'rgb(0, 255, 0)');
+  await expect(row.locator('input[type=color]')).toHaveValue('#00ff00');
   expect(pageErrors).toEqual([]);
 });
