@@ -4,6 +4,7 @@ import Images from '../FilesParser/Images';
 import Uuidv4 from '../FilesParser/uuidv4';
 import IndexedDBProjectsDataSource from './IndexedDBProjectsDataSource';
 import LocalStorageMigration from './LocalStorageMigration';
+import { nextColor } from './colors';
 import type {
   ColorDistribution,
   Colors,
@@ -14,24 +15,7 @@ import type {
 } from './types';
 import type { ImageUrl } from '../FilesParser/Images';
 
-export const colors = [
-  '#F44336',
-  '#E91E63',
-  '#9C27B0',
-  '#3F51B5',
-  '#2196F3',
-  '#03A9F4',
-  '#00BCD4',
-  '#009688',
-  '#4CAF50',
-  '#8BC34A',
-  '#CDDC39',
-  '#FFEB3B',
-  '#FFC107',
-  '#FF9800',
-  '#FF5722',
-  '#795548',
-];
+export { palette as colors } from './colors';
 
 // Every page builds its own Application: they share one migration so it runs once.
 let migration: Promise<void> | undefined;
@@ -148,8 +132,7 @@ class Application {
       }
     });
     if (data.label && project.colors[data.label] === undefined) {
-      project.colors[data.label] =
-        colors[Object.keys(project.colors).length % colors.length];
+      project.colors[data.label] = nextColor(Object.values(project.colors));
     }
     await this._dataSource.save(project);
   }
@@ -170,7 +153,7 @@ class Application {
 
   async deleteColor(id: string, key: string) {
     const project = await this.get(id);
-    project.colors[key] = undefined;
+    delete project.colors[key];
     project.data = project.data.map(item => {
       if (key === item.label) {
         return Object.assign(item, {
@@ -313,10 +296,11 @@ class Application {
     const unique = [
       ...new Set(data.map(d => d.label).filter(p => p !== null && p !== '')),
     ] as string[];
-    return Object.assign(
-      {},
-      ...unique.map((p, i) => ({ [p]: colors[i % colors.length] })),
-    );
+    const colors: Colors = {};
+    for (const label of unique) {
+      colors[label] = nextColor(Object.values(colors));
+    }
+    return colors;
   }
 
   _name(files: File[], defaultName: string) {

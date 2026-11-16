@@ -502,6 +502,58 @@ describe('Application', () => {
       expect(actual.colors).toEqual({ label: '#F44336' });
     });
 
+    test('with every palette colour used, the least used one, lowest index on ties (B13)', async () => {
+      const labels = [...Array(17).keys()].map(i => `label${i}`);
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({
+          content: [
+            ...labels.map((label, i) => `${i + 1};action;${label}`),
+            '18;action',
+          ].join('\n'),
+        }),
+      );
+      await application.updateColor(project.key, { label16: '#9C27B0' });
+
+      await application.update(project.key, { id: '18', label: 'new' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors['new']).toEqual('#F44336');
+    });
+
+    test('a hand-set colour outside the palette leaves its palette colour free (B13)', async () => {
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({ content: '1;action;A\n2;action' }),
+      );
+      await application.updateColor(project.key, { A: '#123456' });
+
+      await application.update(project.key, { id: '2', label: 'B' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors).toEqual({ A: '#123456', B: '#F44336' });
+    });
+
+    test('a hand-set palette colour counts as used, whatever its case (B13)', async () => {
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({ content: '1;action;A\n2;action' }),
+      );
+      await application.updateColor(project.key, { A: '#e91e63' });
+      await application.update(project.key, { id: '2', label: 'B' } as Shot);
+      await application.update(project.key, { id: '2', label: 'C' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors).toEqual({
+        A: '#e91e63',
+        B: '#F44336',
+        C: '#9C27B0',
+      });
+    });
+
     test('do nothing if element not found', async () => {
       const application = Application.createNull();
       const project = await addProject(
@@ -652,21 +704,24 @@ describe('Application', () => {
         expect(actual.data[0].label).toEqual(undefined);
       });
 
-      // B13: deleteColor leaves an undefined key that JSON drops, so the next label reuses a colour.
-      test('new label after delete with a JSON round trip reuses a colour (B13)', async () => {
-        const project = Object.assign(createProject(), {
-          data: [
-            { id: '1', label: 'A' },
-            { id: '2', label: 'B' },
-            { id: '3', label: 'C' },
-            { id: '4' },
-          ],
-          colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
+      test('removes the key, so JSON and the stored project agree', async () => {
+        const application = Application.createNull({
+          dataSource: IndexedDBProjectsDataSource.createNull({
+            projects: [abcProject(createUnlinkedProject())],
+          }),
         });
+
+        await application.deleteColor('key', 'A');
+
+        const actual = await application.get('key');
+        expect(Object.keys(actual.colors)).toEqual(['B', 'C']);
+      });
+
+      test('new label after delete with a JSON round trip gets a free colour (B13)', async () => {
         // A linked project: data.json is the round trip.
         const application = Application.createNull({
           dataSource: IndexedDBProjectsDataSource.createNull({
-            projects: [project],
+            projects: [abcProject(createProject())],
           }),
         });
 
@@ -677,12 +732,30 @@ describe('Application', () => {
         expect(actual.colors).toEqual({
           B: '#E91E63',
           C: '#9C27B0',
-          D: '#9C27B0',
+          D: '#F44336',
         });
       });
 
-      test('new label after delete without a JSON round trip gets a new colour', async () => {
-        const project = Object.assign(createUnlinkedProject(), {
+      test('new label after delete without a JSON round trip gets a free colour (B13)', async () => {
+        const application = Application.createNull({
+          dataSource: IndexedDBProjectsDataSource.createNull({
+            projects: [abcProject(createUnlinkedProject())],
+          }),
+        });
+
+        await application.deleteColor('key', 'A');
+        await application.update('key', { id: '4', label: 'D' } as Shot);
+
+        const actual = await application.get('key');
+        expect(actual.colors).toEqual({
+          B: '#E91E63',
+          C: '#9C27B0',
+          D: '#F44336',
+        });
+      });
+
+      function abcProject(project: Project) {
+        return Object.assign(project, {
           data: [
             { id: '1', label: 'A' },
             { id: '2', label: 'B' },
@@ -691,23 +764,7 @@ describe('Application', () => {
           ],
           colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
         });
-        const application = Application.createNull({
-          dataSource: IndexedDBProjectsDataSource.createNull({
-            projects: [project],
-          }),
-        });
-
-        await application.deleteColor('key', 'A');
-        await application.update('key', { id: '4', label: 'D' } as Shot);
-
-        const actual = await application.get('key');
-        expect(actual.colors).toEqual({
-          A: undefined,
-          B: '#E91E63',
-          C: '#9C27B0',
-          D: '#3F51B5',
-        });
-      });
+      }
 
       test('do nothing if element not found', async () => {
         const application = Application.createNull();
