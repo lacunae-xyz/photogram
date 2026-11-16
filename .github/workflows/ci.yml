@@ -75,7 +75,7 @@ jobs:
   browser:
     needs: build
     runs-on: ubuntu-latest
-    # Keep the tag in sync with @playwright/test in e2e/package.json.
+    # Keep the tag in sync with @playwright/test in e2e/package.json. The image ships Node 26, same as .nvmrc.
     container:
       image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
@@ -152,7 +152,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version-file: .nvmrc
       - uses: actions/download-artifact@v5
         with:
           name: dist
@@ -186,7 +186,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version-file: .nvmrc
       - uses: actions/download-artifact@v5
         with:
           name: dist
