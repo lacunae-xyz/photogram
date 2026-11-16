@@ -74,7 +74,7 @@ function splitLines(rawData) {
 
 function parseLine(value) {
   let number = value.match(/(^\d+)\s+(\S+)\s+/);
-  let dates = value.match(/(\d+:\d+:\d+:\d+)/g);
+  let dates = value.match(/(\d+:\d+:\d+[:;]\d+)/g);
   let vfxName = value.match(/.*FROM CLIP NAME:\s*(.*)\s*\n/);
   let idAndDesc = value.match(/LOC:.*\s([\S]+)\s\/\/\s(.*)\n/);
   let sourceFile = value.match(/SOURCE FILE: ([\S]+)/);
@@ -82,7 +82,6 @@ function parseLine(value) {
   if (
     number === null ||
     dates === null ||
-    vfxName === null ||
     idAndDesc === null ||
     sourceFile === null
   ) {
@@ -93,7 +92,7 @@ function parseLine(value) {
     /*number*/ number[1],
     /*reelName*/ number[2],
     /*description*/ idAndDesc[2].trim().toLowerCase(),
-    /*vfxName*/ vfxName[1].trim(),
+    /*vfxName*/ vfxName === null ? '' : vfxName[1].trim(),
     /*fileName*/ sourceFile[1].trim(),
     /*sourceIn*/ toDate(dates[0]),
     /*sourceOut*/ toDate(dates[1]),
@@ -103,7 +102,7 @@ function parseLine(value) {
 }
 
 function toDate(value) {
-  let stringValues = value.split(':');
+  let stringValues = value.split(/[:;]/);
   if (stringValues.length === 4) {
     let values = stringValues.map(s => parseInt(s));
     return {
@@ -118,6 +117,9 @@ function toDate(value) {
 }
 
 function dateDuration(din, dout, numberOfImages) {
+  if (!(Number.isFinite(numberOfImages) && numberOfImages > 0)) {
+    return undefined;
+  }
   let duration =
     ((dout.hours - din.hours) * 3600 +
       (dout.minutes - din.minutes) * 60 +
@@ -127,5 +129,9 @@ function dateDuration(din, dout, numberOfImages) {
   return Math.round((duration + Number.EPSILON) * 100) / 100;
 }
 
+function formatDuration(duration) {
+  return duration === undefined ? '–' : duration.toString();
+}
+
 export default parse;
-export { Line, dateDuration };
+export { Line, dateDuration, formatDuration };

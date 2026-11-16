@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDuration } from './parser';
 import './CompareTable.css';
 
 function EmptyTable() {
@@ -76,7 +77,7 @@ function OneLine(props) {
         <img alt="vfx" src={line.image} />
       </td>
       <td>{line.description}</td>
-      <td>{line.sourceDuration(props.imagePerSeconde).toString()}</td>
+      <td>{formatDuration(line.sourceDuration(props.imagePerSeconde))}</td>
       <td>{line.vfxName}</td>
       <td>{line[props.source]}</td>
     </tr>
@@ -110,8 +111,8 @@ function HistoryLine(props) {
         {lineB.description}
       </td>
       <td>
-        <del>{lineA.sourceDuration(props.imagePerSeconde).toString()}</del>
-        {lineB.sourceDuration(props.imagePerSeconde).toString()}
+        <del>{formatDuration(lineA.sourceDuration(props.imagePerSeconde))}</del>
+        {formatDuration(lineB.sourceDuration(props.imagePerSeconde))}
       </td>
       <td>
         <del>{lineA.vfxName}</del>

@@ -41,19 +41,9 @@ export async function setColorDistribution(page: Page, distribution: 'indicator'
   }
 }
 
-/** The checkbox lags the saved value (see templates.spec), so click until the tiles have the wanted class. */
 export async function setPrintSpaceAround(page: Page, on: boolean) {
-  const checkbox = page.locator('#print-space-around');
-  const tiles = page.locator('.tiles-container');
-  const expected = new RegExp(on ? 'print-space-around' : 'print-no-space');
-  const matches = () =>
-    expect(tiles)
-      .toHaveClass(expected, { timeout: 1_000 })
-      .then(() => true, () => false);
-  for (let clicks = 0; clicks < 4 && !(await matches()); clicks++) {
-    await checkbox.click();
-  }
-  await expect(tiles).toHaveClass(expected);
+  await page.locator('#print-space-around').setChecked(on);
+  await expect(page.locator('.tiles-container')).toHaveClass(on ? /print-space-around/ : /print-no-space/);
 }
 
 /** Row 5 gets the light palette colour, so it renders dark text. */
@@ -62,8 +52,26 @@ export async function prepareDemo(page: Page) {
   await setLabelColor(page, 'soleil', '#FFEB3B');
 }
 
+/** Moves the mouse to a viewport corner with no tile or preview under it: both scale up on hover. */
+async function parkMouse(page: Page) {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('no viewport');
+  const { width, height } = viewport;
+  for (const [x, y] of [[width - 1, 0], [width - 1, height - 1], [0, height - 1], [0, 0]]) {
+    const hoversNothing = await page.evaluate(
+      ([x, y]) => !document.elementFromPoint(x, y)?.closest('.ele, .preview'),
+      [x, y],
+    );
+    if (hoversNothing) {
+      await page.mouse.move(x, y);
+      return;
+    }
+  }
+  throw new Error('every viewport corner is over a tile');
+}
+
 export async function settle(page: Page) {
-  await page.mouse.move(0, 0);
+  await parkMouse(page);
   await waitForTitleSizing(page);
   await waitForImages(page);
 }

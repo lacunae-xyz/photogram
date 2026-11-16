@@ -20,8 +20,7 @@ test('imported images are served by image-worker.js after reload', async ({ page
   expect(response).toEqual({ status: 200, type: 'image/jpeg' });
 });
 
-// B5: a cache miss answers with a network error. After the fix it is a 404.
-test('unknown /images/ URL is a network error (B5)', async ({ page }) => {
+test('unknown /images/ URL is a 404 (B5)', async ({ page }) => {
   await page.goto('/projects');
   await page.waitForFunction(async () => {
     await navigator.serviceWorker.ready;
@@ -30,5 +29,5 @@ test('unknown /images/ URL is a network error (B5)', async ({ page }) => {
   const result = await page.evaluate(() =>
     fetch('/project/unknown/images/nope.jpg/').then(response => response.status, error => error.name),
   );
-  expect(result).toBe('TypeError');
+  expect(result).toBe(404);
 });

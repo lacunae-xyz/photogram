@@ -178,8 +178,7 @@ describe('IndexedDBProjectsDataSource', () => {
       );
     });
 
-    // B14: the DB is updated before data.json is written, so a failed write leaves them out of sync.
-    test('when data.json cannot be written, the DB is already updated (B14)', async () => {
+    test('when data.json cannot be written, the DB is left unchanged (B14)', async () => {
       const source = IndexedDBProjectsDataSource.createNull();
       await source.add(createProject());
       failWrites(source);
@@ -188,16 +187,13 @@ describe('IndexedDBProjectsDataSource', () => {
         source.save(createProject({ data: ['new'] })),
       ).rejects.toThrow('Permission for dir was denied');
 
-      await expect(source.list()).resolves.toEqual([
-        createProject({ data: ['new'] }),
-      ]);
+      await expect(source.list()).resolves.toEqual([createProject()]);
       await expect(source.get('key')).resolves.toEqual(createProject());
     });
   });
 
-  // B15: list reads the DB, get reads data.json.
   describe('data.json edited outside the app (B15)', () => {
-    test('list keeps the DB copy, get returns the file', async () => {
+    test('get returns the file and list follows once it has been read', async () => {
       const source = IndexedDBProjectsDataSource.createNull();
       await source.add(createProject());
       await editOutside(
@@ -205,10 +201,43 @@ describe('IndexedDBProjectsDataSource', () => {
         Object.assign(createProject(), { name: 'edited' }),
       );
 
-      const listed = await source.list();
-      expect(listed[0].name).toEqual(undefined);
       const project = await source.get('key');
       expect(project.name).toEqual('edited');
+      const listed = await source.list();
+      expect(listed[0].name).toEqual('edited');
+    });
+
+    test('get keeps the position in the list', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(createProject());
+      await source.add(keyed('z'));
+      await editOutside(
+        source,
+        Object.assign(createProject(), { name: 'edited' }),
+      );
+
+      await source.get('key');
+
+      await expect(keysOf(source)).resolves.toEqual(['key', 'z']);
+    });
+
+    test('get returns the file even when the DB cannot be refreshed', async () => {
+      const source = IndexedDBProjectsDataSource.createNull();
+      await source.add(createProject());
+      await editOutside(
+        source,
+        Object.assign(createProject(), { name: 'edited' }),
+      );
+      await failDbWrites(source);
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const project = await source.get('key');
+
+      expect(project.name).toEqual('edited');
+      expect(consoleError).toHaveBeenCalled();
+      consoleError.mockRestore();
     });
   });
 
@@ -281,4 +310,22 @@ async function editOutside(
 ) {
   const { dirLink, ...data } = project;
   await source._fileHandle.write(dirLink!, 'data.json', data);
+}
+
+async function failDbWrites(source: IndexedDBProjectsDataSource) {
+  const db = await source.open();
+  const transaction = db.transaction.bind(db);
+  const failing = {
+    set onsuccess(_: unknown) {},
+    set onerror(handler: (event: unknown) => void) {
+      handler({ target: { error: new Error('QuotaExceededError') } });
+    },
+  };
+  db.transaction = ((...args: Parameters<IDBDatabase['transaction']>) => {
+    const tx = transaction(...args);
+    return {
+      objectStore: (name: string) =>
+        Object.assign(tx.objectStore(name), { put: () => failing }),
+    };
+  }) as unknown as IDBDatabase['transaction'];
 }

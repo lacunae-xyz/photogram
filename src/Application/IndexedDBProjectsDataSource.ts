@@ -117,26 +117,40 @@ export default class IndexedDBProjectsDataSource {
     return this.list();
   }
 
+  // Adding a key that is already stored replaces that project in place: it keeps its position.
   async _add(
     id: string,
     data: Project,
     fileSystemDirectoryHandle?: FileSystemDirectoryHandle,
   ) {
+    const createdAt = (await this.has(id))
+      ? await this._createdAt(id)
+      : this._nextCreatedAt();
     const db = await this.open();
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction(this.storeName, 'readwrite');
       const store = tx.objectStore(this.storeName);
       const request = store.put(
-        {
-          id,
-          fileSystemDirectoryHandle,
-          data,
-          createdAt: this._nextCreatedAt(),
-        },
+        { id, fileSystemDirectoryHandle, data, createdAt },
         id,
       );
       request.onsuccess = () => {
         resolve();
+      };
+      request.onerror = event => {
+        reject(targetOf(event).error);
+      };
+    });
+  }
+
+  async _createdAt(id: string) {
+    const db = await this.open();
+    return new Promise<number | undefined>((resolve, reject) => {
+      const tx = db.transaction(this.storeName, 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.get(id);
+      request.onsuccess = event => {
+        resolve(targetOf<Entry | undefined>(event).result?.createdAt);
       };
       request.onerror = event => {
         reject(targetOf(event).error);
@@ -160,12 +174,19 @@ export default class IndexedDBProjectsDataSource {
       if (!projectDb.dirLink) {
         return projectDb;
       }
-      const projectFs = await this._fileHandle.read(
+      const { dirLink, ...projectFs }: Project = await this._fileHandle.read(
         projectDb.dirLink,
         'data.json',
       );
-      projectFs.dirLink = projectDb.dirLink;
-      return projectFs;
+      // data.json may have been edited outside the app: list() reads the DB, so keep it in step.
+      // Best effort: data.json is the source of truth, a stale list is better than no project.
+      const { dirLink: _, ...stored } = projectDb;
+      if (JSON.stringify(stored) !== JSON.stringify(projectFs)) {
+        await this._save(id, projectFs).catch(error => {
+          console.error(`Could not refresh the stored project ${id}`, error);
+        });
+      }
+      return { ...projectFs, dirLink: projectDb.dirLink };
     } catch (error) {
       throw new Error(`Could not found project with id=${id}`, {
         cause: error,
@@ -198,11 +219,13 @@ export default class IndexedDBProjectsDataSource {
     return { ...entry.data, dirLink: entry.fileSystemDirectoryHandle };
   }
 
+  // The folder first: if the write fails (permission revoked), the DB still matches data.json.
   async save({ dirLink, ...data }: Project) {
-    const projectDb = await this._save(data.key, data);
-    if (projectDb.dirLink) {
-      await this._fileHandle.write(projectDb.dirLink, 'data.json', data);
+    const storedDirLink = await this.dirLink(data.key);
+    if (storedDirLink) {
+      await this._fileHandle.write(storedDirLink, 'data.json', data);
     }
+    await this._save(data.key, data);
     return this.list();
   }
 

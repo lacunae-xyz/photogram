@@ -58,3 +58,25 @@ test('export data.json, then import it back with the edits', async ({ page, brow
   await expect(tiles.first().locator('.action')).toHaveText('Plan exporté');
   expect(pageErrors).toEqual([]);
 });
+
+test('re-importing an exported data.json attaches images added since (B27)', async ({ page }, testInfo) => {
+  const withoutImage = testInfo.outputPath('first', path.basename(importFolder));
+  fs.cpSync(importFolder, withoutImage, { recursive: true });
+  fs.rmSync(path.join(withoutImage, '3.jpg'));
+  const card = await importProject(page, withoutImage);
+  await card.click();
+  const tiles = page.locator('.tiles-container .ele');
+  await expect(tiles.nth(2).locator('.img')).toHaveAttribute('src', /empty\.\w+\.svg$/);
+
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export data.json' }).click();
+  const folder = testInfo.outputPath('second', path.basename(importFolder));
+  fs.cpSync(importFolder, folder, { recursive: true });
+  fs.copyFileSync(await (await download).path(), path.join(folder, 'data.json'));
+
+  // B28: same key, unlinked, so the import replaces the project instead of adding one.
+  const reimported = await importProject(page, folder);
+  await expect(page.locator('.projects-card')).toHaveCount(1);
+  await reimported.click();
+  await expect(tiles.nth(2).locator('.img')).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
+});

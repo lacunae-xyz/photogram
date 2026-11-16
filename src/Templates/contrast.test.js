@@ -34,8 +34,11 @@ describe('getContrastYIQ', () => {
     expect(getContrastYIQ('#000000')).toEqual('light');
   });
 
-  // B12: 3-digit hex parses as NaN, so white gets light text. The fix expects 'dark'.
-  test('3-digit white gives light text (B12)', () => {
-    expect(getContrastYIQ('#fff')).toEqual('light');
+  test('3-digit white gives dark text (B12)', () => {
+    expect(getContrastYIQ('#fff')).toEqual('dark');
+  });
+
+  test('3-digit black gives light text (B12)', () => {
+    expect(getContrastYIQ('#000')).toEqual('light');
   });
 });

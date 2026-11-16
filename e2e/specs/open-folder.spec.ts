@@ -1,5 +1,5 @@
 import { test, expect } from '../support/test';
-import { openFolder, openedName, readDataJson, stubDirectoryPicker } from '../support/open-folder';
+import { addToOpenedFolder, openFolder, openedName, readDataJson, stubDirectoryPicker } from '../support/open-folder';
 import { expectCover, importRows, waitForServiceWorker } from '../support/projects';
 
 test.describe('Chromium', () => {
@@ -61,6 +61,21 @@ test.describe('Chromium', () => {
     await expect(tiles.first().locator('.action')).toHaveText('Écrit dans le dossier');
 
     await expect.poll(async () => (await readDataJson(page)).data[0].action).toBe('Écrit dans le dossier');
+  });
+
+  test('reopening attaches images added to the folder since (B27)', async ({ page }) => {
+    const card = await openFolder(page, { without: ['3.jpg'] });
+    await card.click();
+    const image = page.locator('.tiles-container .ele').nth(2).locator('.img');
+    await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
+
+    await addToOpenedFolder(page, '3.jpg');
+    await page.goto('/projects');
+    await page.locator('#open-project-label').click();
+    await expect(page.locator('.projects-card', { hasText: openedName })).toHaveCount(1);
+    await page.locator('.projects-card', { hasText: openedName }).click();
+    await expect(image).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
+    await expect.poll(async () => (await readDataJson(page)).data[2].url).toMatch(/\/images\/3\.jpg\/$/);
   });
 
   test('permission is asked again after reload when it is back to prompt', async ({ page }) => {

@@ -41,6 +41,13 @@ test('unknown route renders an empty app (B16)', async ({ page, pageErrors }) =>
   expect(pageErrors).toEqual([]);
 });
 
+// B16: fixed in phase 6, where photogram-app has a catch-all route. Remove test.fail with the fix.
+test('unknown route shows a not found page (B16)', async ({ page }) => {
+  test.fail(true, 'B16');
+  await page.goto('/does-not-exist');
+  await expect(page.getByRole('heading', { name: /not found|404/i })).toBeVisible({ timeout: 2_000 });
+});
+
 // Fixor iframes photogram.app/fixor until phase 7. Only meaningful against Netlify (BASE_URL), `serve` sends no such headers.
 test('/fixor can be framed by fixor.photogram.app', async ({ request }) => {
   const response = await request.get('/fixor');

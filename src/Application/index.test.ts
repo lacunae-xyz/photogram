@@ -188,6 +188,77 @@ describe('Application', () => {
       );
     });
 
+    test('data.json: images added since are attached to their rows (B27)', async () => {
+      const application = Application.createNull();
+      await application.add([
+        createCsv(),
+        createJson({ content: JSON.stringify(exportedWithRows()) }),
+        createJpg({ name: '1.jpg' }),
+        createJpg({ name: '2.jpg' }),
+        createJpg({ name: '3.jpg' }),
+      ]);
+      const imported = await application.get('key');
+      expect(imported.data.map(d => d.url)).toEqual([
+        '/project/key/images/1.jpg/',
+        '/project/key/images/2.jpg/',
+        null,
+      ]);
+    });
+
+    describe('data.json with the key of an existing project (B28)', () => {
+      test('linked: the import gets a new key, the linked project is untouched', async () => {
+        const linked = createProject({ data: [{ id: '1', action: 'linked' }] });
+        const dataSource = IndexedDBProjectsDataSource.createNull({
+          projects: [linked],
+        });
+        const images = Images.createNull();
+        const application = Application.createNull({ dataSource, images });
+
+        const projects = await application.add([
+          createCsv(),
+          createJson({ content: JSON.stringify(exportedWithRows()) }),
+          createJpg({ name: '1.jpg' }),
+          createJpg({ name: '2.jpg' }),
+        ]);
+
+        const newKey = Uuidv4.createNull().generate();
+        expect(projects.map(p => p.key)).toEqual(['key', newKey]);
+        await expect(application.get('key')).resolves.toEqual(linked);
+        const imported = await application.get(newKey);
+        expect(imported.dirLink).toBeUndefined();
+        expect(imported.mainPicture).toEqual(
+          `/project/${newKey}/images/1.jpg/`,
+        );
+        expect(imported.data.map(d => d.url)).toEqual([
+          `/project/${newKey}/images/1.jpg/`,
+          `/project/${newKey}/images/2.jpg/`,
+          null,
+        ]);
+        await expect(images.has(newKey)).resolves.toEqual(true);
+      });
+
+      test('unlinked: the import replaces it in place', async () => {
+        const dataSource = IndexedDBProjectsDataSource.createNull({
+          projects: [
+            { ...createUnlinkedProject(), name: 'before' },
+            { ...createUnlinkedProject(), key: 'other' },
+          ],
+        });
+        const application = Application.createNull({ dataSource });
+        const exported = { ...exportedWithRows(), name: 'after' };
+
+        const projects = await application.add([
+          createCsv(),
+          createJson({ content: JSON.stringify(exported) }),
+        ]);
+
+        expect(projects.map(p => [p.key, p.name])).toEqual([
+          ['key', 'after'],
+          ['other', undefined],
+        ]);
+      });
+    });
+
     test('invalid data.json rejects', async () => {
       await expect(
         Application.createNull().add([
@@ -313,6 +384,20 @@ describe('Application', () => {
       ]);
     });
 
+    test('from data.json: images added since are attached to their rows (B27)', async () => {
+      const dirHandle = createDirHandle([
+        createJson({ content: JSON.stringify(exportedWithRows()) }),
+        createJpg({ name: '2.jpg' }),
+        createJpg({ name: '3.jpg' }),
+      ]);
+      const projects = await Application.createNull().open(dirHandle);
+      expect(projects[0].data.map(d => d.url)).toEqual([
+        '/project/key/images/1.jpg/',
+        '/project/key/images/2.jpg/',
+        null,
+      ]);
+    });
+
     test('subdirectories are ignored', async () => {
       const csv = createCsv({ content: '1;action' });
       const dirHandle = createDirHandle([csv], ['sub']);
@@ -385,6 +470,7 @@ describe('Application', () => {
         sequence: '1',
         action: 'edited',
         label: 'other',
+        url: project.data[0].url,
       });
       await application.updateTemplate(project.key, 'large');
       const edited = await application.get(project.key);
@@ -448,17 +534,13 @@ describe('Application', () => {
       await expect(Application.createNull().delete('id')).rejects.toThrow('');
     });
 
-    // B1: the project is removed, then clearing the missing cache rejects. The fix resolves with [].
-    test('project without image cache rejects after removing it (B1)', async () => {
+    test('project without image cache resolves with the updated list (B1)', async () => {
       const images = Images.createNull();
       const application = Application.createNull({ images: images });
       const project = await addProject(application, createCsv(), []);
       await expect(images.has(project.key)).resolves.toEqual(false);
 
-      await expect(application.delete(project.key)).rejects.toThrow(
-        `Cannot delete the cache: ${project.key}`,
-      );
-      await expect(application.list()).resolves.toEqual([]);
+      await expect(application.delete(project.key)).resolves.toEqual([]);
     });
   });
 
@@ -504,6 +586,58 @@ describe('Application', () => {
       const actual = await application.get(project.key);
       expect(actual.data).toEqual([changed]);
       expect(actual.colors).toEqual({ label: '#F44336' });
+    });
+
+    test('with every palette colour used, the least used one, lowest index on ties (B13)', async () => {
+      const labels = [...Array(17).keys()].map(i => `label${i}`);
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({
+          content: [
+            ...labels.map((label, i) => `${i + 1};action;${label}`),
+            '18;action',
+          ].join('\n'),
+        }),
+      );
+      await application.updateColor(project.key, { label16: '#9C27B0' });
+
+      await application.update(project.key, { id: '18', label: 'new' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors['new']).toEqual('#F44336');
+    });
+
+    test('a hand-set colour outside the palette leaves its palette colour free (B13)', async () => {
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({ content: '1;action;A\n2;action' }),
+      );
+      await application.updateColor(project.key, { A: '#123456' });
+
+      await application.update(project.key, { id: '2', label: 'B' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors).toEqual({ A: '#123456', B: '#F44336' });
+    });
+
+    test('a hand-set palette colour counts as used, whatever its case (B13)', async () => {
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({ content: '1;action;A\n2;action' }),
+      );
+      await application.updateColor(project.key, { A: '#e91e63' });
+      await application.update(project.key, { id: '2', label: 'B' } as Shot);
+      await application.update(project.key, { id: '2', label: 'C' } as Shot);
+
+      const actual = await application.get(project.key);
+      expect(actual.colors).toEqual({
+        A: '#e91e63',
+        B: '#F44336',
+        C: '#9C27B0',
+      });
     });
 
     test('do nothing if element not found', async () => {
@@ -656,21 +790,24 @@ describe('Application', () => {
         expect(actual.data[0].label).toEqual(undefined);
       });
 
-      // B13: deleteColor leaves an undefined key that JSON drops, so the next label reuses a colour.
-      test('new label after delete with a JSON round trip reuses a colour (B13)', async () => {
-        const project = Object.assign(createProject(), {
-          data: [
-            { id: '1', label: 'A' },
-            { id: '2', label: 'B' },
-            { id: '3', label: 'C' },
-            { id: '4' },
-          ],
-          colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
+      test('removes the key, so JSON and the stored project agree', async () => {
+        const application = Application.createNull({
+          dataSource: IndexedDBProjectsDataSource.createNull({
+            projects: [abcProject(createUnlinkedProject())],
+          }),
         });
+
+        await application.deleteColor('key', 'A');
+
+        const actual = await application.get('key');
+        expect(Object.keys(actual.colors)).toEqual(['B', 'C']);
+      });
+
+      test('new label after delete with a JSON round trip gets a free colour (B13)', async () => {
         // A linked project: data.json is the round trip.
         const application = Application.createNull({
           dataSource: IndexedDBProjectsDataSource.createNull({
-            projects: [project],
+            projects: [abcProject(createProject())],
           }),
         });
 
@@ -681,12 +818,30 @@ describe('Application', () => {
         expect(actual.colors).toEqual({
           B: '#E91E63',
           C: '#9C27B0',
-          D: '#9C27B0',
+          D: '#F44336',
         });
       });
 
-      test('new label after delete without a JSON round trip gets a new colour', async () => {
-        const project = Object.assign(createUnlinkedProject(), {
+      test('new label after delete without a JSON round trip gets a free colour (B13)', async () => {
+        const application = Application.createNull({
+          dataSource: IndexedDBProjectsDataSource.createNull({
+            projects: [abcProject(createUnlinkedProject())],
+          }),
+        });
+
+        await application.deleteColor('key', 'A');
+        await application.update('key', { id: '4', label: 'D' } as Shot);
+
+        const actual = await application.get('key');
+        expect(actual.colors).toEqual({
+          B: '#E91E63',
+          C: '#9C27B0',
+          D: '#F44336',
+        });
+      });
+
+      function abcProject(project: Project) {
+        return Object.assign(project, {
           data: [
             { id: '1', label: 'A' },
             { id: '2', label: 'B' },
@@ -695,23 +850,7 @@ describe('Application', () => {
           ],
           colors: { A: '#F44336', B: '#E91E63', C: '#9C27B0' },
         });
-        const application = Application.createNull({
-          dataSource: IndexedDBProjectsDataSource.createNull({
-            projects: [project],
-          }),
-        });
-
-        await application.deleteColor('key', 'A');
-        await application.update('key', { id: '4', label: 'D' } as Shot);
-
-        const actual = await application.get('key');
-        expect(actual.colors).toEqual({
-          A: undefined,
-          B: '#E91E63',
-          C: '#9C27B0',
-          D: '#3F51B5',
-        });
-      });
+      }
 
       test('do nothing if element not found', async () => {
         const application = Application.createNull();
@@ -904,4 +1043,17 @@ function createProject({
     colors: {},
     dirLink: dirLink,
   } as Project;
+}
+
+/** An exported project: row 1 has its image, row 2 had none yet, row 3's image was removed in the app. */
+function exportedWithRows() {
+  return {
+    ...createUnlinkedProject(),
+    mainPicture: '/project/key/images/1.jpg/',
+    data: [
+      { id: '1', sequence: '1', url: '/project/key/images/1.jpg/' },
+      { id: '2', sequence: '2' },
+      { id: '3', sequence: '3', url: null },
+    ],
+  } as unknown as Project;
 }

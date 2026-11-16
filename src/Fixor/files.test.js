@@ -47,10 +47,11 @@ describe('parseData', () => {
     await expect(parseData([createFile('a.txt', '')])).resolves.toEqual([]);
   });
 
-  test('upper case extension is ignored', async () => {
-    await expect(
-      parseData([createFile('A.EDL', event('001', '100_010'))]),
-    ).resolves.toEqual([]);
+  test('upper case extension (B26)', async () => {
+    const result = await parseData([
+      createFile('A.EDL', event('001', '100_010')),
+    ]);
+    expect(result.map(line => line.id)).toEqual(['100_010']);
   });
 });
 

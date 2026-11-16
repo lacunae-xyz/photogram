@@ -70,9 +70,8 @@ const printMarginRem = {
 
 for (const template of ['small', 'large'] as const) {
   for (const spaceAround of [true, false]) {
+    // B25: the large print rules targeted .tpl-large-ele, so large tiles kept their .8rem screen margin.
     test(`${template} print margin, space around ${spaceAround ? 'on' : 'off'}`, async ({ page }) => {
-      // B25: the large print rules target .tpl-large-ele, so tiles keep their .8rem screen margin.
-      test.fail(template === 'large', 'B25');
       await prepareDemo(page);
       await setTemplate(page, template);
       await setPrintSpaceAround(page, spaceAround);
@@ -87,24 +86,32 @@ for (const template of ['small', 'large'] as const) {
   }
 }
 
-// Configuration shows printSpaceAround unset as checked while Tiles treats it as off, and the checkbox
-// calls preventDefault in onChange, so what it shows lags the saved value (B24).
-test('print space around checkbox is out of sync with the tiles', async ({ page }) => {
+// B2: the previews were passed the string "{sequence, …}" instead of a shot, so they rendered empty.
+test('Configuration previews show a sample tile (B2)', async ({ page }) => {
+  await prepareDemo(page);
+  const previews = page.locator('.configuration .preview');
+  await expect(previews).toHaveCount(2);
+  for (const preview of await previews.all()) {
+    await expect(preview.locator('.sequence')).not.toBeEmpty();
+    await expect(preview.locator('.action')).not.toBeEmpty();
+  }
+  await settle(page);
+  await expect(page.locator('.configuration')).toHaveScreenshot('configuration.png');
+});
+
+// B24: Configuration showed printSpaceAround unset as checked while Tiles treated it as off, and the
+// checkbox called preventDefault in onChange, so what it showed lagged the saved value.
+test('print space around checkbox matches the tiles (B24)', async ({ page }) => {
   await prepareDemo(page);
   const checkbox = page.locator('#print-space-around');
   const tiles = page.locator('.tiles-container');
-  const states = [];
-  for (let clicks = 0; clicks < 4; clicks++) {
-    await page.waitForTimeout(300);
-    states.push([await checkbox.isChecked(), (await tiles.getAttribute('class'))?.replace('tiles-container ', '')]);
+  await expect(checkbox).not.toBeChecked();
+  await expect(tiles).toHaveClass(/print-no-space/);
+  for (const on of [true, false, true]) {
     await checkbox.click();
+    await expect(checkbox).toBeChecked({ checked: on });
+    await expect(tiles).toHaveClass(on ? /print-space-around/ : /print-no-space/);
   }
-  expect(states).toEqual([
-    [true, 'print-no-space'],
-    [true, 'print-no-space'],
-    [false, 'print-no-space'],
-    [false, 'print-space-around'],
-  ]);
 });
 
 for (const template of ['small', 'large'] as const) {

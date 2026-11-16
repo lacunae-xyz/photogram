@@ -35,9 +35,7 @@ test.describe('project without image cache (B1)', () => {
     await page.goto('/projects');
   });
 
-  // B1: Images.clear rejects when there is no cache, so the list is not refreshed. Remove test.fail with the fix.
   test('card disappears', async ({ page }) => {
-    test.fail();
     const card = page.locator('.projects-card', { hasText: legacyProject.name });
     await card.locator('.btn-delete').click();
     await expect(card).toHaveCount(0, { timeout: 2_000 });
@@ -46,7 +44,6 @@ test.describe('project without image cache (B1)', () => {
   test('project is gone after reload', async ({ page }) => {
     const card = page.locator('.projects-card', { hasText: legacyProject.name });
     await card.locator('.btn-delete').click();
-    // The card stays (B1), so wait for the IndexedDB delete itself.
     await expect.poll(() => storedProjectKeys(page)).toEqual([]);
     await page.reload();
     await expect(page.locator('#grid')).toBeAttached();

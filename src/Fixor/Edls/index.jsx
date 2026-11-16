@@ -8,7 +8,7 @@ import './index.css';
 function Edls(props) {
   const [selected, setSelected] = useState(props.edls[0].name);
   const [compareValue, setCompareValue] = useState('');
-  const [imagePerSeconde, setImagePerSeconde] = useState(NaN);
+  const [imagePerSeconde, setImagePerSeconde] = useState(undefined);
   const [source, setSource] = useState('fileName');
 
   useEffect(() => {
@@ -26,27 +26,24 @@ function Edls(props) {
     let value = event.target.value;
     setSource(value);
   };
-  const onCopy = event => {
+  const onCopy = async event => {
     event.preventDefault();
-    selectElementContents(document.getElementById('fixor-table'), () =>
-      document.execCommand('copy'),
-    );
-  };
-
-  function selectElementContents(el, callback) {
-    var range = document.createRange();
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    try {
-      range.selectNodeContents(el);
-      sel.addRange(range);
-    } catch (e) {
-      range.selectNode(el);
-      sel.addRange(range);
+    const table = document.getElementById('fixor-table');
+    if (!table) {
+      return;
     }
-    callback();
-    sel.removeAllRanges();
-  }
+    // Denied permission, or no ClipboardItem: nothing is copied, the page keeps working.
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([table.outerHTML], { type: 'text/html' }),
+          'text/plain': new Blob([table.innerText], { type: 'text/plain' }),
+        }),
+      ]);
+    } catch (error) {
+      console.error('Could not copy the table', error);
+    }
+  };
 
   let edl = props.edls.find(edl => edl.name === selected);
   let compareTo = props.edls.find(edl => edl.name === compareValue);
@@ -128,14 +125,13 @@ function Edls(props) {
               </select>
             </span>
             <span className="fixor-tool-action">
-              <label htmlFor="compare-button">FPS: </label>
+              <label htmlFor="fps-input">FPS: </label>
               <input
                 type="number"
                 id="fps-input"
                 placeholder="FPS"
                 list="imagePerSeconde"
                 onChange={onImagePerSecond}
-                defaultValue={imagePerSeconde.toString()}
               />
               <datalist id="imagePerSeconde">
                 <option value="23.98" />

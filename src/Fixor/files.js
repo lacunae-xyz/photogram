@@ -94,7 +94,7 @@ export function parseName(files, defaultName) {
 
 export function parseData(files) {
   return Promise.all(
-    Array.from(files).filter(file => file.name.endsWith('.edl')),
+    Array.from(files).filter(file => /\.edl$/i.test(file.name)),
   )
     .then(edls => {
       return Promise.all(edls.map(edl => readUploadedFileAsText(edl)));

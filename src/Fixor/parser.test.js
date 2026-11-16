@@ -1,4 +1,4 @@
-import parser, { Line, dateDuration } from './parser';
+import parser, { Line, dateDuration, formatDuration } from './parser';
 
 it('parse empty string should return empty array', () => {
   let result = parser('');
@@ -205,20 +205,21 @@ it('parse CRLF line endings', () => {
   expect(result).toStrictEqual(parser([oneEvent, otherEvent].join('\n')));
 });
 
-it('skip an event without FROM CLIP NAME', () => {
+it('keep an event without FROM CLIP NAME, with an empty clip name (B26)', () => {
   let result = parser(
     oneEvent.replace('* FROM CLIP NAME:  210/01-03* CAMA\n', ''),
   );
-  expect(result).toEqual([]);
+  expect(result).toStrictEqual([
+    Object.assign(parser(oneEvent)[0], { vfxName: '' }),
+  ]);
 });
 
-// Drop-frame timecodes (HH:MM:SS;FF) are not matched: only the LOC timecode is found and parsing throws.
-it('drop-frame timecodes throw', () => {
+it('parse drop-frame timecodes (B23)', () => {
   let dropFrame = oneEvent.replace(
     '16:51:25:10 16:51:28:00 01:01:05:19 01:01:08:09',
     '16:51:25;10 16:51:28;00 01:01:05;19 01:01:08;09',
   );
-  expect(() => parser(dropFrame)).toThrow(TypeError);
+  expect(parser(dropFrame)).toStrictEqual(parser(oneEvent));
 });
 
 describe('duration', () => {
@@ -234,10 +235,15 @@ describe('duration', () => {
     expect(line.recordDuration(fps)).toEqual(expected);
   });
 
-  // B6: no FPS gives NaN, displayed as "NaN". The fix shows no duration.
-  it('without FPS is NaN (B6)', () => {
-    expect(line.sourceDuration(NaN)).toEqual(NaN);
-    expect(line.sourceDuration(undefined)).toEqual(NaN);
+  it.each([NaN, undefined, 0, -25])('without FPS (%s) is none (B6)', fps => {
+    expect(line.sourceDuration(fps)).toEqual(undefined);
+    expect(line.recordDuration(fps)).toEqual(undefined);
+  });
+
+  it('displays as a dash without FPS (B6)', () => {
+    expect(formatDuration(undefined)).toEqual('–');
+    expect(formatDuration(62)).toEqual('62');
+    expect(formatDuration(61.94)).toEqual('61.94');
   });
 
   it('across an hour', () => {

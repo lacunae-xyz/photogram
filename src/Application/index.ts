@@ -4,6 +4,7 @@ import Images from '../FilesParser/Images';
 import Uuidv4 from '../FilesParser/uuidv4';
 import IndexedDBProjectsDataSource from './IndexedDBProjectsDataSource';
 import LocalStorageMigration from './LocalStorageMigration';
+import { nextColor } from './colors';
 import type {
   ColorDistribution,
   Colors,
@@ -14,24 +15,7 @@ import type {
 } from './types';
 import type { ImageUrl } from '../FilesParser/Images';
 
-export const colors = [
-  '#F44336',
-  '#E91E63',
-  '#9C27B0',
-  '#3F51B5',
-  '#2196F3',
-  '#03A9F4',
-  '#00BCD4',
-  '#009688',
-  '#4CAF50',
-  '#8BC34A',
-  '#CDDC39',
-  '#FFEB3B',
-  '#FFC107',
-  '#FF9800',
-  '#FF5722',
-  '#795548',
-];
+export { palette as colors } from './colors';
 
 // Every page builds its own Application: they share one migration so it runs once.
 let migration: Promise<void> | undefined;
@@ -148,8 +132,7 @@ class Application {
       }
     });
     if (data.label && project.colors[data.label] === undefined) {
-      project.colors[data.label] =
-        colors[Object.keys(project.colors).length % colors.length];
+      project.colors[data.label] = nextColor(Object.values(project.colors));
     }
     await this._dataSource.save(project);
   }
@@ -170,7 +153,7 @@ class Application {
 
   async deleteColor(id: string, key: string) {
     const project = await this.get(id);
-    project.colors[key] = undefined;
+    delete project.colors[key];
     project.data = project.data.map(item => {
       if (key === item.label) {
         return Object.assign(item, {
@@ -225,7 +208,12 @@ class Application {
     await this.ready();
     const exported = await this._readDataJson(fileArray);
     if (exported) {
-      return await this._dataSource.add(exported);
+      const project = (await this._isLinked(exported.key))
+        ? this._withKey(exported, this._uuidv4.generate())
+        : exported;
+      return await this._dataSource.add(
+        await this._withImages(project, fileArray),
+      );
     }
     const projects = await this._dataSource.list();
     const name = this._name(fileArray, `Project (${projects.length})`);
@@ -258,8 +246,9 @@ class Application {
     const exported = await this._readDataJson(fileArray);
 
     if (exported) {
-      exported.dirLink = dirHandle;
-      return exported;
+      const project = await this._withImages(exported, fileArray);
+      project.dirLink = dirHandle;
+      return project;
     } else {
       const identifier = this._uuidv4.generate();
 
@@ -282,7 +271,6 @@ class Application {
     }
   }
 
-  /** The project in data.json, with its images cached under its own key. */
   async _readDataJson(fileArray: File[]): Promise<Project | undefined> {
     const jsonData = fileArray.find(file => file.name === 'data.json');
     if (!jsonData) {
@@ -292,14 +280,46 @@ class Application {
     const { dirLink, ...project }: Project = JSON.parse(
       (await readAsText(jsonData)).result,
     );
-    await this._images.execute(project.key, fileArray);
     return project;
   }
 
+  /** Caches the images under the project's key and attaches them to rows that never had one. */
+  async _withImages(project: Project, fileArray: File[]): Promise<Project> {
+    const images = await this._images.execute(project.key, fileArray);
+    return {
+      ...project,
+      data: this._mergeDateWithImages(project.data, images),
+    };
+  }
+
+  async _isLinked(key: string) {
+    return (
+      (await this._dataSource.has(key)) &&
+      (await this._dataSource.dirLink(key)) !== undefined
+    );
+  }
+
+  /** Moves image URLs to the new key, where _withImages caches the images. */
+  _withKey(project: Project, key: string): Project {
+    const from = `/project/${project.key}/images/`;
+    const to = `/project/${key}/images/`;
+    const move = (url?: string) =>
+      url?.startsWith(from) ? to + url.slice(from.length) : url;
+    return {
+      ...project,
+      key,
+      mainPicture: move(project.mainPicture),
+      data: project.data.map(shot =>
+        shot.url ? { ...shot, url: move(shot.url) } : shot,
+      ),
+    };
+  }
+
+  // A row whose image was removed in the app has url null: leave it without one.
   _mergeDateWithImages(data: Shot[], images: ImageUrl[]) {
     return data.map(d => {
       const results = images.filter(i => i.name.startsWith(`${d.id}.`));
-      if (results.length === 0) {
+      if (results.length === 0 || d.url !== undefined) {
         return d;
       } else {
         return Object.assign(d, {
@@ -313,10 +333,11 @@ class Application {
     const unique = [
       ...new Set(data.map(d => d.label).filter(p => p !== null && p !== '')),
     ] as string[];
-    return Object.assign(
-      {},
-      ...unique.map((p, i) => ({ [p]: colors[i % colors.length] })),
-    );
+    const colors: Colors = {};
+    for (const label of unique) {
+      colors[label] = nextColor(Object.values(colors));
+    }
+    return colors;
   }
 
   _name(files: File[], defaultName: string) {

@@ -1,6 +1,6 @@
 import { test, expect } from '../support/test';
 import { Page } from '@playwright/test';
-import { importProject } from '../support/projects';
+import { importProject, storedProject } from '../support/projects';
 
 async function openImported(page: Page) {
   const card = await importProject(page);
@@ -66,4 +66,32 @@ test('deleted image shows empty.svg and survives reload', async ({ page }) => {
   await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
   await page.reload();
   await expect(image).toHaveAttribute('src', /empty\.\w+\.svg$/);
+});
+
+test('background colour checkbox shows the saved setting after reload (B3)', async ({ page }) => {
+  const tiles = await openImported(page);
+  const checkbox = page.locator('#color-distribution');
+  await expect(checkbox).not.toBeChecked();
+  // Row 1 has the label salon: in card mode the whole tile takes its colour.
+  await checkbox.check();
+  await expect(tiles.first()).toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  const key = page.url().split('/').pop()!;
+  await expect.poll(async () => (await storedProject(page, key))?.colorDistribution).toBe('card');
+
+  await page.reload();
+  await expect(tiles.first()).toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  await expect(checkbox).toBeChecked();
+
+  await checkbox.uncheck();
+  await expect(tiles.first()).not.toHaveCSS('background-color', 'rgb(244, 67, 54)');
+  await expect(checkbox).not.toBeChecked();
+});
+
+// B9: Form listens for keyCode 27, which still works. Phase 6 moves to a native <dialog>; this guards Escape.
+test('Escape closes the form (B9)', async ({ page }) => {
+  const tiles = await openImported(page);
+  await tiles.first().click();
+  await expect(page.locator('#form')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#form')).toHaveCount(0);
 });

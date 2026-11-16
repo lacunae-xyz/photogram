@@ -4,6 +4,16 @@ import Colors from './Colors';
 import LargeImage from '../Templates/Large';
 import SmallImage from '../Templates/Small';
 import ColorWrapper from './ColorWrapper';
+import { palette } from '../Application/colors';
+
+const previewShot = {
+  sequence: '1',
+  action: 'Théo est avec ses invités',
+  periode: 'soir',
+  fx: 'fx',
+  url: '/demo/1.jpg',
+  color: palette[5],
+};
 
 class Configuration extends Component {
   constructor(props) {
@@ -24,7 +34,6 @@ class Configuration extends Component {
   }
 
   onPrintSpaceAroundChange = event => {
-    event.preventDefault();
     this.props.onPrintSpaceAroundChange(event.target.checked);
   };
 
@@ -32,6 +41,13 @@ class Configuration extends Component {
     event.preventDefault();
     this.props.onFontFamilyChange(event.target.value);
   };
+
+  previewShot() {
+    return {
+      ...previewShot,
+      colorDistribution: this.props.colorDistribution,
+    };
+  }
 
   render() {
     return (
@@ -49,11 +65,7 @@ class Configuration extends Component {
                 type="checkbox"
                 list="font-list"
                 onChange={this.onPrintSpaceAroundChange}
-                checked={
-                  this.props.printSpaceAround === undefined
-                    ? true
-                    : this.props.printSpaceAround
-                }
+                checked={Boolean(this.props.printSpaceAround)}
               />
               <label htmlFor="print-space-around">Space around cards</label>
             </form>
@@ -122,10 +134,7 @@ class Configuration extends Component {
             <label htmlFor="layout_small" className="preview">
               <i>Small</i>
               <br />
-              <SmallImage
-                file="{sequence, action, periode, fx, url, color, colorDistribution, onTile}"
-                onTile={() => {}}
-              />
+              <SmallImage file={this.previewShot()} onTile={() => {}} />
             </label>
             <input
               type="radio"
@@ -138,10 +147,7 @@ class Configuration extends Component {
             <label htmlFor="layout_large" className="preview">
               <i>Large</i>
               <br />
-              <LargeImage
-                file="{sequence, action, periode, fx, url, color, colorDistribution}"
-                onTile={() => {}}
-              />
+              <LargeImage file={this.previewShot()} onTile={() => {}} />
             </label>
           </form>
         </section>
@@ -152,6 +158,7 @@ class Configuration extends Component {
             <input
               id="color-distribution"
               type="checkBox"
+              checked={this.props.colorDistribution === 'card'}
               onChange={event =>
                 this.props.onColorDistributionChange(
                   event.target.checked ? 'card' : 'indicator',
