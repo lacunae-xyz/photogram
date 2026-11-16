@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import track from '../track';
 import './index.css';
 import { useHistory } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import useDocumentMeta from '../useDocumentMeta';
 import Header from '../Header';
 import ImportProject from '../ImportProject';
 import QuotaProgress from '../QuotaProgress';
@@ -11,6 +11,11 @@ import Card from './Card';
 import OpenProject from '../OpenProject';
 
 function ListProject() {
+  useDocumentMeta({
+    title: 'Photogram · Projects',
+    description:
+      'Import or open a project folder, and find the projects stored in this browser.',
+  });
   const application = useMemo(() => Application.create(), []);
   const history = useHistory();
 
@@ -72,13 +77,6 @@ function ListProject() {
 
   return (
     <div className="projects-container">
-      <Helmet>
-        <title>Photogram · Projects</title>
-        <meta
-          name="description"
-          content="Import or open a project folder, and find the projects stored in this browser."
-        />
-      </Helmet>
       <Header nav="projects" />
       <div className="action-project">
         <ImportProject onProject={files => onImportProject(files)} />
