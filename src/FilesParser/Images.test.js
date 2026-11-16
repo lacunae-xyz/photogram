@@ -22,6 +22,24 @@ describe("Images", () => {
             }]);
         });
 
+        test("keeps upper case extensions in the url", async () => {
+            await expect(Images.createNull().execute("id", [createFile("1.JPG", "", "image/jpeg")])).resolves.toEqual([{
+                name: "1.JPG",
+                url: "/project/id/images/1.JPG/"
+            }]);
+        });
+
+        test("filters on MIME type, not extension", async () => {
+            await expect(Images.createNull().execute("id", [
+                createFile("1.jpg", "", ""),
+                createFile("2.jpg", "", "application/octet-stream"),
+                createFile("3.bin", "", "image/png"),
+            ])).resolves.toEqual([{
+                name: "3.bin",
+                url: "/project/id/images/3.bin/"
+            }]);
+        });
+
         test("ignores non image type", async () => {
             await expect(Images.createNull().execute("id", [createFile("file.txt", "", "plain/text")])).resolves.toEqual([]);
         });
@@ -40,6 +58,7 @@ describe("Images", () => {
             await expect(images.clear("id")).resolves.toEqual(null);
         });
 
+        // B1: clear rejects when there is no cache, the fix resolves instead.
         test("fails if not present", async () => {
             await expect(Images.createNull().clear("id")).rejects.toThrow("Cannot delete the cache: id");
         });

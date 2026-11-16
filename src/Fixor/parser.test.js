@@ -1,4 +1,4 @@
-import parser, { Line } from "./parser"
+import parser, { Line, dateDuration } from "./parser"
 
 it('parse empty string should return empty array', () => {
   let result = parser("");
@@ -26,7 +26,7 @@ it('parse one line', () => {
   expect(result[0].recordDuration(25)).toEqual(65);
 })
 
-it('parse one line', () => {
+it('parse one line with trailing space after source file', () => {
   let result = parser(`010  A062C006 V     C        15:57:46:02 15:57:49:09 01:00:04:01 01:00:07:08
 * FROM CLIP NAME:  201/03-01 CAMA
 * LOC: 1:00:05:10  CYAN    201_010_E02 // MULTIPASSE
@@ -47,7 +47,7 @@ it('parse one line', () => {
 
 
 
-it('parse one line', () => {
+it('parse one line without a space after the comment star', () => {
   let result = parser(`010  A062C006 V     C        15:57:46:02 15:57:49:09 01:00:04:01 01:00:07:08
 *FROM CLIP NAME:  201/03-01 CAMA
 *LOC: 1:00:05:10  CYAN    201_010_E02 // MULTIPASSE
@@ -102,7 +102,7 @@ it('parse two lines', () => {
 })
 
 
-it('parse two lines', () => {
+it('parse only events with a LOC in a padded EDL', () => {
   let result = parser(`000009  A012C003_190627JC                V     C        09:14:02:08 09:14:03:04 01:00:14:05 01:00:15:01
  * FROM CLIP NAME:  02/01-03
  * SOURCE FILE: A012C003_190627JC
@@ -169,4 +169,59 @@ it('parse one line with to clip name', () => {
     { hours: 1, minutes: 4, secondes: 33, images: 16 },
     { hours: 1, minutes: 4, secondes: 33, images: 22 },
   )]);
+})
+
+const oneEvent = `088  A003C003 V     C        16:51:25:10 16:51:28:00 01:01:05:19 01:01:08:09
+* FROM CLIP NAME:  210/01-03* CAMA
+* LOC: 1:01:06:16  CYAN    208_050_E05 // SPLIT SCREEN
+* SOURCE FILE: A003C003_190318BQ`
+
+const otherEvent = `089  A003C004 V     C        16:52:25:10 16:52:28:00 01:01:08:09 01:01:10:23
+* FROM CLIP NAME:  210/01-04* CAMA
+* LOC: 1:01:09:16  CYAN    208_060 // CLEAN UP
+* SOURCE FILE: A003C004_190318BQ`
+
+it('parse CRLF line endings', () => {
+  let result = parser([oneEvent, otherEvent].join("\n").replace(/\n/g, "\r\n"))
+  expect(result.map(line => line.id)).toEqual(["208_050_E05", "208_060"]);
+  expect(result).toStrictEqual(parser([oneEvent, otherEvent].join("\n")));
+})
+
+it('skip an event without FROM CLIP NAME', () => {
+  let result = parser(oneEvent.replace("* FROM CLIP NAME:  210/01-03* CAMA\n", ""))
+  expect(result).toEqual([]);
+})
+
+// Drop-frame timecodes (HH:MM:SS;FF) are not matched: only the LOC timecode is found and parsing throws.
+it('drop-frame timecodes throw', () => {
+  let dropFrame = oneEvent.replace(
+    "16:51:25:10 16:51:28:00 01:01:05:19 01:01:08:09",
+    "16:51:25;10 16:51:28;00 01:01:05;19 01:01:08;09")
+  expect(() => parser(dropFrame)).toThrow(TypeError);
+})
+
+describe('duration', () => {
+  let line = parser(oneEvent)[0];
+
+  it.each([
+    [24, 62],
+    [25, 65],
+    [30, 80],
+    [23.98, 61.94],
+  ])('at %p fps is %p images', (fps, expected) => {
+    expect(line.sourceDuration(fps)).toEqual(expected);
+    expect(line.recordDuration(fps)).toEqual(expected);
+  })
+
+  // B6: no FPS gives NaN, displayed as "NaN". The fix shows no duration.
+  it('without FPS is NaN (B6)', () => {
+    expect(line.sourceDuration(NaN)).toEqual(NaN);
+    expect(line.sourceDuration(undefined)).toEqual(NaN);
+  })
+
+  it('across an hour', () => {
+    let din = { hours: 0, minutes: 59, secondes: 59, images: 24 };
+    let dout = { hours: 1, minutes: 0, secondes: 0, images: 1 };
+    expect(dateDuration(din, dout, 25)).toEqual(2);
+  })
 })
