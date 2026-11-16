@@ -52,8 +52,26 @@ export async function prepareDemo(page: Page) {
   await setLabelColor(page, 'soleil', '#FFEB3B');
 }
 
+/** Moves the mouse to a viewport corner with no tile or preview under it: both scale up on hover. */
+async function parkMouse(page: Page) {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error('no viewport');
+  const { width, height } = viewport;
+  for (const [x, y] of [[width - 1, 0], [width - 1, height - 1], [0, height - 1], [0, 0]]) {
+    const hoversNothing = await page.evaluate(
+      ([x, y]) => !document.elementFromPoint(x, y)?.closest('.ele, .preview'),
+      [x, y],
+    );
+    if (hoversNothing) {
+      await page.mouse.move(x, y);
+      return;
+    }
+  }
+  throw new Error('every viewport corner is over a tile');
+}
+
 export async function settle(page: Page) {
-  await page.mouse.move(0, 0);
+  await parkMouse(page);
   await waitForTitleSizing(page);
   await waitForImages(page);
 }
