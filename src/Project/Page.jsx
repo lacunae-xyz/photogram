@@ -64,7 +64,21 @@ class Page extends Component {
     window.print();
   }
 
+  async exportDataJson() {
+    const json = await this.application.exportDataJson(this.props.id);
+    const url = URL.createObjectURL(
+      new Blob([json], { type: 'application/json' }),
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url));
+  }
+
   render() {
+    const project = this.state.project;
+    const unlinked = project.key !== undefined && !project.dirLink;
     return (
       <div>
         <Form
@@ -109,6 +123,11 @@ class Page extends Component {
               title={this.state.project.name}
               onPrint={() => this.print()}
               onBack={() => this.back()}
+              onExport={
+                unlinked
+                  ? () => this.exportDataJson().catch(e => console.error(e))
+                  : undefined
+              }
             />
           </div>
           <div className="layout-left">

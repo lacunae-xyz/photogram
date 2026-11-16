@@ -213,10 +213,20 @@ class Application {
     await this._dataSource.save(project);
   }
 
+  /** data.json for an unlinked project: Import reads it back, edits included. */
+  async exportDataJson(id: string): Promise<string> {
+    const { dirLink, ...project } = await this.get(id);
+    return JSON.stringify(project);
+  }
+
   async add(files: ArrayLike<File> | Iterable<File>): Promise<Project[]> {
     // Copy before awaiting: callers reset the form, which empties a live FileList.
     const fileArray = Array.from(files);
     await this.ready();
+    const exported = await this._readDataJson(fileArray);
+    if (exported) {
+      return await this._dataSource.add(exported);
+    }
     const projects = await this._dataSource.list();
     const name = this._name(fileArray, `Project (${projects.length})`);
     const identifier = this._uuidv4.generate();
@@ -245,14 +255,11 @@ class Application {
         fileArray.push(await value.getFile());
       }
     }
-    const jsonData = fileArray.find(file => file.name === 'data.json');
+    const exported = await this._readDataJson(fileArray);
 
-    if (jsonData) {
-      const json = (await readAsText(jsonData)).result;
-      const project: Project = JSON.parse(json);
-      project.dirLink = dirHandle;
-      await this._images.execute(project.key, fileArray);
-      return project;
+    if (exported) {
+      exported.dirLink = dirHandle;
+      return exported;
     } else {
       const identifier = this._uuidv4.generate();
 
@@ -273,6 +280,17 @@ class Application {
       }
       return project;
     }
+  }
+
+  /** The project in data.json, with its images cached under its own key. */
+  async _readDataJson(fileArray: File[]): Promise<Project | undefined> {
+    const jsonData = fileArray.find(file => file.name === 'data.json');
+    if (!jsonData) {
+      return undefined;
+    }
+    const project: Project = JSON.parse((await readAsText(jsonData)).result);
+    await this._images.execute(project.key, fileArray);
+    return project;
   }
 
   _mergeDateWithImages(data: Shot[], images: ImageUrl[]) {

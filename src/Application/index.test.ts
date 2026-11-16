@@ -145,26 +145,27 @@ describe('Application', () => {
       expect(project.data[1].url).toEqual(undefined);
     });
 
-    test('ignores data.json', async () => {
+    test('reads data.json, images cached under its key', async () => {
+      const images = Images.createNull();
+      const exported = createUnlinkedProject();
       const csv = createCsv({ content: '1;action' });
-      const json = createJson({
-        content: JSON.stringify({
-          key: 'other',
-          name: 'from json',
-          data: [],
-          colors: {},
-        }),
-      });
-      const projects = await Application.createNull().add([csv, json]);
-      expect(projects).toEqual([
-        {
-          key: Uuidv4.createNull().generate(),
-          name: 'Project (0)',
-          data: await new Csv().execute([csv]),
-          colors: {},
-          template: 'small',
-        },
+      const json = createJson({ content: JSON.stringify(exported) });
+      const projects = await Application.createNull({ images }).add([
+        csv,
+        json,
+        createJpg({ name: '1.jpg' }),
       ]);
+      expect(projects).toEqual([exported]);
+      await expect(images.has(exported.key)).resolves.toEqual(true);
+    });
+
+    test('invalid data.json rejects', async () => {
+      await expect(
+        Application.createNull().add([
+          createCsv(),
+          createJson({ content: '{ not json' }),
+        ]),
+      ).rejects.toThrow(SyntaxError);
     });
 
     test('reads the files before waiting: the form resets its FileList', async () => {
@@ -329,6 +330,51 @@ describe('Application', () => {
         }),
       });
       await expect(source.open(createDirHandle([csv]))).rejects.toThrow();
+    });
+  });
+
+  describe('exportDataJson', () => {
+    test('the project without its folder link', async () => {
+      const application = Application.createNull({
+        dataSource: IndexedDBProjectsDataSource.createNull({
+          projects: [createProject()],
+        }),
+      });
+      const json = await application.exportDataJson('key');
+      expect(JSON.parse(json)).toEqual(createUnlinkedProject());
+    });
+
+    test('import after export keeps the edits', async () => {
+      const application = Application.createNull();
+      const project = await addProject(
+        application,
+        createCsv({ content: '1;action;label' }),
+        [createJpg({ name: '1.jpg' })],
+      );
+      await application.update(project.key, {
+        id: '1',
+        sequence: '1',
+        action: 'edited',
+        label: 'other',
+      });
+      await application.updateTemplate(project.key, 'large');
+      const edited = await application.get(project.key);
+      const json = await application.exportDataJson(project.key);
+
+      const other = Application.createNull();
+      await other.add([
+        createCsv({ content: '1;action;label' }),
+        createJson({ content: json }),
+        createJpg({ name: '1.jpg' }),
+      ]);
+
+      await expect(other.get(project.key)).resolves.toEqual(edited);
+    });
+
+    test('fails is project not found', async () => {
+      await expect(
+        Application.createNull().exportDataJson('id'),
+      ).rejects.toThrow('Could not found project with id=id');
     });
   });
 
