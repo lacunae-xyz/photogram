@@ -40,6 +40,8 @@ export default function PrivacyPolicy() {
           deleting, leaving and printing a project, with the number of tiles
           printed. With each, it records the referring site, your browser,
           operating system, device type, screen size, language and country.
+          Aiven stores these records in a database for us. See{' '}
+          <a href="https://aiven.io/privacy">Aiven&apos;s privacy policy</a>.
         </p>
         <p>
           Netlify hosts the site and our Umami server. Its servers log requests,
@@ -51,7 +53,7 @@ export default function PrivacyPolicy() {
         </p>
         <p>
           Photogram has no accounts, sends no emails, shows no ads and has no
-          Google sign-in. Netlify is the only third party.
+          Google sign-in. Netlify and Aiven are the only third parties.
         </p>
         <p>
           Questions: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
