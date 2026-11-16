@@ -13,7 +13,6 @@ export class PgCard extends LitElement {
     :host {
       position: relative;
       display: flex;
-      align-content: flex-end;
       flex-direction: column;
       padding: 0.8rem;
       padding-bottom: 0;
