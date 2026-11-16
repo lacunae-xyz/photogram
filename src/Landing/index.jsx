@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import track from '../track';
+import { Helmet } from 'react-helmet';
 import Header from '../Header';
 import Creators from './Creators';
 import EmptyProject from './EmptyProject';
@@ -72,6 +73,13 @@ export default function Landing() {
 
   return (
     <div className="landing-container">
+      <Helmet>
+        <title>Photogram · A tool for editor assistants</title>
+        <meta
+          name="description"
+          content="Create a board of photograms ready to print and cut, from a CSV file and your stills. Your projects stay on your device."
+        />
+      </Helmet>
       <Header />
       {projects.length <= 0 ? null : (
         <div>

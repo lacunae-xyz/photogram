@@ -30,7 +30,7 @@ class Creators extends Component {
           img="/nicolas.jpeg"
           name="Nicolas Mouchel"
           job="Developer"
-          link="http://sagix.fr/nicolasmouchel"
+          link="https://sagix.fr/nicolasmouchel/"
         />
         <Creator
           className="creator-two"

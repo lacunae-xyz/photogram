@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import track from '../track';
 import './index.css';
 import { useHistory } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import Header from '../Header';
 import ImportProject from '../ImportProject';
 import QuotaProgress from '../QuotaProgress';
@@ -71,6 +72,13 @@ function ListProject() {
 
   return (
     <div className="projects-container">
+      <Helmet>
+        <title>Photogram · Projects</title>
+        <meta
+          name="description"
+          content="Import or open a project folder, and find the projects stored in this browser."
+        />
+      </Helmet>
       <Header nav="projects" />
       <div className="action-project">
         <ImportProject onProject={files => onImportProject(files)} />
