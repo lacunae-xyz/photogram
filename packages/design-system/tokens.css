@@ -22,5 +22,9 @@
   --pg-radius-s: 3px;
 
   --pg-font-mono: 'Courier New', Courier, monospace;
-  --pg-font-text: system-ui, sans-serif;
+  /* The stack lightningcss expanded `system-ui, sans-serif` into for the es2020 CSS target.
+     It doesn't expand through var(), and Firefox < 92 has no system-ui. */
+  --pg-font-text:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Noto Sans', Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
