@@ -34,17 +34,16 @@ export default function PrivacyPolicy() {
           sent anywhere.
         </p>
         <p>
-          We count visits with Umami Cloud. It sets no cookies and stores no
-          personal data. It records the pages you open, with project ids removed
-          from the addresses, and four actions: creating, deleting, leaving and
-          printing a project, with the number of tiles printed. With each, it
-          records the referring site, your browser, operating system, device
-          type, screen size, language and country. See{' '}
-          <a href="https://umami.is/privacy">Umami&apos;s privacy policy</a>.
+          We count visits with Umami, which we run ourselves. It sets no cookies
+          and stores no personal data. It records the pages you open, with
+          project ids removed from the addresses, and four actions: creating,
+          deleting, leaving and printing a project, with the number of tiles
+          printed. With each, it records the referring site, your browser,
+          operating system, device type, screen size, language and country.
         </p>
         <p>
-          Netlify hosts the site. Its servers log requests, including your IP
-          address and browser. See{' '}
+          Netlify hosts the site and our Umami server. Its servers log requests,
+          including your IP address and browser. See{' '}
           <a href="https://www.netlify.com/privacy/">
             Netlify&apos;s privacy policy
           </a>
@@ -52,7 +51,7 @@ export default function PrivacyPolicy() {
         </p>
         <p>
           Photogram has no accounts, sends no emails, shows no ads and has no
-          Google sign-in. Umami and Netlify are the only third parties.
+          Google sign-in. Netlify is the only third party.
         </p>
         <p>
           Questions: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.

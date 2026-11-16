@@ -20,7 +20,7 @@ async function routeUmami(page: Page) {
     const body = (await response.text()).replace(/ data-domains="[^"]*"/, '');
     return route.fulfill({ response, body });
   });
-  await page.route('https://cloud.umami.is/script.js', route =>
+  await page.route('https://*/script.js', route =>
     route.fulfill({ path: path.join(fixtures, 'umami-script.js'), contentType: 'text/javascript' }),
   );
   await page.route('**/api/send', route => {
@@ -48,7 +48,9 @@ test('page views and events reach Umami without project ids', async ({ page }) =
   await expect.poll(events).toContain('project-back');
 
   expect(sends.every(send => send.payload.website)).toBe(true);
-  expect(JSON.stringify(sends)).not.toMatch(uuid);
+  // The website id is a uuid too.
+  const withoutWebsite = sends.map(({ type, payload: { website, ...payload } }) => ({ type, payload }));
+  expect(JSON.stringify(withoutWebsite)).not.toMatch(uuid);
 });
 
 test('the app works with Umami blocked', async ({ page, pageErrors }) => {
