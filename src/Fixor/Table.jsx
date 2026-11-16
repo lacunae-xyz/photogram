@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDuration } from './parser';
 import './Table.css';
 
 function EmptyTable() {
@@ -27,7 +28,9 @@ function DataTable(props) {
                 <img alt="vfx" src={line.image} />
               </td>
               <td>{line.description}</td>
-              <td>{line.sourceDuration(props.imagePerSeconde).toString()}</td>
+              <td>
+                {formatDuration(line.sourceDuration(props.imagePerSeconde))}
+              </td>
               <td>{line.vfxName}</td>
               <td>{line[props.source]}</td>
             </tr>

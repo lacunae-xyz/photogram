@@ -117,6 +117,9 @@ function toDate(value) {
 }
 
 function dateDuration(din, dout, numberOfImages) {
+  if (!(Number.isFinite(numberOfImages) && numberOfImages > 0)) {
+    return undefined;
+  }
   let duration =
     ((dout.hours - din.hours) * 3600 +
       (dout.minutes - din.minutes) * 60 +
@@ -126,5 +129,9 @@ function dateDuration(din, dout, numberOfImages) {
   return Math.round((duration + Number.EPSILON) * 100) / 100;
 }
 
+function formatDuration(duration) {
+  return duration === undefined ? '–' : duration.toString();
+}
+
 export default parse;
-export { Line, dateDuration };
+export { Line, dateDuration, formatDuration };

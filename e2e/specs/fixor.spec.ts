@@ -19,9 +19,11 @@ test('compare two EDLs', async ({ page }) => {
   await expect(rows.locator('td:first-child')).toHaveText(['modify', 'remove', 'modify', 'add']);
 
   const duration = (row: number) => rows.nth(row).locator('td').nth(4);
-  // B6: durations show "NaN" until an FPS is typed. After the fix they show "–".
-  await expect(duration(0)).toHaveText('NaNNaN');
-  await expect(duration(2)).toHaveText('NaNNaN');
+  // B6: no duration until an FPS is typed.
+  await expect(page.locator('#fps-input')).toHaveValue('');
+  await expect(duration(0)).toHaveText('––');
+  await expect(duration(2)).toHaveText('––');
+  await expect(duration(3)).toHaveText('–');
 
   await page.locator('#fps-input').fill('25');
   await expect(duration(0)).toHaveText('8282');

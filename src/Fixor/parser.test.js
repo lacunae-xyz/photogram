@@ -1,4 +1,4 @@
-import parser, { Line, dateDuration } from './parser';
+import parser, { Line, dateDuration, formatDuration } from './parser';
 
 it('parse empty string should return empty array', () => {
   let result = parser('');
@@ -235,10 +235,15 @@ describe('duration', () => {
     expect(line.recordDuration(fps)).toEqual(expected);
   });
 
-  // B6: no FPS gives NaN, displayed as "NaN". The fix shows no duration.
-  it('without FPS is NaN (B6)', () => {
-    expect(line.sourceDuration(NaN)).toEqual(NaN);
-    expect(line.sourceDuration(undefined)).toEqual(NaN);
+  it.each([NaN, undefined, 0, -25])('without FPS (%s) is none (B6)', fps => {
+    expect(line.sourceDuration(fps)).toEqual(undefined);
+    expect(line.recordDuration(fps)).toEqual(undefined);
+  });
+
+  it('displays as a dash without FPS (B6)', () => {
+    expect(formatDuration(undefined)).toEqual('–');
+    expect(formatDuration(62)).toEqual('62');
+    expect(formatDuration(61.94)).toEqual('61.94');
   });
 
   it('across an hour', () => {

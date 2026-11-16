@@ -8,7 +8,7 @@ import './index.css';
 function Edls(props) {
   const [selected, setSelected] = useState(props.edls[0].name);
   const [compareValue, setCompareValue] = useState('');
-  const [imagePerSeconde, setImagePerSeconde] = useState(NaN);
+  const [imagePerSeconde, setImagePerSeconde] = useState(undefined);
   const [source, setSource] = useState('fileName');
 
   useEffect(() => {
@@ -135,7 +135,6 @@ function Edls(props) {
                 placeholder="FPS"
                 list="imagePerSeconde"
                 onChange={onImagePerSecond}
-                defaultValue={imagePerSeconde.toString()}
               />
               <datalist id="imagePerSeconde">
                 <option value="23.98" />
