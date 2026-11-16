@@ -86,6 +86,19 @@ for (const template of ['small', 'large'] as const) {
   }
 }
 
+// B2: the previews were passed the string "{sequence, …}" instead of a shot, so they rendered empty.
+test('Configuration previews show a sample tile (B2)', async ({ page }) => {
+  await prepareDemo(page);
+  const previews = page.locator('.configuration .preview');
+  await expect(previews).toHaveCount(2);
+  for (const preview of await previews.all()) {
+    await expect(preview.locator('.sequence')).not.toBeEmpty();
+    await expect(preview.locator('.action')).not.toBeEmpty();
+  }
+  await settle(page);
+  await expect(page.locator('.configuration')).toHaveScreenshot('configuration.png');
+});
+
 // B24: Configuration showed printSpaceAround unset as checked while Tiles treated it as off, and the
 // checkbox called preventDefault in onChange, so what it showed lagged the saved value.
 test('print space around checkbox matches the tiles (B24)', async ({ page }) => {
