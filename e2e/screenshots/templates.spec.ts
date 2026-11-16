@@ -70,9 +70,8 @@ const printMarginRem = {
 
 for (const template of ['small', 'large'] as const) {
   for (const spaceAround of [true, false]) {
+    // B25: the large print rules targeted .tpl-large-ele, so large tiles kept their .8rem screen margin.
     test(`${template} print margin, space around ${spaceAround ? 'on' : 'off'}`, async ({ page }) => {
-      // B25: the large print rules target .tpl-large-ele, so tiles keep their .8rem screen margin.
-      test.fail(template === 'large', 'B25');
       await prepareDemo(page);
       await setTemplate(page, template);
       await setPrintSpaceAround(page, spaceAround);

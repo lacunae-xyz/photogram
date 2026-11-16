@@ -15,10 +15,10 @@
 }
 
 @media print {
-  .print-space-around > .tpl-large-ele {
+  .print-space-around > .tpl-large.ele {
     margin: 2rem;
   }
-  .print-no-space > .tpl-large-ele {
+  .print-no-space > .tpl-large.ele {
     margin: 0rem;
   }
 }
