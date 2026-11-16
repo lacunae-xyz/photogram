@@ -1,6 +1,7 @@
 /* Photogram design tokens. Values are today's: the 06 §6.5 refresh changes values, not names. */
 :root {
   --pg-color-surface: #fff;
+  --pg-color-surface-raised: #fff;
   --pg-color-border: #ddd;
   --pg-color-chrome: #111111;
   --pg-color-on-chrome: #ffffffee;

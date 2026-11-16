@@ -11,7 +11,7 @@
   text-align: center;
   /* stylelint-disable-next-line color-named -- pg: 6.5 */
   border: 1px solid silver;
-  background-color: var(--pg-color-surface);
+  background-color: var(--pg-color-surface-raised);
 }
 
 .projects-card:hover {
