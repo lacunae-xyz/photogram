@@ -23,6 +23,8 @@ function standardDecorators(): Plugin {
             target: ts.ScriptTarget.ES2022,
             module: ts.ModuleKind.ESNext,
             sourceMap: true,
+            // One copy of __esDecorate & co. from tslib, not one per element.
+            importHelpers: true,
           },
         });
         return {
@@ -36,6 +38,8 @@ function standardDecorators(): Plugin {
 
 export default defineConfig({
   plugins: [standardDecorators(), react()],
+  // standardDecorators adds the tslib imports after the dependency scan.
+  optimizeDeps: { include: ['tslib'] },
   build: {
     target: 'es2020',
     // Assets stay files named like CRA's (`empty.<hex>.svg`): edit.spec matches the empty image src on that.
