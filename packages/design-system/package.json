@@ -4,10 +4,13 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./tokens.css": "./tokens.css"
+    "./tokens.css": "./tokens.css",
+    "./pg-icon.js": "./src/pg-icon.ts"
   },
   "files": [
-    "tokens.css"
+    "tokens.css",
+    "icons",
+    "src"
   ],
   "dependencies": {
     "lit": "^3.3.3"
