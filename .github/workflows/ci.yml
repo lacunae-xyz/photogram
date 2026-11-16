@@ -78,8 +78,34 @@ jobs:
           path: dist/
           retention-days: 7
 
+  # Pull requests: the base commit's build, which the Perf step measures the PR's against. Runs alongside build.
+  build-base:
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'update-budgets')
+    runs-on: ubuntu-latest
+    # A base that doesn't build leaves the Perf step on its absolute budgets rather than failing the PR.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-base
+          path: dist/
+          retention-days: 1
+
   browser:
-    needs: build
+    needs: [build, build-base]
+    # build-base is skipped outside pull requests and may fail: only build is required.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     # Keep the tag in sync with @playwright/test in e2e/package.json. The image ships Node 26, same as .nvmrc.
     container:
@@ -103,17 +129,29 @@ jobs:
         with:
           name: dist
           path: dist
+      - uses: actions/download-artifact@v5
+        if: ${{ github.event_name == 'pull_request' && env.UPDATE_BUDGETS != 'true' }}
+        # No base build: the Perf step falls back to the absolute budgets.
+        continue-on-error: true
+        with:
+          name: build-base
+          path: base-dist
       - id: install
         run: npm ci
       - run: npm run typecheck
+      - run: npm run test:gate
       - name: Screenshots and e2e
         run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ env.UPDATE_SNAPSHOTS == 'true' && '--update-snapshots' || '' }}
       - name: Perf
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         # Own output dir: a second run wipes test-results/ and the traces of the first.
+        # Pull requests: blocking time against the base build measured in this job (A/B), not against budgets.json,
+        # whose absolute values can't tell a slower runner from a regression. LayoutCount stays on budgets.json.
         run: |
           if [ "$UPDATE_BUDGETS" = true ]; then
             node perf/update-budgets.mjs --output=test-results-perf
+          elif [ -f ../base-dist/index.html ]; then
+            node perf/check-budgets.mjs --baseline ../base-dist --output=test-results-perf
           else
             node perf/check-budgets.mjs --output=test-results-perf
           fi
