@@ -16,7 +16,9 @@ afterEach(() => render(null, document.body));
 describe('pg-icon', () => {
   it('knows every icon file', () => {
     expect([...iconNames].sort()).toEqual([
+      'arrow-back',
       'auto-fix',
+      'print',
       'weather-night',
       'weather-none',
       'weather-sunny',

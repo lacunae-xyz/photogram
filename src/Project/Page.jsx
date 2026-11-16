@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import track from '../track';
 import Image from '../FilesParser/Images';
-import Toolbar from './Toolbar';
-import Configuration from './Configuration';
-import Tiles from './Tiles';
-import Form from './Form';
+import '@lacunae-xyz/photogram-design-system/pg-big-button.js';
+import './photogram-configuration';
+import './photogram-tile-form';
+import './photogram-tiles';
+import './photogram-toolbar';
 import '../styles.css';
 import './Page.css';
 
@@ -76,64 +77,58 @@ class Page extends Component {
   render() {
     const project = this.state.project;
     const unlinked = project.key !== undefined && !project.dirLink;
+    const reload = () => this.loadData();
     return (
       <div>
-        <Form
-          data={this.state.data}
-          colors={this.state.project.colors}
-          onCancel={() =>
-            this.setState(Object.assign(this.state, { data: undefined }))
-          }
-          onSave={data =>
+        <photogram-tile-form
+          shot={this.state.data}
+          colors={project.colors}
+          onclose={() => this.setState({ data: undefined })}
+          onsave={event => {
+            this.setState({ data: undefined });
             this.application
-              .update(this.props.id, data)
-              .then(() => this.loadData())
-          }
-          onNewImage={file => {
+              .update(this.props.id, event.detail.shot)
+              .then(reload);
+          }}
+          onnew-image={event => {
+            const shotId = this.state.data.id;
             Image.create()
-              .execute(this.props.id, file)
-              .then(result => {
-                this.setState(
-                  Object.assign(
-                    this.state,
-                    Object.assign(this.state.data, { url: result[0].url }),
-                  ),
-                );
-              });
-          }}
-          onDeleteImage={() => {
-            this.setState(
-              Object.assign(
-                this.state,
-                Object.assign(this.state.data, { url: null }),
-              ),
-            );
-          }}
-          setAsMain={url =>
-            this.application
-              .updateMainPicture(this.props.id, url)
-              .then(() =>
-                this.setState(Object.assign(this.state, { data: undefined })),
+              .execute(this.props.id, event.detail.files)
+              .then(([image]) =>
+                // The form may have closed, or moved to another shot, while the image was stored.
+                this.setState(({ data }) =>
+                  image && data?.id === shotId
+                    ? { data: { ...data, url: image.url } }
+                    : null,
+                ),
               )
+              .catch(e => console.error(e));
+          }}
+          ondelete-image={() =>
+            this.setState({ data: { ...this.state.data, url: null } })
+          }
+          onset-main={event =>
+            this.application
+              .updateMainPicture(this.props.id, event.detail.url)
+              .then(() => this.setState({ data: undefined }))
               .catch(e => console.error(e))
           }
         />
         <div className="layout-parent">
           <div className="layout-top">
-            <Toolbar
-              title={this.state.project.name}
-              onPrint={() => this.print()}
-              onBack={() => this.back()}
-              onExport={
-                unlinked
-                  ? () => this.exportDataJson().catch(e => console.error(e))
-                  : undefined
+            <photogram-toolbar
+              heading={project.name}
+              exportable={unlinked}
+              onback={() => this.back()}
+              onprint={() => this.print()}
+              onexport={() =>
+                this.exportDataJson().catch(e => console.error(e))
               }
             />
           </div>
           <div className="layout-left">
             {this.state.permission ? (
-              <PromtPermission
+              <PromptPermission
                 promptPermission={async () => {
                   try {
                     await this.application.requestPermission(this.props.id);
@@ -144,65 +139,69 @@ class Page extends Component {
                 }}
               />
             ) : (
-              <Tiles
-                colorDistribution={this.state.project.colorDistribution}
-                defaultColor={this.state.project.defaultColor}
-                colors={this.state.project.colors}
-                value={this.state.project.data}
-                type={this.state.project.template}
-                fontFamily={this.state.project.fontFamily}
-                printSpaceAround={this.state.project.printSpaceAround}
-                onTile={data =>
-                  this.setState(Object.assign(this.state, { data: data }))
+              <photogram-tiles
+                shots={project.data}
+                template={project.template}
+                colors={project.colors}
+                defaultColor={project.defaultColor}
+                colorDistribution={project.colorDistribution}
+                fontFamily={project.fontFamily}
+                printSpaceAround={project.printSpaceAround}
+                ontile-select={event =>
+                  this.setState({ data: event.detail.shot })
                 }
               />
             )}
           </div>
           <div className="layout-right">
-            <Configuration
-              colorDistribution={this.state.project.colorDistribution}
-              defaultColor={this.state.project.defaultColor}
-              colors={this.state.project.colors}
-              template={this.state.project.template}
-              fontFamily={this.state.project.fontFamily}
-              printSpaceAround={this.state.project.printSpaceAround}
-              onChange={template =>
+            <photogram-configuration
+              template={project.template}
+              fontFamily={project.fontFamily}
+              printSpaceAround={project.printSpaceAround}
+              colorDistribution={project.colorDistribution}
+              defaultColor={project.defaultColor}
+              colors={project.colors}
+              ontemplate-change={event =>
                 this.application
-                  .updateTemplate(this.props.id, template)
-                  .then(() => this.loadData())
+                  .updateTemplate(this.props.id, event.detail.template)
+                  .then(reload)
               }
-              onDefaultColorChange={color =>
+              onfont-family-change={event =>
                 this.application
-                  .updateDefaultColor(this.props.id, color)
-                  .then(() => this.loadData())
+                  .updateFontFamily(this.props.id, event.detail.fontFamily)
+                  .then(reload)
               }
-              onColorChange={color =>
-                this.application
-                  .updateColor(this.props.id, color)
-                  .then(() => this.loadData())
-              }
-              onDeleteColor={key =>
-                this.application
-                  .deleteColor(this.props.id, key)
-                  .then(() => this.loadData())
-              }
-              onColorDistributionChange={distribution => {
-                this.showSetting({ colorDistribution: distribution });
-                this.application
-                  .updateColorDistribution(this.props.id, distribution)
-                  .then(() => this.loadData());
-              }}
-              onFontFamilyChange={fontFamily =>
-                this.application
-                  .updateFontFamily(this.props.id, fontFamily)
-                  .then(() => this.loadData())
-              }
-              onPrintSpaceAroundChange={printSpaceAround => {
+              onprint-space-around-change={event => {
+                const { printSpaceAround } = event.detail;
                 this.showSetting({ printSpaceAround });
                 this.application
                   .updatePrintSpaceAround(this.props.id, printSpaceAround)
-                  .then(() => this.loadData());
+                  .then(reload);
               }}
+              oncolor-distribution-change={event => {
+                const { colorDistribution } = event.detail;
+                this.showSetting({ colorDistribution });
+                this.application
+                  .updateColorDistribution(this.props.id, colorDistribution)
+                  .then(reload);
+              }}
+              ondefault-color-change={event =>
+                this.application
+                  .updateDefaultColor(this.props.id, event.detail.color)
+                  .then(reload)
+              }
+              oncolor-change={event =>
+                this.application
+                  .updateColor(this.props.id, {
+                    [event.detail.label]: event.detail.color,
+                  })
+                  .then(reload)
+              }
+              oncolor-delete={event =>
+                this.application
+                  .deleteColor(this.props.id, event.detail.label)
+                  .then(reload)
+              }
             />
           </div>
         </div>
@@ -211,7 +210,7 @@ class Page extends Component {
   }
 }
 
-function PromtPermission(props) {
+function PromptPermission(props) {
   return (
     <div className="prompt-permission">
       <img
@@ -225,14 +224,9 @@ function PromtPermission(props) {
       <p className="prompt-permission-reason">
         Permission will be asked after each reload
       </p>
-      <button
-        className="prompt-permission-button"
-        onClick={() => {
-          props.promptPermission();
-        }}
-      >
+      <pg-big-button onClick={() => props.promptPermission()}>
         Grant permission
-      </button>
+      </pg-big-button>
     </div>
   );
 }

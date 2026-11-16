@@ -5,6 +5,9 @@
   "type": "module",
   "exports": {
     "./tokens.css": "./tokens.css",
+    "./pg-big-button.js": "./src/pg-big-button.ts",
+    "./pg-button.js": "./src/pg-button.ts",
+    "./pg-dialog.js": "./src/pg-dialog.ts",
     "./pg-icon.js": "./src/pg-icon.ts"
   },
   "files": [

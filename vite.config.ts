@@ -71,7 +71,9 @@ export default defineConfig({
           include: [
             'lit',
             'lit/decorators.js',
+            'lit/directives/keyed.js',
             'lit/directives/ref.js',
+            'lit/directives/repeat.js',
             'lit/directives/style-map.js',
           ],
         },

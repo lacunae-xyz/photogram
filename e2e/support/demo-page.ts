@@ -11,24 +11,27 @@ export async function openDemo(page: Page) {
   await expect(page.locator(tileSelector)).toHaveCount(demoRows.length);
 }
 
-async function pickColor(page: Page, button: ReturnType<Page['locator']>, hex: string) {
-  await button.click();
-  const picker = page.locator('.sketch-picker');
-  await picker.locator('input').first().fill(hex.replace('#', ''));
-  await page.keyboard.press('Escape');
-  await expect(picker).toHaveCount(0);
+/** Waits for the save: the panel shows the stored colours once the project reloads. */
+async function pickColor(page: Page, row: string, hex: string, stored: (colors: StoredColors) => string | undefined) {
+  const input = page.locator('.configuration tr', { has: page.locator('td', { hasText: new RegExp(`^${row}$`) }) }).locator('input[type=color]');
+  await input.fill(hex.toLowerCase());
+  const configuration = page.locator('photogram-configuration');
+  const storedColor = () =>
+    configuration.evaluate(element => {
+      const { colors, defaultColor } = element as unknown as StoredColors;
+      return { colors, defaultColor };
+    });
+  await expect.poll(async () => stored(await storedColor())?.toLowerCase()).toBe(hex.toLowerCase());
 }
 
+type StoredColors = { colors?: Record<string, string | undefined>; defaultColor?: string };
+
 export async function setLabelColor(page: Page, label: string, hex: string) {
-  const row = page.locator('.configuration tr', { has: page.locator('td', { hasText: new RegExp(`^${label}$`) }) });
-  await pickColor(page, row.locator('button').first(), hex);
-  await expect(row.locator('button span').first()).toHaveCSS('background-color', rgb(hex));
+  await pickColor(page, label, hex, ({ colors }) => colors?.[label]);
 }
 
 export async function setDefaultColor(page: Page, hex: string) {
-  const row = page.locator('.configuration tr', { has: page.locator('td', { hasText: /^Default$/ }) });
-  await pickColor(page, row.locator('button').first(), hex);
-  await expect(row.locator('button span').first()).toHaveCSS('background-color', rgb(hex));
+  await pickColor(page, 'Default', hex, ({ defaultColor }) => defaultColor);
 }
 
 export async function setTemplate(page: Page, template: 'small' | 'large') {
@@ -75,9 +78,4 @@ export async function settle(page: Page) {
   await parkMouse(page);
   await waitForTitleSizing(page);
   await waitForImages(page);
-}
-
-function rgb(hex: string) {
-  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.substring(i, i + 2), 16));
-  return `rgb(${r}, ${g}, ${b})`;
 }
