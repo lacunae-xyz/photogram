@@ -41,19 +41,9 @@ export async function setColorDistribution(page: Page, distribution: 'indicator'
   }
 }
 
-/** The checkbox lags the saved value (see templates.spec), so click until the tiles have the wanted class. */
 export async function setPrintSpaceAround(page: Page, on: boolean) {
-  const checkbox = page.locator('#print-space-around');
-  const tiles = page.locator('.tiles-container');
-  const expected = new RegExp(on ? 'print-space-around' : 'print-no-space');
-  const matches = () =>
-    expect(tiles)
-      .toHaveClass(expected, { timeout: 1_000 })
-      .then(() => true, () => false);
-  for (let clicks = 0; clicks < 4 && !(await matches()); clicks++) {
-    await checkbox.click();
-  }
-  await expect(tiles).toHaveClass(expected);
+  await page.locator('#print-space-around').setChecked(on);
+  await expect(page.locator('.tiles-container')).toHaveClass(on ? /print-space-around/ : /print-no-space/);
 }
 
 /** Row 5 gets the light palette colour, so it renders dark text. */

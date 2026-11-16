@@ -24,7 +24,6 @@ class Configuration extends Component {
   }
 
   onPrintSpaceAroundChange = event => {
-    event.preventDefault();
     this.props.onPrintSpaceAroundChange(event.target.checked);
   };
 
@@ -49,11 +48,7 @@ class Configuration extends Component {
                 type="checkbox"
                 list="font-list"
                 onChange={this.onPrintSpaceAroundChange}
-                checked={
-                  this.props.printSpaceAround === undefined
-                    ? true
-                    : this.props.printSpaceAround
-                }
+                checked={Boolean(this.props.printSpaceAround)}
               />
               <label htmlFor="print-space-around">Space around cards</label>
             </form>

@@ -86,24 +86,19 @@ for (const template of ['small', 'large'] as const) {
   }
 }
 
-// Configuration shows printSpaceAround unset as checked while Tiles treats it as off, and the checkbox
-// calls preventDefault in onChange, so what it shows lags the saved value (B24).
-test('print space around checkbox is out of sync with the tiles', async ({ page }) => {
+// B24: Configuration showed printSpaceAround unset as checked while Tiles treated it as off, and the
+// checkbox called preventDefault in onChange, so what it showed lagged the saved value.
+test('print space around checkbox matches the tiles (B24)', async ({ page }) => {
   await prepareDemo(page);
   const checkbox = page.locator('#print-space-around');
   const tiles = page.locator('.tiles-container');
-  const states = [];
-  for (let clicks = 0; clicks < 4; clicks++) {
-    await page.waitForTimeout(300);
-    states.push([await checkbox.isChecked(), (await tiles.getAttribute('class'))?.replace('tiles-container ', '')]);
+  await expect(checkbox).not.toBeChecked();
+  await expect(tiles).toHaveClass(/print-no-space/);
+  for (const on of [true, false, true]) {
     await checkbox.click();
+    await expect(checkbox).toBeChecked({ checked: on });
+    await expect(tiles).toHaveClass(on ? /print-space-around/ : /print-no-space/);
   }
-  expect(states).toEqual([
-    [true, 'print-no-space'],
-    [true, 'print-no-space'],
-    [false, 'print-no-space'],
-    [false, 'print-space-around'],
-  ]);
 });
 
 for (const template of ['small', 'large'] as const) {
