@@ -2,6 +2,7 @@ import { html, render } from 'lit';
 import { afterEach, describe, expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import './pg-header';
+import '../tokens.css';
 
 afterEach(() => render(null, document.body));
 

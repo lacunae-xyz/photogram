@@ -60,8 +60,7 @@ export class PgHeader extends LitElement {
     }
 
     nav a[aria-current='page'] {
-      /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
-      border-bottom-color: rgba(180, 220, 220, 1);
+      border-bottom-color: var(--pg-color-accent);
     }
 
     nav a:hover,
