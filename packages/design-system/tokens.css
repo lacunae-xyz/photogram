@@ -13,6 +13,13 @@
 
   --pg-color-hover: rgba(180, 220, 220, 0.5);
 
+  --pg-color-accent: #38d39f;
+
+  /* Illustration fills, the unDraw colours each one replaces in pg-illustration. */
+  --pg-illus-bg: #f2f2f2;
+  --pg-illus-ink: #3f3d56;
+  --pg-illus-paper: #fff;
+
   --pg-color-action: #d32f2f;
   --pg-color-on-action: #ffffffee;
 
