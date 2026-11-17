@@ -1,4 +1,8 @@
+import type { Page } from '@playwright/test';
 import { test, expect, tileSelector } from '../support/test';
+import { routeDemo } from '../support/demo';
+import { openFolder } from '../support/open-folder';
+import { importProject, importRows } from '../support/projects';
 
 const routes = [
   { path: '/', ready: '.landing-container' },
@@ -61,4 +65,65 @@ test('/fixor can be framed by fixor.photogram.app', async ({ request }) => {
   if (frameAncestors !== undefined) {
     expect(frameAncestors).toContain('https://fixor.photogram.app');
   }
+});
+
+type Illustration = { name: string | null; loaded: boolean };
+
+/** Every pg-illustration on the page, in document order, and whether its image has loaded. */
+function illustrations(page: Page) {
+  return page.locator('pg-illustration').evaluateAll(elements =>
+    elements.map(element => {
+      const image = element.shadowRoot?.querySelector('img');
+      return { name: element.getAttribute('name'), loaded: !!image && image.complete && image.naturalWidth > 0 };
+    }),
+  );
+}
+
+async function expectIllustrations(page: Page, names: string[]) {
+  const expected: Illustration[] = names.map(name => ({ name, loaded: true }));
+  await expect.poll(() => illustrations(page)).toEqual(expected);
+}
+
+// B11: the landing loaded an illustration from a relative URL, which only resolved on `/`.
+const routeIllustrations = [
+  { path: '/', names: ({ chromium }: { chromium: boolean }) => ['learning', 'upload-image', ...(chromium ? ['folder'] : []), 'presentation'] },
+  { path: '/tutorial', names: () => [] },
+  { path: '/projects', names: () => ['empty-street'] },
+  { path: '/project-demo', names: () => [] },
+  { path: '/privacy-policy', names: () => [] },
+  { path: '/fixor', names: () => [] },
+];
+
+for (const { path, names } of routeIllustrations) {
+  test(`${path} loads its illustrations (B11)`, async ({ page, browserName }) => {
+    await routeDemo(page);
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    await expectIllustrations(page, names({ chromium: browserName === 'chromium' }));
+  });
+}
+
+test('/project/:id loads its illustrations (B11)', async ({ page }) => {
+  const card = await importProject(page);
+  await card.click();
+  await expect(page).toHaveURL(/\/project\/[\w-]+$/);
+  await expect(page.locator(tileSelector)).toHaveCount(importRows);
+  await expectIllustrations(page, []);
+});
+
+test('/project/:id loads the permission illustration (B11)', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'showDirectoryPicker is Chromium only');
+  const card = await openFolder(page);
+  await card.click();
+  await expect(page).toHaveURL(/\/project\/[\w-]+$/);
+  // As open-folder.spec: the permission is back to prompt after the reload.
+  await page.addInitScript(() => {
+    const prototype = FileSystemHandle.prototype as FileSystemHandle & {
+      queryPermission(): Promise<PermissionState>;
+    };
+    prototype.queryPermission = async () => 'prompt';
+  });
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Grant permission' })).toBeVisible();
+  await expectIllustrations(page, ['secure-files']);
 });
