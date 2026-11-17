@@ -143,6 +143,23 @@ describe('tokens.css contrast', () => {
     expect(value).toBeCloseTo(4.5006, 4);
   });
 
+  // Outlines of tiles, cards and swatches, and the cut lines in print: never text or a control's only boundary, so
+  // under 3:1 (2.3:1 on white). The dark scheme must outline as clearly as the light one, and more than border does.
+  it.each(['color-surface-raised', 'color-fill'])(
+    'border-strong on %s: as clear in dark as in light, clearer than border',
+    surface => {
+      const light = contrast('color-border-strong', surface, 'light');
+      expect(
+        contrast('color-border-strong', surface, 'dark'),
+      ).toBeGreaterThanOrEqual(light);
+      for (const scheme of schemes) {
+        expect(
+          contrast('color-border-strong', surface, scheme),
+        ).toBeGreaterThan(contrast('color-border', surface, scheme));
+      }
+    },
+  );
+
   it('resolves light-dark() per scheme', () => {
     expect(resolve('--pg-color-surface', 'light')).toEqual([255, 255, 255, 1]);
     expect(resolve('--pg-color-surface', 'dark')).toEqual([34, 34, 34, 1]);
