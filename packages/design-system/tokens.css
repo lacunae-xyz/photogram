@@ -1,15 +1,34 @@
-/* Photogram design tokens. Values are today's: the 06 §6.5 refresh changes values, not names. */
+/* Photogram design tokens. The palette steps, then the semantic tokens elements use, built from them. */
 :root {
+  /* Neutral scale. White isn't a step: surfaces use #fff. */
+  --pg-grey-50: #fafafa;
+  --pg-grey-100: #f5f5f5;
+  --pg-grey-200: #eee;
+  --pg-grey-300: #ddd;
+  --pg-grey-400: #aaa;
+  --pg-grey-500: #888;
+  --pg-grey-600: #666;
+  --pg-grey-700: #444;
+  --pg-grey-800: #333;
+  --pg-grey-850: #2a2a2a;
+  --pg-grey-900: #222;
+  --pg-grey-950: #111;
+
   --pg-color-surface: #fff;
   --pg-color-surface-raised: #fff;
-  --pg-color-border: #ddd;
-  --pg-color-chrome: #111111;
+  --pg-color-border: var(--pg-grey-300);
+  --pg-color-chrome: var(--pg-grey-950);
   --pg-color-on-chrome: #ffffffee;
-  --pg-color-backdrop: #111111bb;
+  /* 73.3% is today's bb alpha. */
+  --pg-color-backdrop: color-mix(
+    in srgb,
+    var(--pg-grey-950) 73.3%,
+    transparent
+  );
 
-  --pg-color-text: #222;
-  --pg-color-text-muted: #444;
-  --pg-color-text-subtle: #666;
+  --pg-color-text: var(--pg-grey-900);
+  --pg-color-text-muted: var(--pg-grey-700);
+  --pg-color-text-subtle: var(--pg-grey-600);
 
   --pg-color-hover: rgba(180, 220, 220, 0.5);
 
