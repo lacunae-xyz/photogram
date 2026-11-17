@@ -32,12 +32,12 @@ export class PhotogramToolbar extends LitElement {
     }
 
     pg-button {
-      margin: 0 0.5rem;
+      margin: 0 var(--pg-space-2);
     }
 
     .button-export::part(button) {
       height: auto;
-      padding: 0.5rem 0.75rem;
+      padding: var(--pg-space-2) var(--pg-space-3);
       border-radius: var(--pg-radius-s);
       font: inherit;
       font-weight: bold;

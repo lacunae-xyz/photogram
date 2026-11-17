@@ -17,7 +17,7 @@ export class PhotogramQuota extends LitElement {
       min-height: 2rem;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 1rem;
+      padding: var(--pg-space-2) var(--pg-space-4);
       position: fixed;
       bottom: 0;
       max-width: 560px;
@@ -26,7 +26,7 @@ export class PhotogramQuota extends LitElement {
     }
 
     progress {
-      margin: 0 0.5rem;
+      margin: 0 var(--pg-space-2);
     }
   `;
 

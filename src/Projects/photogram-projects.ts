@@ -48,7 +48,7 @@ export class PhotogramProjects extends LitElement {
       margin: auto;
       overflow-y: hidden;
       flex-flow: wrap;
-      padding: 0.25rem;
+      padding: var(--pg-space-1);
     }
   `;
 

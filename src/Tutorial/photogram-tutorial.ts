@@ -48,7 +48,7 @@ export class PhotogramTutorial extends LitElement {
       background-color: var(--pg-color-surface);
       max-width: 50rem;
       margin: auto;
-      padding-bottom: 1rem;
+      padding-bottom: var(--pg-space-4);
     }
 
     article {
@@ -63,14 +63,14 @@ export class PhotogramTutorial extends LitElement {
     .tutorial-example-layout {
       display: grid;
       grid-template-columns: 50% 50%;
-      grid-column-gap: 1rem;
-      margin-bottom: 1rem;
+      grid-column-gap: var(--pg-space-4);
+      margin-bottom: var(--pg-space-4);
     }
 
     .tutorial-example-form {
       display: grid;
       grid-template-columns: 50% 50%;
-      grid-row-gap: 1rem;
+      grid-row-gap: var(--pg-space-4);
       align-content: center;
     }
 

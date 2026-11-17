@@ -51,7 +51,7 @@ export class PhotogramLanding extends LitElement {
     }
 
     .landing-footer {
-      padding: 2rem 0;
+      padding: var(--pg-space-6) 0;
     }
 
     .landing-footer a {
@@ -75,12 +75,12 @@ export class PhotogramLanding extends LitElement {
     #grid {
       display: flex;
       list-style-type: none;
-      padding: 0.25rem;
+      padding: var(--pg-space-1);
     }
 
     .empty-project-layout {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
+      padding-top: var(--pg-space-4);
+      padding-bottom: var(--pg-space-4);
     }
 
     .empty-project-layout a {
@@ -108,7 +108,7 @@ export class PhotogramLanding extends LitElement {
       transition-duration: 0.5s;
       color: var(--pg-color-text);
       text-decoration: none;
-      padding-bottom: 1rem;
+      padding-bottom: var(--pg-space-4);
     }
 
     .empty-project-item:hover {
@@ -124,7 +124,7 @@ export class PhotogramLanding extends LitElement {
     .empty-project-item pg-illustration::part(image) {
       width: 8rem;
       height: 8rem;
-      margin: 0.5rem 2rem;
+      margin: var(--pg-space-2) var(--pg-space-6);
       opacity: 0.8;
       transition-property: opacity;
       transition-duration: 0.5s;
@@ -139,14 +139,14 @@ export class PhotogramLanding extends LitElement {
     }
 
     .empty-project-item h1 {
-      margin: 1rem;
+      margin: var(--pg-space-4);
       font-size: var(--pg-font-size-5);
       text-decoration: none;
     }
 
     .empty-project-item span {
       display: inline-block;
-      padding: 0rem 1rem;
+      padding: 0 var(--pg-space-4);
       color: var(--pg-color-text-muted);
     }
 
@@ -197,8 +197,8 @@ export class PhotogramLanding extends LitElement {
 
     .creator-name {
       display: inline-block;
-      padding-top: 1rem;
-      padding-bottom: 0.5rem;
+      padding-top: var(--pg-space-4);
+      padding-bottom: var(--pg-space-2);
       font-weight: bold;
     }
 

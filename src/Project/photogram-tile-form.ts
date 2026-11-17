@@ -46,7 +46,7 @@ export class PhotogramTileForm extends LitElement {
       border-radius: var(--pg-radius-s);
       background-color: var(--pg-grey-200);
       border: none;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--pg-space-2);
       font-family: var(--pg-font-mono);
       font-size: var(--pg-font-size-4);
     }
@@ -117,7 +117,7 @@ export class PhotogramTileForm extends LitElement {
       width: 100%;
       position: absolute;
       min-height: 3rem;
-      bottom: 0.25rem;
+      bottom: var(--pg-space-1);
       background: color-mix(in srgb, var(--pg-grey-950) 25%, transparent);
       text-align: start;
     }

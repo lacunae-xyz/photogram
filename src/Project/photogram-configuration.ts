@@ -72,11 +72,11 @@ export class PhotogramConfiguration extends LitElement {
 
     h2 {
       font-size: var(--pg-font-size-3);
-      margin: 1rem;
+      margin: var(--pg-space-4);
     }
 
     #font-family {
-      margin-left: 1rem;
+      margin-left: var(--pg-space-4);
       font: inherit;
     }
 
@@ -100,8 +100,8 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     .labels {
-      margin-left: 1rem;
-      margin-right: 1rem;
+      margin-left: var(--pg-space-4);
+      margin-right: var(--pg-space-4);
     }
 
     .preview {

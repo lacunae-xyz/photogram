@@ -22,7 +22,7 @@ export class PhotogramProjectCard extends LitElement {
     pg-card {
       width: 15rem;
       min-width: 7.5rem;
-      margin: 0.75rem;
+      margin: var(--pg-space-3);
     }
 
     .img-project-cover {

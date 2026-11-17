@@ -23,7 +23,7 @@ export class PhotogramPrivacy extends LitElement {
     article {
       max-width: 40rem;
       margin: auto;
-      padding: 0 4rem 2rem;
+      padding: 0 4rem var(--pg-space-6);
       text-align: left;
       font-family: var(--pg-font-text);
     }
