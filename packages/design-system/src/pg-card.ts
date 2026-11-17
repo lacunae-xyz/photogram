@@ -14,7 +14,7 @@ export class PgCard extends LitElement {
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 0.5rem;
+      padding: var(--pg-space-2);
       padding-bottom: 0;
       text-align: center;
       border: 1px solid var(--pg-grey-400);
@@ -63,7 +63,7 @@ export class PgCard extends LitElement {
 
     .heading {
       flex-grow: 1;
-      padding: 1rem;
+      padding: var(--pg-space-4);
       display: block;
       color: var(--pg-color-text-muted);
       text-decoration: none;

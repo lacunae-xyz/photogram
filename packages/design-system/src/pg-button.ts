@@ -49,7 +49,7 @@ export class PgButton extends LitElement {
     :host([variant='icon']) button {
       display: flex;
       height: auto;
-      padding: 0.5rem;
+      padding: var(--pg-space-2);
       line-height: 0;
       border-radius: var(--pg-radius-pill);
     }
