@@ -18,7 +18,7 @@ export class PgHeader extends LitElement {
       display: flex;
       font-family: var(--pg-font-mono);
       align-items: center;
-      padding: 20px 0;
+      padding: var(--pg-space-4) 0;
     }
 
     .logo {
