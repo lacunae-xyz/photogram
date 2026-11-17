@@ -140,6 +140,21 @@ export function createTitleSizer<T extends Title>(
   };
 }
 
+/**
+ * Calls `callback` now, or once `fonts` have loaded if some are loading: sizing measures the text, and a title measured
+ * in the fallback font while the web font loads would keep a size that doesn't fit.
+ */
+export function afterFontsLoad(
+  fonts: Pick<FontFaceSet, 'status' | 'ready'> | undefined,
+  callback: () => void,
+) {
+  if (fonts?.status === 'loading') {
+    void fonts.ready.then(() => callback());
+  } else {
+    callback();
+  }
+}
+
 let observer: ReturnType<typeof createObserver> | undefined;
 
 function createObserver() {
@@ -154,9 +169,11 @@ function createObserver() {
 
   const sizer = createTitleSizer<HTMLElement>(
     {
-      request: callback => requestAnimationFrame(callback),
+      request: callback =>
+        afterFontsLoad(document.fonts, () => requestAnimationFrame(callback)),
       requestAfterNext: callback => {
-        const next = () => requestAnimationFrame(callback);
+        const next = () =>
+          afterFontsLoad(document.fonts, () => requestAnimationFrame(callback));
         if (typeof requestIdleCallback === 'function') {
           requestIdleCallback(next, { timeout: 100 });
         } else {

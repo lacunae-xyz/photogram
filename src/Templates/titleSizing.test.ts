@@ -369,6 +369,31 @@ describe('observeTitle', () => {
     expect(observed.size).toEqual(0);
   });
 
+  test('waits for loading fonts before sizing', async () => {
+    let loaded = () => {};
+    const ready = new Promise<void>(resolve => (loaded = resolve));
+    const fonts = { status: 'loading', ready };
+    Object.defineProperty(document, 'fonts', {
+      configurable: true,
+      value: fonts,
+    });
+    try {
+      const action = title('Action');
+      observeTitle(action);
+      runFrames();
+      expect(action.style.fontSize).toEqual('');
+
+      fonts.status = 'loaded';
+      loaded();
+      await ready;
+      runFrames();
+      expect(action.style.fontSize).toEqual('1.25rem');
+      unobserveTitle(action);
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
+    }
+  });
+
   test('stops after unobserveTitle', async () => {
     const action = title('Action');
     observeTitle(action);
