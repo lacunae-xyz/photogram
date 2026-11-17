@@ -130,6 +130,14 @@ describe('photogram-app', () => {
     expect(meta()).toEqual(defaultMeta);
   });
 
+  it('decodes the project id of the address', async () => {
+    const app = await renderApp('/project/a%20b');
+    const project = () => app.shadowRoot!.querySelector('photogram-project')!;
+    expect(project().projectId).toBe('a b');
+    await app.navigate('/project/100%');
+    expect(project().projectId).toBe('100%');
+  });
+
   it('shows not found on an unknown address (B16)', async () => {
     const app = await renderApp('/does-not-exist');
     expect(shownPage(app)).toBe('photogram-not-found');

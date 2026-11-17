@@ -40,6 +40,15 @@ function pattern(pathname: string) {
   );
 }
 
+/** A path segment as react-router 5 passed it: decoded, or as is if it isn't valid. */
+function decoded(segment: string) {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 function documentMeta(): Meta {
   return {
     title: document.title,
@@ -118,7 +127,7 @@ export class PhotogramApp extends LitElement {
         enter: () => this.#enter(),
         render: ({ id }) =>
           html`<photogram-project
-            project-id=${id ?? nothing}
+            project-id=${id === undefined ? nothing : decoded(id)}
             @back=${this.#onBack}
           ></photogram-project>`,
       },
