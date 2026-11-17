@@ -11,10 +11,11 @@
     <!-- The UI font, used from the first paint. tokens.css has its @font-face rules. -->
     <link rel="preload" href="/packages/design-system/fonts/courier-prime-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/packages/design-system/fonts/courier-prime-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <!-- The header's chrome, dark in both colour schemes. -->
-    <meta name="theme-color" content="#111111">
+    <!-- The browser's UI around the page: --pg-color-surface in each scheme. -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" data-scheme="light">
+    <meta name="theme-color" content="#222222" media="(prefers-color-scheme: dark)" data-scheme="dark">
     <!-- The canvas before the CSS loads. The script applies a theme picked in the header's switch before the first
-         paint: packages/design-system/src/theme.ts writes it under the same key and keeps this meta in step. -->
+         paint: packages/design-system/src/theme.ts writes it under the same key and keeps these metas in step. -->
     <meta name="color-scheme" content="light dark">
     <script>
       try {
@@ -22,6 +23,9 @@
         if (theme === 'light' || theme === 'dark') {
           document.documentElement.dataset.theme = theme;
           document.querySelector('meta[name="color-scheme"]').content = theme;
+          document.querySelectorAll('meta[name="theme-color"][data-scheme]').forEach(function (meta) {
+            meta.media = meta.dataset.scheme === theme ? 'all' : 'not all';
+          });
         }
       } catch (error) {}
     </script>

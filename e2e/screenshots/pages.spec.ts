@@ -97,6 +97,12 @@ test.describe('theme override', () => {
     await page.goto('/');
     expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
     expect(await background(page)).toBe(dark);
+    const themeColors = page.locator('meta[name="theme-color"]');
+    await expect(themeColors).toHaveCount(2);
+    expect(await themeColors.evaluateAll(metas => metas.map(meta => [meta.getAttribute('content'), meta.getAttribute('media')]))).toEqual([
+      ['#ffffff', 'not all'],
+      ['#222222', 'all'],
+    ]);
   });
 
   test('dark, printed light', async ({ page }) => {
