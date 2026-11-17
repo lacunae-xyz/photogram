@@ -242,7 +242,7 @@ render(
         <p>A modal dialog on the backdrop.</p>
         <div class="row">
           <pg-button @click=${closeDialog}>Cancel</pg-button>
-          <pg-big-button @click=${closeDialog}>Save</pg-big-button>
+          <pg-button @click=${closeDialog}>Save</pg-button>
         </div>
       </pg-dialog>
 
