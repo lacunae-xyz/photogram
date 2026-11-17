@@ -28,6 +28,4 @@
 
 .import-button-label:not([disabled]):hover {
   box-shadow: var(--pg-shadow-2);
-  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-  color: #ffffffff;
 }
