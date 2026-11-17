@@ -32,12 +32,16 @@ async function svgOf(illustration: PgIllustration) {
 describe('pg-illustration', () => {
   it('has the illustrations the pages use', () => {
     expect([...illustrationNames].sort()).toEqual([
+      'editable',
       'empty-street',
       'folder',
       'learning',
       'presentation',
       'private-files',
+      'the-search',
       'upload-image',
+      'videographer',
+      'web-developer',
     ]);
   });
 

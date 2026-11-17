@@ -1,6 +1,8 @@
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import videographer from '@lacunae-xyz/photogram-design-system/illustrations/videographer.svg';
+import webDeveloper from '@lacunae-xyz/photogram-design-system/illustrations/web-developer.svg';
 import '@lacunae-xyz/photogram-design-system/pg-illustration.js';
 import Application from '../Application';
 import { canOpenFolder, pickFolder } from '../Projects/folder-picker';
@@ -8,8 +10,6 @@ import { ProjectsController } from '../Projects/projects-controller';
 import '../Projects/photogram-import-project';
 import '../Projects/photogram-project-card';
 import '../Projects/photogram-quota';
-import videographer from '../illus/undraw_videographer_nnc7.svg';
-import webDeveloper from '../illus/undraw_web_developer_p3e5.svg';
 
 const creators = [
   {
@@ -156,6 +156,7 @@ export class PhotogramLanding extends LitElement {
       align-content: center;
       padding-bottom: 4.5rem;
 
+      /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
       background-image:
         url(${unsafeCSS(webDeveloper)}), url(${unsafeCSS(videographer)});
       background-position:

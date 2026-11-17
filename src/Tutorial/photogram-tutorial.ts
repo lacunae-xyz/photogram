@@ -1,9 +1,9 @@
 import { LitElement, css, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import editable from '@lacunae-xyz/photogram-design-system/illustrations/editable.svg';
+import theSearch from '@lacunae-xyz/photogram-design-system/illustrations/the-search.svg';
 import { colors } from '../Application';
 import '../Templates/photogram-tile-small';
-import editable from '../illus/undraw_editable_dywm.svg';
-import examination from '../illus/undraw_detailed_examination_joef.svg';
 
 type Example = {
   sequence: string;
@@ -34,8 +34,9 @@ export class PhotogramTutorial extends LitElement {
     }
 
     .tutorial-container {
+      /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
       background-image:
-        url(${unsafeCSS(editable)}), url(${unsafeCSS(examination)});
+        url(${unsafeCSS(editable)}), url(${unsafeCSS(theSearch)});
       background-position:
         left 1rem bottom,
         right 1rem bottom;

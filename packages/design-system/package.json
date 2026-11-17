@@ -12,7 +12,8 @@
     "./pg-empty-state.js": "./src/pg-empty-state.ts",
     "./pg-header.js": "./src/pg-header.ts",
     "./pg-icon.js": "./src/pg-icon.ts",
-    "./pg-illustration.js": "./src/pg-illustration.ts"
+    "./pg-illustration.js": "./src/pg-illustration.ts",
+    "./illustrations/*.svg": "./illustrations/*.svg"
   },
   "files": [
     "tokens.css",
