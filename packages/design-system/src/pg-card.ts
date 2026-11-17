@@ -44,12 +44,8 @@ export class PgCard extends LitElement {
       margin: var(--pg-space-2);
       padding: var(--pg-space-1);
       border-radius: var(--pg-radius-pill);
-      /* Light, for the dark icons: --pg-color-backdrop once pg-icon paints in currentColor. */
-      background-color: color-mix(
-        in srgb,
-        var(--pg-color-surface-raised) 60%,
-        transparent
-      );
+      color: var(--pg-color-on-chrome);
+      background-color: var(--pg-color-backdrop);
     }
 
     .badge[hidden] {

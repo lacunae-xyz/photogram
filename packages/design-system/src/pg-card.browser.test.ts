@@ -71,6 +71,28 @@ describe('pg-card', () => {
     await vi.waitFor(() => expect(badge.checkVisibility()).toBe(false));
   });
 
+  it('draws the badge in the chrome colours, over the backdrop', async () => {
+    document.body.style.setProperty('--pg-color-on-chrome', 'rgb(1, 2, 3)');
+    document.body.style.setProperty('--pg-color-backdrop', 'rgb(4, 5, 6)');
+    try {
+      const card = await renderCard(
+        html`<pg-card heading="Le fardeau"
+          ><span slot="badge">badge</span></pg-card
+        >`,
+      );
+      const badge = card.shadowRoot!.querySelector<HTMLElement>('.badge')!;
+      expect(getComputedStyle(badge)).toMatchObject({
+        backgroundColor: 'rgb(4, 5, 6)',
+        color: 'rgb(1, 2, 3)',
+      });
+      expect(getComputedStyle(card.querySelector('span')!).color).toBe(
+        'rgb(1, 2, 3)',
+      );
+    } finally {
+      document.body.removeAttribute('style');
+    }
+  });
+
   it('keeps the heading centred beside the actions', async () => {
     const card = await renderCard(
       html`<pg-card heading="Le fardeau" style="width: 240px">
