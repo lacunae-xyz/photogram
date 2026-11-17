@@ -29,8 +29,7 @@ export class PhotogramToolbar extends LitElement {
       flex-grow: 1;
       margin: 0;
       text-align: left;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.25rem;
+      font-size: var(--pg-font-size-4);
     }
 
     pg-button {

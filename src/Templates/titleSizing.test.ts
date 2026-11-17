@@ -369,6 +369,87 @@ describe('observeTitle', () => {
     expect(observed.size).toEqual(0);
   });
 
+  test('waits for loading fonts before sizing', async () => {
+    let loaded = () => {};
+    const ready = new Promise<void>(resolve => (loaded = resolve));
+    const fonts = { status: 'loading', ready };
+    Object.defineProperty(document, 'fonts', {
+      configurable: true,
+      value: fonts,
+    });
+    try {
+      const action = title('Action');
+      observeTitle(action);
+      runFrames();
+      expect(action.style.fontSize).toEqual('');
+
+      fonts.status = 'loaded';
+      loaded();
+      await ready;
+      runFrames();
+      expect(action.style.fontSize).toEqual('1.25rem');
+      unobserveTitle(action);
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
+    }
+  });
+
+  test('leaves the frame after fonts load free of sizing', async () => {
+    // A loaded font swaps in on the next frame, which lays out every title again.
+    const idles: (() => void)[] = [];
+    vi.stubGlobal('requestIdleCallback', (callback: () => void) =>
+      idles.push(callback),
+    );
+    let loaded = () => {};
+    const ready = new Promise<void>(resolve => (loaded = resolve));
+    const fonts = { status: 'loading', ready };
+    Object.defineProperty(document, 'fonts', {
+      configurable: true,
+      value: fonts,
+    });
+    try {
+      const action = title('Action');
+      observeTitle(action);
+      idles.shift()?.();
+      expect(frames).toHaveLength(0);
+
+      fonts.status = 'loaded';
+      loaded();
+      await ready;
+      expect(frames).toHaveLength(0);
+      expect(idles).toHaveLength(1);
+
+      idles.shift()?.();
+      runFrames();
+      expect(action.style.fontSize).toEqual('1.25rem');
+      unobserveTitle(action);
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
+    }
+  });
+
+  test('sizes in the fallback font when loading fonts stall', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    Object.defineProperty(document, 'fonts', {
+      configurable: true,
+      value: { status: 'loading', ready: new Promise<void>(() => {}) },
+    });
+    try {
+      const action = title('Action');
+      observeTitle(action);
+      runFrames();
+      expect(action.style.fontSize).toEqual('');
+
+      vi.advanceTimersByTime(1000);
+      runFrames();
+      expect(action.style.fontSize).toEqual('1.25rem');
+      unobserveTitle(action);
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
+      vi.useRealTimers();
+    }
+  });
+
   test('stops after unobserveTitle', async () => {
     const action = title('Action');
     observeTitle(action);

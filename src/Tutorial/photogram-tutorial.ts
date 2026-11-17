@@ -57,6 +57,7 @@ export class PhotogramTutorial extends LitElement {
 
     h1 {
       font-family: var(--pg-font-mono);
+      font-size: var(--pg-font-size-5);
     }
 
     .tutorial-example-layout {
@@ -73,9 +74,12 @@ export class PhotogramTutorial extends LitElement {
       align-content: center;
     }
 
+    input {
+      font: inherit;
+    }
+
     .tutorial-example-tile {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-family: Courier New;
+      font-family: var(--pg-font-mono);
     }
   `;
 

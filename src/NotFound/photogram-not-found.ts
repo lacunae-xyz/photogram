@@ -25,6 +25,10 @@ export class PhotogramNotFound extends LitElement {
       align-items: safe center;
     }
 
+    h1 {
+      font-size: var(--pg-font-size-5);
+    }
+
     pg-empty-state::part(illustration) {
       width: 24rem;
     }

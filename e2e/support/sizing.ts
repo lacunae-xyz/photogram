@@ -1,8 +1,9 @@
 import { expect, Page } from '@playwright/test';
 
 /**
- * Waits until title sizing (src/Templates/titleSizing.ts) is done: every `.action` has an inline font-size that holds across two frames.
- * Holds until the Lit port changes the sizing (06 §6.5 item 7).
+ * Waits until title sizing (src/Templates/titleSizing.ts) is done: the fonts have loaded, and every `.action` has an
+ * inline font-size that holds across two frames. Sizing waits for loading fonts too, so a size seen here was measured
+ * in the loaded font. Holds until the Lit port changes the sizing (06 §6.5 item 7).
  */
 export async function waitForTitleSizing(page: Page, timeout = 30_000) {
   await expect
@@ -11,6 +12,10 @@ export async function waitForTitleSizing(page: Page, timeout = 30_000) {
         page.locator('.action').evaluateAll(async nodes => {
           if (nodes.length === 0) {
             return 'no .action';
+          }
+          await document.fonts.ready;
+          if (document.fonts.status !== 'loaded') {
+            return 'fonts loading';
           }
           const sizes = () => nodes.map(node => (node as HTMLElement).style.fontSize);
           const before = sizes();

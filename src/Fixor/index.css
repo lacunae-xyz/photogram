@@ -19,8 +19,7 @@
 }
 
 .header-text > h1 {
-  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-  font-size: 2rem;
+  font-size: var(--pg-font-size-4);
   margin: 0;
 }
 
@@ -28,4 +27,5 @@
 .header-text > p {
   margin: 0;
   margin-left: 0.125rem;
+  font-size: var(--pg-font-size-1);
 }

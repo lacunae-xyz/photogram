@@ -47,8 +47,7 @@ export class PhotogramProjectCard extends LitElement {
       width: 1.625rem;
       padding: 0;
       line-height: normal;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 0.8125rem;
+      font-size: var(--pg-font-size-2);
       font-weight: bold;
       text-transform: none;
       background: var(--pg-color-surface-raised);

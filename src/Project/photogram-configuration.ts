@@ -71,13 +71,13 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     h2 {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.25rem;
+      font-size: var(--pg-font-size-3);
       margin: 1rem;
     }
 
     #font-family {
       margin-left: 1rem;
+      font: inherit;
     }
 
     .template input {

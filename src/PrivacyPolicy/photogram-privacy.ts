@@ -30,6 +30,7 @@ export class PhotogramPrivacy extends LitElement {
 
     h1 {
       font-family: var(--pg-font-mono);
+      font-size: var(--pg-font-size-5);
     }
 
     a {

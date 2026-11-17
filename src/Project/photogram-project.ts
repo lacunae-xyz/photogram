@@ -76,8 +76,7 @@ export class PhotogramProject extends LitElement {
     }
 
     .prompt-permission-description {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.2em;
+      font-size: var(--pg-font-size-3);
       margin-bottom: 0;
     }
   `;

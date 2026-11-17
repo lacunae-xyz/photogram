@@ -140,6 +140,37 @@ export function createTitleSizer<T extends Title>(
   };
 }
 
+/**
+ * How long sizing waits for loading fonts. A stalled font would otherwise leave titles unsized: past this, they're
+ * measured in the fallback font, and `loadingdone` re-sizes them once the font lands.
+ */
+const fontWaitMs = 1000;
+
+/**
+ * Calls `callback` now, or once `fonts` have loaded if some are loading, at most `timeoutMs` later: sizing measures the
+ * text, and a title measured in the fallback font while the web font loads would keep a size that doesn't fit.
+ */
+export function afterFontsLoad(
+  fonts: Pick<FontFaceSet, 'status' | 'ready'> | undefined,
+  callback: () => void,
+  timeoutMs = fontWaitMs,
+) {
+  if (fonts?.status !== 'loading') {
+    callback();
+    return;
+  }
+  let called = false;
+  const once = () => {
+    if (!called) {
+      called = true;
+      clearTimeout(timer);
+      callback();
+    }
+  };
+  const timer = setTimeout(once, timeoutMs);
+  void fonts.ready.then(once);
+}
+
 let observer: ReturnType<typeof createObserver> | undefined;
 
 function createObserver() {
@@ -152,17 +183,28 @@ function createObserver() {
     return `${container?.clientWidth}×${container?.clientHeight}×${title.offsetHeight}`;
   };
 
+  const idle = (callback: () => void) => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(callback, { timeout: 100 });
+    } else {
+      setTimeout(callback);
+    }
+  };
+
+  // A font that finishes loading swaps in on the next frame, which lays out every title again: like after a large
+  // render, leave that frame free of our script. Once the wait timed out, go ahead even if fonts still load.
+  const frame = (callback: () => void, waited = false) => {
+    if (!waited && document.fonts?.status === 'loading') {
+      afterFontsLoad(document.fonts, () => idle(() => frame(callback, true)));
+    } else {
+      requestAnimationFrame(callback);
+    }
+  };
+
   const sizer = createTitleSizer<HTMLElement>(
     {
-      request: callback => requestAnimationFrame(callback),
-      requestAfterNext: callback => {
-        const next = () => requestAnimationFrame(callback);
-        if (typeof requestIdleCallback === 'function') {
-          requestIdleCallback(next, { timeout: 100 });
-        } else {
-          setTimeout(next);
-        }
-      },
+      request: callback => frame(callback),
+      requestAfterNext: callback => idle(() => frame(callback)),
       now: () => performance.now(),
     },
     {

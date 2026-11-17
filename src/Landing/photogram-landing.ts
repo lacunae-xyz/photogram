@@ -47,8 +47,7 @@ export class PhotogramLanding extends LitElement {
     }
 
     h2 {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.75rem;
+      font-size: var(--pg-font-size-4);
     }
 
     .landing-footer {
@@ -142,6 +141,7 @@ export class PhotogramLanding extends LitElement {
 
     .empty-project-item h1 {
       margin: 1rem;
+      font-size: var(--pg-font-size-5);
       text-decoration: none;
     }
 
