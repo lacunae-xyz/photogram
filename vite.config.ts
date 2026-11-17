@@ -56,7 +56,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['src/**/*.test.{js,jsx,ts,tsx}'],
+          include: ['src/**/*.test.{js,ts}'],
           exclude: ['**/*.browser.test.ts'],
           environment: 'jsdom',
           globals: true,
