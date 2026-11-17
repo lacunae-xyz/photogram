@@ -7,7 +7,8 @@ export const indicatorStyles = css`
     margin-right: var(--pg-space-2);
   }
 
-  .indicator.hide::part(icon) {
+  /* On the host, so the labelled image hides with its icon. */
+  .indicator.hide {
     visibility: hidden;
   }
 `;

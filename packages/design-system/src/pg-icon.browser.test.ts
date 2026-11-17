@@ -100,6 +100,24 @@ describe('pg-icon', () => {
       .toBeInTheDocument();
   });
 
+  it('names an HTML element, not the svg, so axe keeps the content around it in one region', async () => {
+    const icon = await renderIcon(
+      html`<pg-icon name="auto-fix-high" label="special effects"></pg-icon>`,
+    );
+    const image = icon.shadowRoot?.querySelector('[role="img"]');
+    expect(image?.localName).toBe('span');
+    expect(image?.querySelector('svg')).not.toBeNull();
+  });
+
+  it('renders nothing once the name becomes unknown', async () => {
+    const icon = await renderIcon(
+      html`<pg-icon name="print" label="print"></pg-icon>`,
+    );
+    icon.name = 'nope';
+    await icon.updateComplete;
+    expect(icon.shadowRoot?.querySelector('svg, [role="img"]')).toBeNull();
+  });
+
   it('is decorative without a label', async () => {
     const icon = await renderIcon(
       html`<pg-icon name="auto-fix-high"></pg-icon>`,

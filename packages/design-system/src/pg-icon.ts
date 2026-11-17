@@ -1,4 +1,4 @@
-import { LitElement, css, nothing } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
@@ -39,6 +39,11 @@ export class PgIcon extends LitElement {
       display: contents;
     }
 
+    /* Lays its svg out as the bare svg would be, inline or as a flex item: no line box around it. */
+    span {
+      display: inline-flex;
+    }
+
     svg {
       width: 1.5rem;
       height: 1.5rem;
@@ -56,13 +61,15 @@ export class PgIcon extends LitElement {
       return nothing;
     }
     // Static parts, so each icon is one template however many tiles show it.
-    return staticHtml`<svg
+    const svg = staticHtml`<svg
       part="icon"
       viewBox="${icon.viewBox}"
-      role=${this.label ? 'img' : nothing}
-      aria-label=${this.label || nothing}
       aria-hidden=${this.label ? nothing : 'true'}
     >${icon.body}</svg>`;
+    // The label goes on an HTML element: axe's region rule splits the surrounding content around an <svg>.
+    return this.label
+      ? html`<span role="img" aria-label=${this.label}>${svg}</span>`
+      : svg;
   }
 }
 
