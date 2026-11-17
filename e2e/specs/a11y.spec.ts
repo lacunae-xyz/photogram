@@ -27,6 +27,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await routeGallery(page);
         await page.goto(route);
         await page.waitForLoadState('networkidle');
+        // One main landmark, and the header's banner outside it (Playwright's locators pierce shadow roots).
+        await expect(page.locator('main')).toHaveCount(1);
+        await expect(page.locator('main header')).toHaveCount(0);
         const results = await new AxeBuilder({ page }).analyze();
         await testInfo.attach('axe', { body: JSON.stringify(results.violations, null, 2), contentType: 'application/json' });
         const violations = results.violations
