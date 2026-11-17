@@ -104,7 +104,8 @@ export class PgHeader extends LitElement {
     @media print {
       :host {
         color: var(--pg-color-text);
-        border-image: none;
+        /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
+        border-image-source: none;
       }
 
       nav a[aria-current='page'] {
