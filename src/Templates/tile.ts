@@ -26,8 +26,13 @@ export abstract class Tile extends LitElement {
 
   protected willUpdate(changed: PropertyValues<this>) {
     if (changed.has('color') || changed.has('colorDistribution')) {
-      this.style.backgroundColor =
-        backgroundColor(this.colorDistribution, this.color) ?? '';
+      const background = backgroundColor(this.colorDistribution, this.color);
+      this.style.backgroundColor = background ?? '';
+      // The accent can't be read on every label colour: the fx icon takes the text's.
+      this.style.setProperty(
+        '--photogram-fx-color',
+        background ? 'currentColor' : null,
+      );
     }
   }
 }

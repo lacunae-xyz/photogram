@@ -105,6 +105,24 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
         .toBeVisible();
     });
 
+    it('paints fx in the accent, and in the text colour on a label-coloured tile', async () => {
+      document.body.style.setProperty('--pg-color-accent-icon', 'rgb(1, 2, 3)');
+      document.body.style.color = 'rgb(4, 5, 6)';
+      try {
+        const tile = await renderTile({
+          ...shot,
+          colorDistribution: 'indicator',
+        });
+        const fx = part(tile, ['photogram-fx', 'pg-icon', 'svg']);
+        expect(getComputedStyle(fx).fill).toBe('rgb(1, 2, 3)');
+        tile.colorDistribution = 'card';
+        await tile.updateComplete;
+        expect(getComputedStyle(fx).fill).toBe('rgb(4, 5, 6)');
+      } finally {
+        document.body.removeAttribute('style');
+      }
+    });
+
     it('takes the label colour as background only for the card distribution', async () => {
       const tile = await renderTile({
         ...shot,
