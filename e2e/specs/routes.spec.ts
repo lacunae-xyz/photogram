@@ -25,8 +25,10 @@ for (const { path, ready } of routes) {
 
 test('the privacy policy is linked from /', async ({ page }) => {
   await page.goto('/');
+  await markWindow(page);
   await page.getByRole('link', { name: 'Privacy policy' }).click();
   await expect(page).toHaveURL(/\/privacy-policy$/);
+  expect(await windowMarked(page)).toBe(true);
   await expect(page.getByRole('heading', { level: 1, name: 'Privacy policy' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'contact@lacunae.xyz' })).toHaveAttribute('href', 'mailto:contact@lacunae.xyz');
 });
@@ -41,6 +43,72 @@ test('unknown route shows a not found page (B16)', async ({ page, pageErrors }) 
   const response = await page.goto('/does-not-exist');
   expect(response?.status()).toBe(200);
   await expect(page.getByRole('heading', { name: /not found|404/i })).toBeVisible({ timeout: 2_000 });
+  expect(pageErrors).toEqual([]);
+});
+
+/** Sets a marker on `window`: a full page load drops it. */
+async function markWindow(page: Page) {
+  await page.evaluate(() => Object.assign(window, { photogramMarker: true }));
+}
+
+async function windowMarked(page: Page) {
+  return page.evaluate(() => 'photogramMarker' in window);
+}
+
+const headerLink = (page: Page, name: string) => page.getByRole('navigation').getByRole('link', { name });
+
+test('Projects → Tutorial navigates without loading the page', async ({ page, pageErrors }) => {
+  await page.goto('/projects');
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await markWindow(page);
+  await headerLink(page, 'Tutorial').click();
+  await expect(page).toHaveURL(/\/tutorial$/);
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+  await expect(page).toHaveTitle('Photogram · Comment utiliser Photogram');
+  expect(await windowMarked(page)).toBe(true);
+  expect(pageErrors).toEqual([]);
+});
+
+test('back and forward show the page of the address, without loading it', async ({ page }) => {
+  await page.goto('/projects');
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await markWindow(page);
+  await headerLink(page, 'Tutorial').click();
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/projects$/);
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await expect(page).toHaveTitle('Photogram · Projects');
+
+  await page.goForward();
+  await expect(page).toHaveURL(/\/tutorial$/);
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+  await expect(page).toHaveTitle('Photogram · Comment utiliser Photogram');
+  expect(await windowMarked(page)).toBe(true);
+});
+
+test('a modified click on a header link opens it in a new page', async ({ page, context }) => {
+  await page.goto('/projects');
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  const opened = context.waitForEvent('page');
+  await headerLink(page, 'Tutorial').click({ modifiers: ['ControlOrMeta'] });
+  const tutorial = await opened;
+  await expect(tutorial).toHaveURL(/\/tutorial$/);
+  await expect(tutorial.getByText('nommé data.csv')).toBeVisible();
+  await expect(page).toHaveURL(/\/projects$/);
+});
+
+test('routes without a native URLPattern', async ({ page, pageErrors }) => {
+  await page.addInitScript(() => {
+    delete (globalThis as { URLPattern?: unknown }).URLPattern;
+  });
+  await page.goto('/Tutorial/');
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+  await headerLink(page, 'Projects').click();
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await page.goto('/does-not-exist');
+  await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 
