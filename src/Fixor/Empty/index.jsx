@@ -11,14 +11,16 @@ function Empty(props) {
           <p>A tool for assistant editor</p>
         </a>
       </header>
-      <div className="empty-button">
-        <ImportButton onFiles={props.onFiles}>Add first project</ImportButton>
-      </div>
-      <img
-        className="projects-empty"
-        src="/illus/empty-street.svg"
-        alt="No project"
-      />
+      <main>
+        <div className="empty-button">
+          <ImportButton onFiles={props.onFiles}>Add first project</ImportButton>
+        </div>
+        <img
+          className="projects-empty"
+          src="/illus/empty-street.svg"
+          alt="No project"
+        />
+      </main>
     </div>
   );
 }

@@ -159,7 +159,7 @@ function Edls(props) {
         </button>
       </header>
       <br />
-      {content}
+      <main>{content}</main>
     </div>
   );
 }

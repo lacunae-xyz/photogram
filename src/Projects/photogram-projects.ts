@@ -64,42 +64,44 @@ export class PhotogramProjects extends LitElement {
     const { projects, quota } = this.#projects;
     return html`<div class="projects-container">
       <slot name="header"></slot>
-      <div class="action-project">
-        <photogram-import-project
-          @import=${(event: CustomEvent<{ files: File[] }>) =>
-            this.#projects.import(event.detail.files)}
-        ></photogram-import-project>
-        <photogram-open-project
-          @open=${(
-            event: CustomEvent<{ dirHandle: FileSystemDirectoryHandle }>,
-          ) => this.#projects.open(event.detail.dirHandle)}
-        ></photogram-open-project>
-      </div>
-      ${
-        projects.length <= 0
-          ? html`<pg-empty-state
-              class="projects-empty"
-              illustration="empty-street"
-              label="No project"
-            ></pg-empty-state>`
-          : nothing
-      }
-      <ul id="grid">
-        ${repeat(
-          projects,
-          project => project.key,
-          project =>
-            html`<photogram-project-card
-              .project=${project}
-              @open=${() => this.#projects.link(project.key)}
-              @delete=${() => this.#projects.delete(project.key)}
-            ></photogram-project-card>`,
-        )}
-      </ul>
-      <photogram-quota
-        .value=${quota.value}
-        .max=${quota.max}
-      ></photogram-quota>
+      <main>
+        <div class="action-project">
+          <photogram-import-project
+            @import=${(event: CustomEvent<{ files: File[] }>) =>
+              this.#projects.import(event.detail.files)}
+          ></photogram-import-project>
+          <photogram-open-project
+            @open=${(
+              event: CustomEvent<{ dirHandle: FileSystemDirectoryHandle }>,
+            ) => this.#projects.open(event.detail.dirHandle)}
+          ></photogram-open-project>
+        </div>
+        ${
+          projects.length <= 0
+            ? html`<pg-empty-state
+                class="projects-empty"
+                illustration="empty-street"
+                label="No project"
+              ></pg-empty-state>`
+            : nothing
+        }
+        <ul id="grid">
+          ${repeat(
+            projects,
+            project => project.key,
+            project =>
+              html`<photogram-project-card
+                .project=${project}
+                @open=${() => this.#projects.link(project.key)}
+                @delete=${() => this.#projects.delete(project.key)}
+              ></photogram-project-card>`,
+          )}
+        </ul>
+        <photogram-quota
+          .value=${quota.value}
+          .max=${quota.max}
+        ></photogram-quota>
+      </main>
     </div>`;
   }
 }

@@ -43,6 +43,12 @@ export class PhotogramProject extends LitElement {
       overflow-y: auto;
     }
 
+    /* Focusable, so the keyboard scrolls the tiles. */
+    .layout-left:focus-visible {
+      outline: 2px solid var(--pg-color-focus);
+      outline-offset: -2px;
+    }
+
     .layout-right {
       grid-area: layout-right;
     }
@@ -227,7 +233,7 @@ export class PhotogramProject extends LitElement {
             .then(() => (this.shot = undefined))
             .catch(error => console.error(error))}
       ></photogram-tile-form>
-      <div class="layout-parent">
+      <main class="layout-parent">
         <div class="layout-top">
           <photogram-toolbar
             .heading=${project.name}
@@ -238,7 +244,7 @@ export class PhotogramProject extends LitElement {
               this.#exportDataJson().catch(error => console.error(error))}
           ></photogram-toolbar>
         </div>
-        <div class="layout-left">
+        <div class="layout-left" role="region" aria-label="Tiles" tabindex="0">
           ${
             this.permission
               ? this.#promptPermission()
@@ -311,7 +317,7 @@ export class PhotogramProject extends LitElement {
               )}
           ></photogram-configuration>
         </div>
-      </div>`;
+      </main>`;
   }
 }
 

@@ -376,12 +376,14 @@ export class PhotogramLanding extends LitElement {
     const { quota } = this.#projects;
     return html`<div class="landing-container">
       <slot name="header"></slot>
-      ${this.#list()} ${this.#howToStart()}
-      <photogram-quota
-        .value=${quota.value}
-        .max=${quota.max}
-      ></photogram-quota>
-      ${this.#creators()}
+      <main>
+        ${this.#list()} ${this.#howToStart()}
+        <photogram-quota
+          .value=${quota.value}
+          .max=${quota.max}
+        ></photogram-quota>
+        ${this.#creators()}
+      </main>
       <footer class="landing-footer">
         <a href="/privacy-policy">Privacy policy</a>
       </footer>
