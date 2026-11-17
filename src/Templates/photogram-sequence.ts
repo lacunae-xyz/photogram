@@ -18,8 +18,7 @@ export class PhotogramSequence extends LitElement {
       justify-content: center;
       align-items: center;
       text-align: center;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.25rem;
+      border-radius: var(--pg-radius-s);
       font-size: var(--pg-font-size-4);
       font-weight: bold;
       margin-right: 0.5rem;

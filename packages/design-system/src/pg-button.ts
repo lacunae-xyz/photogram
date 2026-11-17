@@ -51,8 +51,7 @@ export class PgButton extends LitElement {
       height: auto;
       padding: 0.5rem;
       line-height: 0;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 62.5rem;
+      border-radius: var(--pg-radius-pill);
     }
 
     :host([variant='icon']) button:enabled {

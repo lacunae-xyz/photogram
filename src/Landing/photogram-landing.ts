@@ -103,8 +103,7 @@ export class PhotogramLanding extends LitElement {
 
     .empty-project-item {
       display: flex;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.5rem;
+      border-radius: var(--pg-radius-s);
       transition-property: transform background-color;
       transition-duration: 0.5s;
       color: var(--pg-color-text);
@@ -193,8 +192,7 @@ export class PhotogramLanding extends LitElement {
     .creator-item img {
       width: 8rem;
       height: 8rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 8rem;
+      border-radius: var(--pg-radius-pill);
     }
 
     .creator-name {

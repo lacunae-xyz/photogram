@@ -6,8 +6,7 @@ export const dotStyles = css`
     padding: 0.375rem;
     height: 1.25rem;
     width: 1.25rem;
-    /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-    border-radius: 100%;
+    border-radius: var(--pg-radius-pill);
     background-color: var(--pg-grey-400);
     margin-right: 0.5rem;
     -webkit-print-color-adjust: exact;

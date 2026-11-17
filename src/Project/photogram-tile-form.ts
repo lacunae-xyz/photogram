@@ -43,8 +43,7 @@ export class PhotogramTileForm extends LitElement {
     #label,
     #periode,
     #fx {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 2px;
+      border-radius: var(--pg-radius-s);
       background-color: var(--pg-grey-200);
       border: none;
       margin-bottom: 0.5rem;

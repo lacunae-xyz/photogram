@@ -39,8 +39,7 @@ export class PhotogramToolbar extends LitElement {
     .button-export::part(button) {
       height: auto;
       padding: 0.5rem 0.75rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.25rem;
+      border-radius: var(--pg-radius-s);
       font: inherit;
       font-weight: bold;
       text-transform: none;
