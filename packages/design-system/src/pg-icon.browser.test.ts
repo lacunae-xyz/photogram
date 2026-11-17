@@ -11,6 +11,17 @@ async function renderIcon(template: ReturnType<typeof html>) {
   return icon;
 }
 
+const files = import.meta.glob<string>('../icons/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+/** The icon file's path data. */
+function pathData(name: string) {
+  return /\sd="([^"]*)"/.exec(files[`../icons/${name}.svg`])?.[1];
+}
+
 afterEach(() => render(null, document.body));
 
 describe('pg-icon', () => {
@@ -23,25 +34,53 @@ describe('pg-icon', () => {
       'link-off',
       'print',
       'weather-night',
-      'weather-none',
       'weather-sunny',
       'weather-sunset-down',
       'weather-sunset-up',
     ]);
   });
 
-  it('renders the named icon file', async () => {
+  it('renders the named icon file inline, 24px', async () => {
     const icon = await renderIcon(
       html`<pg-icon name="weather-sunny"></pg-icon>`,
     );
-    const image = icon.shadowRoot?.querySelector('img');
-    expect(image?.getAttribute('src')).toMatch(/weather-sunny.*\.svg$/);
-    await expect.poll(() => image?.complete && image.naturalWidth).toBe(24);
+    const svg = icon.shadowRoot?.querySelector('svg');
+    expect(svg?.querySelector('path')?.getAttribute('d')).toBe(
+      pathData('weather-sunny'),
+    );
+    expect(svg?.getBoundingClientRect()).toMatchObject({
+      width: 24,
+      height: 24,
+    });
+  });
+
+  it('scales every file to its box, whatever its viewBox', async () => {
+    for (const name of iconNames) {
+      const icon = await renderIcon(html`<pg-icon name=${name}></pg-icon>`);
+      const svg = icon.shadowRoot?.querySelector('svg');
+      expect(svg?.getAttribute('viewBox'), name).toMatch(/^\S+ \S+ \d+ \d+$/);
+      const path = svg?.querySelector('path')?.getBoundingClientRect();
+      expect(path?.width, name).toBeGreaterThan(14);
+      expect(path?.width, name).toBeLessThanOrEqual(24);
+      render(null, document.body);
+    }
+  });
+
+  it('paints in the current colour', async () => {
+    const icon = await renderIcon(
+      html`<div style="color: rgb(1, 2, 3)">
+        <pg-icon name="print"></pg-icon>
+      </div>`,
+    );
+    const svg = icon.shadowRoot?.querySelector('svg');
+    expect(getComputedStyle(svg!).fill).toBe('rgb(1, 2, 3)');
+    icon.style.color = 'rgb(4, 5, 6)';
+    expect(getComputedStyle(svg!).fill).toBe('rgb(4, 5, 6)');
   });
 
   it('renders nothing for an unknown name', async () => {
     const icon = await renderIcon(html`<pg-icon name="nope"></pg-icon>`);
-    expect(icon.shadowRoot?.querySelector('img')).toBeNull();
+    expect(icon.shadowRoot?.querySelector('svg')).toBeNull();
   });
 
   it('swaps the icon when the name changes', async () => {
@@ -50,9 +89,11 @@ describe('pg-icon', () => {
     );
     icon.name = 'auto-fix';
     await icon.updateComplete;
-    const images = icon.shadowRoot?.querySelectorAll('img');
-    expect(images).toHaveLength(1);
-    expect(images?.[0].getAttribute('src')).toMatch(/auto-fix.*\.svg$/);
+    const svgs = icon.shadowRoot?.querySelectorAll('svg');
+    expect(svgs).toHaveLength(1);
+    expect(svgs?.[0].querySelector('path')?.getAttribute('d')).toBe(
+      pathData('auto-fix'),
+    );
   });
 
   it('is an image named by its label', async () => {
@@ -62,6 +103,24 @@ describe('pg-icon', () => {
     await expect
       .element(page.getByRole('img', { name: 'special effects' }))
       .toBeInTheDocument();
+  });
+
+  it('names an HTML element, not the svg, so axe keeps the content around it in one region', async () => {
+    const icon = await renderIcon(
+      html`<pg-icon name="auto-fix" label="special effects"></pg-icon>`,
+    );
+    const image = icon.shadowRoot?.querySelector('[role="img"]');
+    expect(image?.localName).toBe('span');
+    expect(image?.querySelector('svg')).not.toBeNull();
+  });
+
+  it('renders nothing once the name becomes unknown', async () => {
+    const icon = await renderIcon(
+      html`<pg-icon name="print" label="print"></pg-icon>`,
+    );
+    icon.name = 'nope';
+    await icon.updateComplete;
+    expect(icon.shadowRoot?.querySelector('svg, [role="img"]')).toBeNull();
   });
 
   it('is decorative without a label', async () => {
@@ -89,11 +148,11 @@ describe('pg-icon', () => {
     );
     const icon = document.body.querySelector('pg-icon');
     await icon?.updateComplete;
-    const image = icon?.shadowRoot?.querySelector('img');
-    expect(image?.getBoundingClientRect()).toMatchObject({
+    const svg = icon?.shadowRoot?.querySelector('svg');
+    expect(svg?.getBoundingClientRect()).toMatchObject({
       width: 32,
       height: 32,
     });
-    expect(getComputedStyle(image!).backgroundColor).toBe('rgb(1, 2, 3)');
+    expect(getComputedStyle(svg!).backgroundColor).toBe('rgb(1, 2, 3)');
   });
 });

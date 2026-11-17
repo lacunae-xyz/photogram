@@ -64,11 +64,11 @@ test('period and fx survive reload', async ({ page }) => {
   await save(page);
 
   const tile = tiles.nth(1);
-  await expect(tile.locator('.period')).toHaveClass(/dot-darker/);
+  await expect(tile.getByRole('img', { name: 'period: night', exact: true })).toBeVisible();
   await expect(tile.locator('.fx')).not.toHaveClass(/hide/);
 
   await page.reload();
-  await expect(tile.locator('.period')).toHaveClass(/dot-darker/);
+  await expect(tile.getByRole('img', { name: 'period: night', exact: true })).toBeVisible();
   await expect(tile.locator('.fx')).not.toHaveClass(/hide/);
 });
 

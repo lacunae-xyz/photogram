@@ -1,9 +1,11 @@
 import { html, render, type LitElement } from 'lit';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { page } from 'vitest/browser';
 import './photogram-tile-large';
 import './photogram-tile-small';
 import type { Tile } from './tile';
+import { palette } from '../Application/colors';
+import tokens from '@lacunae-xyz/photogram-design-system/tokens.css?inline';
 
 const shot = {
   sequence: '12',
@@ -15,6 +17,27 @@ const shot = {
 };
 
 afterEach(() => render(null, document.body));
+
+/** Paints the dot's fill over the tile, then the icon over the dot, and returns their WCAG contrast ratio. */
+function contrast(tile: string, dot: string, icon: string) {
+  const context = new OffscreenCanvas(1, 1).getContext('2d')!;
+  const paint = (...colors: string[]) => {
+    for (const color of colors) {
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+    }
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    const linear = (channel: number) => {
+      const c = channel / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+  };
+  const [lighter, darker] = [paint(tile, dot), paint(tile, dot, icon)].sort(
+    (a, b) => b - a,
+  );
+  return (lighter + 0.05) / (darker + 0.05);
+}
 
 async function frames(count: number) {
   for (let i = 0; i < count; i++) {
@@ -62,7 +85,7 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
         '/demo/1.jpg',
       );
       await expect
-        .element(page.getByRole('img', { name: 'period' }))
+        .element(page.getByRole('img', { name: 'period: evening' }))
         .toBeVisible();
       await expect
         .element(page.getByRole('img', { name: 'special effects indicator' }))
@@ -96,6 +119,59 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       await light.updateComplete;
       await part<LitElement>(light, ['photogram-sequence']).updateComplete;
       expect(getComputedStyle(sequence).color).toBe('rgb(255, 255, 255)');
+    });
+
+    it('shows each period with its own icon', async () => {
+      const paths = new Set();
+      for (const period of ['matin', 'jour', 'soir', 'nuit']) {
+        const tile = await renderTile({ ...shot, period });
+        await part<LitElement>(tile, ['photogram-period', 'pg-icon'])
+          .updateComplete;
+        paths.add(
+          part(tile, ['photogram-period', 'pg-icon', 'path']).getAttribute('d'),
+        );
+      }
+      expect(paths.size).toBe(4);
+    });
+
+    it('names the period it shows', async () => {
+      await renderTile({ ...shot, period: 'nuit' });
+      await expect
+        .element(page.getByRole('img', { name: 'period: night' }))
+        .toBeVisible();
+    });
+
+    it('draws period and fx as dots their icons read on (3:1), on any label colour', async () => {
+      const style = document.createElement('style');
+      style.textContent = tokens;
+      document.head.append(style);
+      onTestFinished(() => style.remove());
+      const labels = [undefined, '#FFFFFF', ...palette, '#000000'];
+      for (const value of ['matin', 'jour', 'soir', 'nuit']) {
+        for (const color of labels) {
+          const tile = await renderTile({
+            ...shot,
+            period: value,
+            color,
+            colorDistribution: 'card',
+          });
+          for (const indicator of ['photogram-period', 'photogram-fx']) {
+            const svg = part(tile, [indicator, 'pg-icon', 'svg']);
+            const style = getComputedStyle(svg);
+            expect(style.width, `${indicator} ${value} size`).toBe('20px');
+            expect(style.borderRadius).not.toBe('0px');
+            const ratio = contrast(
+              getComputedStyle(tile).backgroundColor,
+              style.backgroundColor,
+              style.fill,
+            );
+            expect(
+              ratio,
+              `${indicator} ${value} on ${color ?? 'white'}`,
+            ).toBeGreaterThanOrEqual(3);
+          }
+        }
+      }
     });
 
     it('takes the label colour as background only for the card distribution', async () => {

@@ -74,6 +74,8 @@ for (const template of ['small', 'large'] as const) {
         expect(imagePages[0].texts.some(t => t.includes(word)), `action of row ${row} next to its image`).toBe(true);
       }
     }
+    // One image per tile, its own: the icons print as vector paths, not as images.
+    expect(pages.flatMap(p => p.imageWidths)).toHaveLength(demoRows.length);
     for (const [row, word] of Object.entries(actionWords)) {
       expect(pages.some(p => p.texts.some(t => t.includes(word))), `action of row ${row}`).toBe(true);
     }

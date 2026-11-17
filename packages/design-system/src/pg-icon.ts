@@ -1,31 +1,50 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { html as staticHtml, unsafeStatic } from 'lit/static-html.js';
 
 const files = import.meta.glob<string>('../icons/*.svg', {
-  query: '?url',
+  query: '?raw',
   import: 'default',
   eager: true,
 });
 
+/** The file's `viewBox` and the markup inside its `<svg>`. */
+function parse(file: string) {
+  const open = file.slice(0, file.indexOf('>'));
+  const viewBox = /\sviewBox="([^"]*)"/.exec(open)?.[1] ?? '';
+  const body = file.slice(open.length + 1, file.lastIndexOf('</svg>'));
+  return { viewBox: unsafeStatic(viewBox), body: unsafeStatic(body) };
+}
+
 const icons = new Map(
-  Object.entries(files).map(([path, url]) => [
+  Object.entries(files).map(([path, file]) => [
     path.slice(path.lastIndexOf('/') + 1, -'.svg'.length),
-    url,
+    parse(file),
   ]),
 );
 
 export const iconNames = [...icons.keys()];
 
 /**
- * An icon from `icons/`, decorative unless it has a `label`. Size and paint it through `::part(icon)`.
- *
- * An `<img>` until 06 §6.5 inlines the SVG for `currentColor`: inline SVG rasterises a few pixels differently.
+ * An icon from `icons/`, decorative unless it has a `label`. Inline SVG painted in `currentColor`: set `color` on it, or
+ * let it inherit. 24px by default, sized through `::part(icon)`.
  */
 @customElement('pg-icon')
 export class PgIcon extends LitElement {
   static styles = css`
     :host {
       display: contents;
+    }
+
+    /* Lays its svg out as the bare svg would be, inline or as a flex item: no line box around it. */
+    span {
+      display: inline-flex;
+    }
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: currentColor;
     }
   `;
 
@@ -34,10 +53,20 @@ export class PgIcon extends LitElement {
   @property() accessor label = '';
 
   render() {
-    const url = icons.get(this.name);
-    return url
-      ? html`<img part="icon" src=${url} alt=${this.label} />`
-      : nothing;
+    const icon = icons.get(this.name);
+    if (!icon) {
+      return nothing;
+    }
+    // Static parts, so each icon is one template however many tiles show it.
+    const svg = staticHtml`<svg
+      part="icon"
+      viewBox="${icon.viewBox}"
+      aria-hidden=${this.label ? nothing : 'true'}
+    >${icon.body}</svg>`;
+    // The label goes on an HTML element: axe's region rule splits the surrounding content around an <svg>.
+    return this.label
+      ? html`<span role="img" aria-label=${this.label}>${svg}</span>`
+      : svg;
   }
 }
 
