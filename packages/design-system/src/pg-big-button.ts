@@ -12,7 +12,7 @@ export class PgBigButton extends PgButton {
 
     button {
       min-width: 88px;
-      margin: 6px 8px;
+      margin: var(--pg-space-1) var(--pg-space-2);
       padding: var(--pg-space-3) var(--pg-space-4);
       border: none;
       border-radius: var(--pg-radius-s);
