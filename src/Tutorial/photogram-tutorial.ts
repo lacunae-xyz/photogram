@@ -1,114 +1,106 @@
-import React, { Component } from 'react';
-import useDocumentMeta from '../useDocumentMeta';
-import './index.css';
-import Header from '../Header';
-import '../Templates/photogram-tile-small';
+import { LitElement, css, html, unsafeCSS } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
 import { colors } from '../Application';
+import '../Templates/photogram-tile-small';
+import editable from '../illus/undraw_editable_dywm.svg';
+import examination from '../illus/undraw_detailed_examination_joef.svg';
 
-class Example extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      sequence: '1',
-      action: 'Théo est avec ses invités',
-      label: 'salon',
-      periode: 'soir',
-      fx: 'fx',
-      url: '/demo/1.jpg',
-      color: colors[5],
-      colorDistribution: 'indicator',
-    };
+type Example = {
+  sequence: string;
+  action: string;
+  label: string;
+  period: string;
+  fx: string;
+};
+
+const initialExample: Example = {
+  sequence: '1',
+  action: 'Théo est avec ses invités',
+  label: 'salon',
+  period: 'soir',
+  fx: 'fx',
+};
+
+/**
+ * The tutorial page, in French, with a tile that follows the example row typed in its form.
+ *
+ * Slot: `header`.
+ */
+@customElement('photogram-tutorial')
+export class PhotogramTutorial extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+    }
+
+    .tutorial-container {
+      background-image:
+        url(${unsafeCSS(editable)}), url(${unsafeCSS(examination)});
+      background-position:
+        left 1.6rem bottom,
+        right 1.6rem bottom;
+      background-size: 25.6rem;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    .tutorial-layout {
+      background-color: var(--pg-color-surface);
+      max-width: 80rem;
+      margin: auto;
+      padding-bottom: 1.6rem;
+    }
+
+    article {
+      font-family: var(--pg-font-text);
+    }
+
+    h1 {
+      font-family: var(--pg-font-mono);
+    }
+
+    .tutorial-example-layout {
+      display: grid;
+      grid-template-columns: 50% 50%;
+      grid-column-gap: 1.6rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .tutorial-example-form {
+      display: grid;
+      grid-template-columns: 50% 50%;
+      grid-row-gap: 1.6rem;
+      align-content: center;
+    }
+
+    .tutorial-example-tile {
+      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
+      font-family: Courier New;
+    }
+  `;
+
+  @state() private accessor example = initialExample;
+
+  #onInput(event: InputEvent) {
+    const { name, value } = event.target as HTMLInputElement;
+    this.example = { ...this.example, [name]: value };
   }
 
-  handleInputChange = event => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-    if (name === 'label') {
-      this.setState(state => {
-        return Object.assign(state, {
-          label: value,
-          color: value === '' ? '' : colors[value.length % 16],
-        });
-      });
-    } else {
-      this.setState(state => {
-        return Object.assign(state, { [name]: value });
-      });
-    }
-  };
+  #field(label: string, name: keyof Example) {
+    return html`<label>${label}</label
+      ><input
+        type="text"
+        name=${name}
+        value=${initialExample[name]}
+        @input=${this.#onInput}
+      />`;
+  }
 
   render() {
-    return (
-      <div className="tutorial-example-layout">
-        <form className="tutorial-example-form">
-          <label>Numéro de séquence</label>
-          <input
-            type="text"
-            name="sequence"
-            defaultValue={this.state.sequence}
-            onChange={this.handleInputChange}
-          />
-          <label>Description de l'action</label>
-          <input
-            type="text"
-            name="action"
-            defaultValue={this.state.action}
-            onChange={this.handleInputChange}
-          />
-          <label>Label</label>
-          <input
-            type="text"
-            name="label"
-            defaultValue={this.state.label}
-            onChange={this.handleInputChange}
-          />
-          <label>Périodes</label>
-          <input
-            type="text"
-            name="periode"
-            defaultValue={this.state.periode}
-            onChange={this.handleInputChange}
-          />
-          <label>Fx</label>
-          <input
-            type="text"
-            name="fx"
-            defaultValue={this.state.fx}
-            onChange={this.handleInputChange}
-          />
-        </form>
-        <div
-          style={{
-            fontFamily: 'Courier New',
-          }}
-        >
-          <photogram-tile-small
-            sequence={this.state.sequence}
-            action={this.state.action}
-            period={this.state.periode}
-            fx={this.state.fx}
-            url={this.state.url}
-            color={this.state.color}
-            colorDistribution={this.state.colorDistribution}
-          />
-        </div>
-      </div>
-    );
-  }
-}
-
-export default function Tutorial() {
-  useDocumentMeta({
-    title: 'Photogram · Comment utiliser Photogram',
-    description:
-      'Préparer le tableau et les photogrammes de votre projet, puis les ajouter à Photogram',
-  });
-
-  return (
-    <div className="tutorial-container">
-      <div className="tutorial-layout">
-        <Header nav="tutorial" />
+    const { sequence, action, label, period, fx } = this.example;
+    return html`<div class="tutorial-container">
+      <div class="tutorial-layout">
+        <slot name="header"></slot>
         <article>
           <h1>Comment utiliser Photogram</h1>
           <p>
@@ -155,7 +147,7 @@ export default function Tutorial() {
               suite être modifiées directement sur le site.
             </p>
             <p>
-              Une fois ce tableau complété, il doit être enregistré au format{' '}
+              Une fois ce tableau complété, il doit être enregistré au format
               <strong>.csv</strong>, et être nommé <strong>data.csv</strong>.
             </p>
           </section>
@@ -166,15 +158,33 @@ export default function Tutorial() {
               dédié à votre projet, vous pouvez maintenant exporter vos
               photogrammes, au fur et à mesure de l'avancée du tournage.
               <br />
-              Il suffit de les exporter au format .jpeg, de les nommer{' '}
+              Il suffit de les exporter au format .jpeg, de les nommer
               <em>exactement</em> comme les numéros de séquence utilisés dans
-              votre tableau, et de les mettre dans le même dossier que{' '}
+              votre tableau, et de les mettre dans le même dossier que
               <strong>data.csv</strong>.
             </p>
           </section>
           <section>
             <h1>3. Et la magie fut...</h1>
-            <Example />
+            <div class="tutorial-example-layout">
+              <form class="tutorial-example-form">
+                ${this.#field('Numéro de séquence', 'sequence')}
+                ${this.#field("Description de l'action", 'action')}
+                ${this.#field('Label', 'label')}
+                ${this.#field('Périodes', 'period')} ${this.#field('Fx', 'fx')}
+              </form>
+              <div class="tutorial-example-tile">
+                <photogram-tile-small
+                  .sequence=${sequence}
+                  .action=${action}
+                  .period=${period}
+                  .fx=${fx}
+                  .url=${'/demo/1.jpg'}
+                  .color=${label === '' ? '' : colors[label.length % 16]}
+                  color-distribution="indicator"
+                ></photogram-tile-small>
+              </div>
+            </div>
             <p>
               Une fois la première étape terminée, vous pouvez d'ores et déjà
               ajouter votre projet à Photogram, avec l'un de ces deux boutons :
@@ -221,6 +231,12 @@ export default function Tutorial() {
           </section>
         </article>
       </div>
-    </div>
-  );
+    </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'photogram-tutorial': PhotogramTutorial;
+  }
 }

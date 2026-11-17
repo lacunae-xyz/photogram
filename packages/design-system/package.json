@@ -9,11 +9,14 @@
     "./pg-button.js": "./src/pg-button.ts",
     "./pg-card.js": "./src/pg-card.ts",
     "./pg-dialog.js": "./src/pg-dialog.ts",
-    "./pg-icon.js": "./src/pg-icon.ts"
+    "./pg-empty-state.js": "./src/pg-empty-state.ts",
+    "./pg-icon.js": "./src/pg-icon.ts",
+    "./pg-illustration.js": "./src/pg-illustration.ts"
   },
   "files": [
     "tokens.css",
     "icons",
+    "illustrations",
     "src"
   ],
   "dependencies": {

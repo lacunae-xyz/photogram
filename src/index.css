@@ -5,11 +5,3 @@ body {
   padding: 0;
   font-family: var(--pg-font-mono);
 }
-
-article {
-  font-family: var(--pg-font-text);
-}
-
-article h1 {
-  font-family: var(--pg-font-mono);
-}

@@ -1,19 +1,41 @@
-import React from 'react';
-import useDocumentMeta from '../useDocumentMeta';
-import Header from '../Header';
-import './index.css';
+import { LitElement, css, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
 
 const contactEmail = 'contact@lacunae.xyz';
 
-export default function PrivacyPolicy() {
-  useDocumentMeta({
-    title: 'Photogram · Privacy policy',
-    description:
-      'Photogram keeps your projects on your device. What it counts, and who hosts it.',
-  });
-  return (
-    <div className="privacy-layout">
-      <Header />
+/**
+ * The privacy policy page.
+ *
+ * Slot: `header`.
+ */
+@customElement('photogram-privacy')
+export class PhotogramPrivacy extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+    }
+
+    .privacy-layout {
+      max-width: 80rem;
+      margin: auto;
+    }
+
+    article {
+      max-width: 64rem;
+      margin: auto;
+      padding: 0 6.4rem 3.2rem;
+      text-align: left;
+      font-family: var(--pg-font-text);
+    }
+
+    h1 {
+      font-family: var(--pg-font-mono);
+    }
+  `;
+
+  render() {
+    return html`<div class="privacy-layout">
+      <slot name="header"></slot>
       <article>
         <h1>Privacy policy</h1>
         <p>
@@ -24,7 +46,7 @@ export default function PrivacyPolicy() {
           Every project lives in your browser: its data in IndexedDB, its images
           in Cache Storage. An opened folder also stays where it is, and
           Photogram writes your changes to <code>data.json</code> in that
-          folder. Deleting a project, or clearing this site&apos;s data in your
+          folder. Deleting a project, or clearing this site's data in your
           browser, removes it from the browser.
         </p>
         <p>
@@ -38,26 +60,30 @@ export default function PrivacyPolicy() {
           deleting, leaving and printing a project, with the number of tiles
           printed. With each, it records the referring site, your browser,
           operating system, device type, screen size, language and country.
-          Aiven stores these records in a database for us. See{' '}
-          <a href="https://aiven.io/privacy">Aiven&apos;s privacy policy</a>.
+          Aiven stores these records in a database for us. See
+          <a href="https://aiven.io/privacy">Aiven's privacy policy</a>.
         </p>
         <p>
           Netlify hosts the site and our Umami server. Its servers log requests,
-          including your IP address and browser. See{' '}
-          <a href="https://www.netlify.com/privacy/">
-            Netlify&apos;s privacy policy
-          </a>
-          .
+          including your IP address and browser. See
+          <a href="https://www.netlify.com/privacy/">Netlify's privacy policy</a
+          >.
         </p>
         <p>
           Photogram has no accounts, sends no emails, shows no ads and has no
           Google sign-in. Netlify and Aiven are the only third parties.
         </p>
         <p>
-          Questions: <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+          Questions: <a href=${`mailto:${contactEmail}`}>${contactEmail}</a>.
         </p>
         <p>Last updated 16 November 2026.</p>
       </article>
-    </div>
-  );
+    </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'photogram-privacy': PhotogramPrivacy;
+  }
 }
