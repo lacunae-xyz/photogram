@@ -11,8 +11,6 @@
   margin: 6px 8px 6px 8px;
   min-width: 88px;
   border-radius: var(--pg-radius-s);
-  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-  font-size: 0.875rem;
   text-align: center;
   text-transform: uppercase;
   text-decoration: none;
@@ -21,8 +19,7 @@
 
   color: var(--pg-color-on-action);
   background-color: var(--pg-color-action);
-  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-  font-size: 1rem;
+  font-size: var(--pg-font-size-3);
 }
 
 .import-button-label:not([disabled]) {
