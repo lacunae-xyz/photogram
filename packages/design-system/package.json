@@ -13,6 +13,8 @@
     "./pg-header.js": "./src/pg-header.ts",
     "./pg-icon.js": "./src/pg-icon.ts",
     "./pg-illustration.js": "./src/pg-illustration.ts",
+    "./pg-theme-switch.js": "./src/pg-theme-switch.ts",
+    "./theme.js": "./src/theme.ts",
     "./illustrations/*.svg": "./illustrations/*.svg"
   },
   "files": [

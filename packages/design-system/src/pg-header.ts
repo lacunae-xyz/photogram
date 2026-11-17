@@ -5,8 +5,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 export type PgHeaderLink = { href: string; label: string };
 
 /**
- * An app's header: its logo, its name and tagline linking home, and its navigation.
- * The link whose `href` is `current` is marked as the current page.
+ * An app's header: its logo, its name and tagline linking home, its navigation, and its children after them
+ * (Photogram's theme switch). The link whose `href` is `current` is marked as the current page.
  */
 @customElement('pg-header')
 export class PgHeader extends LitElement {
@@ -19,8 +19,12 @@ export class PgHeader extends LitElement {
         100vw;
     }
 
+    /* Wraps what doesn't fit, the children first: they go to their own row, at the end, and the logo, name and
+       navigation keep theirs. */
     header {
       display: flex;
+      flex-wrap: wrap;
+      row-gap: var(--pg-space-2);
       font-family: var(--pg-font-mono);
       align-items: center;
       padding: var(--pg-space-4) 0;
@@ -46,9 +50,10 @@ export class PgHeader extends LitElement {
       outline-offset: 2px;
     }
 
+    /* Grows from its narrowest, the tagline wrapped, so the line breaks after the navigation. */
     .home {
       margin: var(--pg-space-5);
-      flex-grow: 1;
+      flex: 1 1 0;
     }
 
     h1 {
@@ -67,6 +72,11 @@ export class PgHeader extends LitElement {
       display: flex;
       gap: var(--pg-space-2);
       list-style: none;
+    }
+
+    ::slotted(*) {
+      margin-left: auto;
+      padding-left: var(--pg-space-4);
     }
 
     nav a {
@@ -177,6 +187,7 @@ export class PgHeader extends LitElement {
               </ul>
             </nav>`
       }
+      <slot></slot>
     </header>`;
   }
 }
