@@ -1,6 +1,7 @@
 import { LitElement, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import backgroundColor from './background';
+import { blackOrWhite } from './contrast';
 import './photogram-action';
 import './photogram-fx';
 import './photogram-image';
@@ -28,10 +29,15 @@ export abstract class Tile extends LitElement {
     if (changed.has('color') || changed.has('colorDistribution')) {
       const background = backgroundColor(this.colorDistribution, this.color);
       this.style.backgroundColor = background ?? '';
-      // The accent can't be read on every label colour: the fx icon takes the text's.
+      // The accent can't be read on every label colour, nor the text on the darkest: period and fx take the text
+      // colour, or white where it is the one that reads.
       this.style.setProperty(
-        '--photogram-fx-color',
-        background ? 'currentColor' : null,
+        '--photogram-indicator-color',
+        background
+          ? blackOrWhite(background) === '#ffffff'
+            ? '#ffffff'
+            : 'currentColor'
+          : null,
       );
     }
   }

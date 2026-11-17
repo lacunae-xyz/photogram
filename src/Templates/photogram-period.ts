@@ -11,7 +11,7 @@ const icons = {
   night: 'clear-night',
 };
 
-/** The period icon, in the tile's text colour. Without a period, a hidden icon holds its place, as fx's does. */
+/** The period icon, in the tile's text colour, or its indicator colour on a label-coloured tile. Without a period, a hidden icon holds its place, as fx's does. */
 @customElement('photogram-period')
 export class PhotogramPeriod extends LitElement {
   static styles = [
@@ -19,6 +19,10 @@ export class PhotogramPeriod extends LitElement {
     css`
       :host {
         display: contents;
+      }
+
+      .period {
+        color: var(--photogram-indicator-color, currentColor);
       }
     `,
   ];

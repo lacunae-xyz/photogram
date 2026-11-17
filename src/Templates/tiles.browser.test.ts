@@ -123,6 +123,31 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       }
     });
 
+    it('paints period and fx white on the darkest label colours, where the text is unreadable', async () => {
+      document.body.style.color = 'rgb(4, 5, 6)';
+      try {
+        const tile = await renderTile({
+          ...shot,
+          color: '#3F51B5',
+          colorDistribution: 'card',
+        });
+        const icons = () =>
+          [
+            part(tile, ['photogram-period', 'pg-icon', 'svg']),
+            part(tile, ['photogram-fx', 'pg-icon', 'svg']),
+          ].map(icon => getComputedStyle(icon).fill);
+        expect(icons()).toEqual(['rgb(255, 255, 255)', 'rgb(255, 255, 255)']);
+        tile.color = '#F44336';
+        await tile.updateComplete;
+        expect(icons()).toEqual(['rgb(4, 5, 6)', 'rgb(4, 5, 6)']);
+        tile.colorDistribution = 'indicator';
+        await tile.updateComplete;
+        expect(icons()[0]).toBe('rgb(4, 5, 6)');
+      } finally {
+        document.body.removeAttribute('style');
+      }
+    });
+
     it('takes the label colour as background only for the card distribution', async () => {
       const tile = await renderTile({
         ...shot,
