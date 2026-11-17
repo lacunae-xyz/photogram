@@ -53,6 +53,11 @@ export default defineConfig({
     // Assets stay files named like CRA's (`empty.<hex>.svg`): edit.spec matches the empty image src on that.
     assetsInlineLimit: 0,
     rolldownOptions: {
+      // The design system's gallery ships with the app, at /packages/design-system/: the screenshot run serves dist.
+      input: {
+        main: 'index.html',
+        gallery: 'packages/design-system/index.html',
+      },
       output: {
         hashCharacters: 'hex',
         assetFileNames: 'assets/[name].[hash][extname]',
