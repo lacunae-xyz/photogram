@@ -32,12 +32,16 @@ async function svgOf(illustration: PgIllustration) {
 describe('pg-illustration', () => {
   it('has the illustrations the pages use', () => {
     expect([...illustrationNames].sort()).toEqual([
+      'editable',
       'empty-street',
       'folder',
       'learning',
       'presentation',
-      'secure-files',
+      'private-files',
+      'the-search',
       'upload-image',
+      'videographer',
+      'web-developer',
     ]);
   });
 
@@ -86,19 +90,33 @@ describe('pg-illustration', () => {
     const svg = await svgOf(
       renderIllustration(
         html`<pg-illustration
-          name="empty-street"
-          style="--pg-color-accent: #00ff00; --pg-illus-ink: #111111; --pg-illus-bg: #222222; --pg-illus-paper: #333333"
+          name="folder"
+          style="--pg-color-accent: #00ff00; --pg-illus-ink: #111111; --pg-illus-bg: #222222; --pg-illus-shape: #444444; --pg-illus-line: #555555; --pg-illus-paper: #333333"
         ></pg-illustration>`,
       ),
     );
-    for (const colour of ['#38d39f', '#3f3d56', '#f2f2f2', '"#fff"']) {
+    for (const colour of [
+      '#38d39f',
+      '#3f3d56',
+      '#f2f2f2',
+      '#e6e6e6',
+      '"#ccc"',
+      '"#fff"',
+    ]) {
       expect(svg).not.toContain(colour);
     }
-    for (const colour of ['#00ff00', '#111111', '#222222', '#333333']) {
+    for (const colour of [
+      '#00ff00',
+      '#111111',
+      '#222222',
+      '#444444',
+      '#555555',
+      '#333333',
+    ]) {
       expect(svg).toContain(`fill="${colour}"`);
     }
-    // No token for this one.
-    expect(svg).toContain('fill="#e6e6e6"');
+    // No token for skin.
+    expect(svg).toContain('fill="#9e616a"');
   });
 
   it('switches illustration with its name', async () => {

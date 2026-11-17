@@ -1,6 +1,8 @@
 import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import videographer from '@lacunae-xyz/photogram-design-system/illustrations/videographer.svg';
+import webDeveloper from '@lacunae-xyz/photogram-design-system/illustrations/web-developer.svg';
 import '@lacunae-xyz/photogram-design-system/pg-illustration.js';
 import Application from '../Application';
 import { canOpenFolder, pickFolder } from '../Projects/folder-picker';
@@ -8,8 +10,6 @@ import { ProjectsController } from '../Projects/projects-controller';
 import '../Projects/photogram-import-project';
 import '../Projects/photogram-project-card';
 import '../Projects/photogram-quota';
-import videographer from '../illus/undraw_videographer_nnc7.svg';
-import webDeveloper from '../illus/undraw_web_developer_p3e5.svg';
 
 const creators = [
   {
@@ -155,7 +155,19 @@ export class PhotogramLanding extends LitElement {
       grid-template-areas: 'creator-title creator-title' 'creator-one creator-two';
       align-content: center;
       padding-bottom: 4.5rem;
+      position: relative;
+      isolation: isolate;
+    }
 
+    /* Its own layer, so the backgrounds fade without fading the creators. */
+    .creator-layout::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.8;
+
+      /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
       background-image:
         url(${unsafeCSS(webDeveloper)}), url(${unsafeCSS(videographer)});
       background-position:
@@ -167,8 +179,15 @@ export class PhotogramLanding extends LitElement {
       transition-duration: 0.5s;
     }
 
-    .creator-layout:hover {
+    .creator-layout:hover::before {
       background-size: 10.25rem;
+    }
+
+    /* Narrower, the creators sit on the artwork. The tutorial's backgrounds go at the same width, under its 50rem layout. */
+    @media (max-width: 50rem) {
+      .creator-layout::before {
+        display: none;
+      }
     }
 
     .creator-layout h2 {

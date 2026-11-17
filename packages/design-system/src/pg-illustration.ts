@@ -20,6 +20,8 @@ const tokens = new Map([
   ['#38d39f', '--pg-color-accent'],
   ['#3f3d56', '--pg-illus-ink'],
   ['#f2f2f2', '--pg-illus-bg'],
+  ['#e6e6e6', '--pg-illus-shape'],
+  ['#ccc', '--pg-illus-line'],
   ['#fff', '--pg-illus-paper'],
 ]);
 

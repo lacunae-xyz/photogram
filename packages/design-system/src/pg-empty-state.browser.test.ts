@@ -28,7 +28,7 @@ describe('pg-empty-state', () => {
 
   it('puts its content under the illustration', async () => {
     await renderEmptyState(
-      html`<pg-empty-state illustration="secure-files">
+      html`<pg-empty-state illustration="private-files">
         <p>Permission needs to be given again</p>
         <button>Grant permission</button>
       </pg-empty-state>`,
