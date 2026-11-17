@@ -70,6 +70,18 @@ async function expectMeta(page: Page, { title, description }: { title: string; d
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', description);
 }
 
+test('only the not found page asks not to be indexed', async ({ page }) => {
+  await routeDemo(page);
+  const robots = page.locator('meta[name="robots"]');
+  await page.goto('/does-not-exist');
+  await expect(robots).toHaveAttribute('content', 'noindex');
+  for (const { path, ...meta } of routeMeta.filter(({ path }) => path !== '/does-not-exist')) {
+    await page.goto(path);
+    await expectMeta(page, meta);
+    await expect(robots, path).toHaveCount(0);
+  }
+});
+
 for (const { path, ...meta } of routeMeta) {
   test(`${path} has its title and description`, async ({ page }) => {
     await routeDemo(page);

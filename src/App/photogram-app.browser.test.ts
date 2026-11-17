@@ -23,6 +23,7 @@ beforeEach(() => {
 afterEach(() => {
   render(null, document.body);
   description.remove();
+  document.head.querySelector('meta[name="robots"]')?.remove();
   history.replaceState(null, '', testerUrl);
   vi.restoreAllMocks();
 });
@@ -139,6 +140,18 @@ describe('photogram-app', () => {
       ...defaultMeta,
       title: 'Photogram · Page not found',
     });
+  });
+
+  it('keeps search engines off the not found page only', async () => {
+    const robots = () =>
+      document.head.querySelectorAll('meta[name="robots"][content="noindex"]')
+        .length;
+    const app = await renderApp('/does-not-exist');
+    expect(robots()).toBe(1);
+    await app.navigate('/also-missing');
+    expect(robots()).toBe(1);
+    await app.navigate('/tutorial');
+    expect(robots()).toBe(0);
   });
 
   it('matches like react-router did: any case, with or without a trailing slash', async () => {

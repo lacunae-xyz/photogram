@@ -67,6 +67,12 @@ export class PhotogramApp extends LitElement {
 
   #fixor: HTMLElement | undefined;
 
+  /** On the not found page only: the server answers its address with a 200. */
+  readonly #noindex = Object.assign(document.createElement('meta'), {
+    name: 'robots',
+    content: 'noindex',
+  });
+
   readonly #routes = new Routes(
     this,
     [
@@ -146,10 +152,10 @@ export class PhotogramApp extends LitElement {
     {
       fallback: {
         enter: () =>
-          this.#enter({
-            ...this.#defaultMeta,
-            title: 'Photogram · Page not found',
-          }),
+          this.#enter(
+            { ...this.#defaultMeta, title: 'Photogram · Page not found' },
+            { noindex: true },
+          ),
         render: () =>
           html`<photogram-not-found>${header()}</photogram-not-found>`,
       },
@@ -185,11 +191,16 @@ export class PhotogramApp extends LitElement {
     return this.#routes.goto(url.pathname);
   }
 
-  #enter(meta = this.#defaultMeta, { fixor = false } = {}) {
+  #enter(meta = this.#defaultMeta, { fixor = false, noindex = false } = {}) {
     document.title = meta.title;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute('content', meta.description);
+    if (noindex) {
+      document.head.append(this.#noindex);
+    } else {
+      this.#noindex.remove();
+    }
     if (fixor) {
       this.#fixor ??= this.appendChild(
         document.createElement('photogram-fixor'),
