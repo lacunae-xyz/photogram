@@ -1,5 +1,6 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 export type PgHeaderLink = { href: string; label: string };
 
@@ -12,6 +13,10 @@ export class PgHeader extends LitElement {
   static styles = css`
     :host {
       display: block;
+      color: var(--pg-color-on-chrome);
+      /* The band spans the viewport, the content keeps its page's column. Ink overflow: no scrollbar. */
+      border-image: linear-gradient(var(--pg-color-chrome) 0 0) fill 0 / 0 / 0
+        100vw;
     }
 
     header {
@@ -21,16 +26,29 @@ export class PgHeader extends LitElement {
       padding: var(--pg-space-4) 0;
     }
 
+    /* A mask, not an <img>: a one-colour logo takes the text colour, on the chrome and in print. */
     .logo {
       height: 3.125rem;
       width: 3.125rem;
+      flex-shrink: 0;
+      background-color: currentColor;
+      mask: var(--logo) center / contain no-repeat;
+      print-color-adjust: exact;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--pg-color-focus);
+      outline-offset: 2px;
     }
 
     .home {
       margin: var(--pg-space-5);
       flex-grow: 1;
-      text-decoration: none;
-      color: var(--pg-grey-950);
     }
 
     h1 {
@@ -42,34 +60,57 @@ export class PgHeader extends LitElement {
       margin: 0;
       margin-left: 0.125rem;
       font-size: var(--pg-font-size-1);
+      opacity: 0.7;
     }
 
     ul {
       display: flex;
+      gap: var(--pg-space-2);
       list-style: none;
     }
 
     nav a {
       display: block;
-      padding: var(--pg-space-4);
-      text-decoration: none;
-      color: var(--pg-grey-950);
-      border-bottom: 0.1875rem solid var(--pg-color-border);
-      margin-left: var(--pg-space-2);
+      padding: var(--pg-space-2) var(--pg-space-3);
+      border-radius: var(--pg-radius-pill);
       font-size: var(--pg-font-size-2);
     }
 
+    nav a:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--pg-color-on-chrome) 10%,
+        transparent
+      );
+    }
+
     nav a[aria-current='page'] {
-      border-bottom-color: var(--pg-color-accent);
+      background-color: var(--pg-color-accent);
+      color: var(--pg-color-on-accent);
+      font-weight: 700;
     }
 
-    nav a:hover,
-    nav a:focus {
-      background-color: var(--pg-grey-200);
+    @media (forced-colors: active) {
+      .logo {
+        forced-color-adjust: none;
+        background-color: CanvasText;
+      }
+
+      nav a[aria-current='page'] {
+        text-decoration: underline;
+      }
     }
 
-    nav a:active {
-      background-color: var(--pg-color-hover);
+    @media print {
+      :host {
+        color: var(--pg-color-text);
+        border-image: none;
+      }
+
+      nav a[aria-current='page'] {
+        background-color: transparent;
+        color: inherit;
+      }
     }
   `;
 
@@ -95,7 +136,14 @@ export class PgHeader extends LitElement {
       ${
         this.logo === undefined
           ? nothing
-          : html`<img class="logo" src=${this.logo} alt=${this.logoLabel} />`
+          : html`<span
+              class="logo"
+              role="img"
+              aria-label=${this.logoLabel}
+              style=${styleMap({
+                '--logo': `url("${this.logo.replaceAll('"', '%22')}")`,
+              })}
+            ></span>`
       }
       <a class="home" href=${this.href}>
         <h1>${this.heading}</h1>
