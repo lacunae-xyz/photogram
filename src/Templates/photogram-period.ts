@@ -4,12 +4,13 @@ import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { indicatorStyles } from './indicator-styles';
 import { toPeriod } from './period';
 
-// Master's MDI glyphs: the arrows tell sunrise from sunset, which no Material Symbol does.
+// Filled Material Symbols at weight 600, bold enough for a 20px dot. No Material Symbol tells sunrise from sunset, so
+// morning and evening put a chevron, up or down, under wb_twilight's horizon (see icons/LICENSE.txt).
 const icons = {
-  morning: 'weather-sunset-up',
-  day: 'weather-sunny',
-  evening: 'weather-sunset-down',
-  night: 'weather-night',
+  morning: 'wb-twilight-up',
+  day: 'sunny',
+  evening: 'wb-twilight-down',
+  night: 'moon-stars',
 };
 
 /** The period dot: lighter by day, darker by night. Without a period, a hidden dot holds its place, as fx's does. */
