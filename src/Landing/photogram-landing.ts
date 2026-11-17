@@ -113,7 +113,7 @@ export class PhotogramLanding extends LitElement {
 
     .empty-project-item:hover {
       transform: scale(1.05);
-      background-color: var(--pg-grey-200);
+      background-color: var(--pg-color-fill);
       cursor: pointer;
     }
 

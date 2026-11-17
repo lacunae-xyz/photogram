@@ -174,11 +174,13 @@ function probe(background: string) {
   return color;
 }
 
+/** An `rgb()`/`rgba()` colour, or the `color(srgb …)` a `color-mix()` computes to. */
 function rgba(color: string): Rgba {
   const [r = 0, g = 0, b = 0, a = 1] = (color.match(/[\d.]+/g) ?? []).map(
     Number,
   );
-  return [r, g, b, a];
+  const scale = color.startsWith('color(srgb') ? 255 : 1;
+  return [r * scale, g * scale, b * scale, a];
 }
 
 function over([r, g, b, a]: Rgba, [br, bg, bb]: Rgba): Rgba {

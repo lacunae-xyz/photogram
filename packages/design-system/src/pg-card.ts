@@ -17,12 +17,12 @@ export class PgCard extends LitElement {
       padding: var(--pg-space-2);
       padding-bottom: 0;
       text-align: center;
-      border: 1px solid var(--pg-grey-400);
+      border: 1px solid var(--pg-color-border-strong);
       background-color: var(--pg-color-surface-raised);
     }
 
     :host(:hover) {
-      outline: 0.1875rem solid var(--pg-grey-300);
+      outline: 0.1875rem solid var(--pg-color-border);
       cursor: pointer;
     }
 

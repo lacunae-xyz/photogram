@@ -26,8 +26,10 @@ export abstract class Tile extends LitElement {
 
   protected willUpdate(changed: PropertyValues<this>) {
     if (changed.has('color') || changed.has('colorDistribution')) {
-      this.style.backgroundColor =
-        backgroundColor(this.colorDistribution, this.color) ?? '';
+      const background = backgroundColor(this.colorDistribution, this.color);
+      this.style.backgroundColor = background ?? '';
+      // A label colour is the same in both schemes: the text and border on it stay light-scheme.
+      this.style.colorScheme = background ? 'light' : '';
     }
   }
 }

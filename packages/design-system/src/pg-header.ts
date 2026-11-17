@@ -60,7 +60,7 @@ export class PgHeader extends LitElement {
       margin: 0;
       margin-left: 0.125rem;
       font-size: var(--pg-font-size-1);
-      opacity: 0.7;
+      color: var(--pg-color-on-chrome-muted);
     }
 
     ul {
@@ -111,6 +111,10 @@ export class PgHeader extends LitElement {
         color: var(--pg-color-text);
         /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
         border-image-source: none;
+      }
+
+      p {
+        color: var(--pg-color-text-subtle);
       }
 
       nav a[aria-current='page'] {

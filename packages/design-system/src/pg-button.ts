@@ -31,9 +31,12 @@ export class PgButton extends LitElement {
       background-color: transparent;
     }
 
-    /* :enabled keeps the browser's disabled colour. */
     button:enabled {
       color: var(--pg-color-accent-text);
+    }
+
+    button:disabled {
+      color: var(--pg-color-disabled);
     }
 
     button:enabled:hover,

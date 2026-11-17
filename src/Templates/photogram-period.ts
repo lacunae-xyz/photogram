@@ -22,7 +22,8 @@ export class PhotogramPeriod extends LitElement {
         display: contents;
       }
 
-      /* Translucent, as they always were: the contrasts are the lowest over white, black or any palette colour. */
+      /* Translucent, as they always were: the contrasts are the lowest over white, black or any palette colour.
+         Grey steps, not semantic tokens: a period looks the same on every tile, in both colour schemes. */
       .morning::part(icon) {
         background-color: color-mix(
           in srgb,

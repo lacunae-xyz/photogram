@@ -44,7 +44,8 @@ export class PhotogramTileForm extends LitElement {
     #periode,
     #fx {
       border-radius: var(--pg-radius-s);
-      background-color: var(--pg-grey-200);
+      background-color: var(--pg-color-fill);
+      color: inherit;
       border: none;
       margin-bottom: var(--pg-space-2);
       font-family: var(--pg-font-mono);
@@ -109,7 +110,8 @@ export class PhotogramTileForm extends LitElement {
       top: 85%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: color-mix(in srgb, var(--pg-grey-900) 53.3%, transparent);
+      /* On the image, which is the same in both schemes. */
+      color: color-mix(in srgb, var(--pg-color-chrome) 53.3%, transparent);
     }
 
     .button-container {
@@ -118,7 +120,7 @@ export class PhotogramTileForm extends LitElement {
       position: absolute;
       min-height: 3rem;
       bottom: var(--pg-space-1);
-      background: color-mix(in srgb, var(--pg-grey-950) 25%, transparent);
+      background: color-mix(in srgb, var(--pg-color-chrome) 25%, transparent);
       text-align: start;
     }
 

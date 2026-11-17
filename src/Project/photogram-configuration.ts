@@ -96,7 +96,7 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     .template input[type='radio']:checked + label {
-      background-color: var(--pg-grey-200);
+      background-color: var(--pg-color-fill);
     }
 
     .labels {
