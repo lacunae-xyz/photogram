@@ -74,6 +74,10 @@ export class PhotogramTutorial extends LitElement {
       align-content: center;
     }
 
+    input {
+      font: inherit;
+    }
+
     .tutorial-example-tile {
       font-family: var(--pg-font-mono);
     }

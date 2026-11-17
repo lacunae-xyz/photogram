@@ -45,6 +45,7 @@ export class PhotogramColors extends LitElement {
     }
 
     .btn-color {
+      font: inherit;
       display: inline-block;
       opacity: 0;
       background: var(--pg-color-surface-raised);

@@ -77,6 +77,7 @@ export class PhotogramConfiguration extends LitElement {
 
     #font-family {
       margin-left: 1rem;
+      font: inherit;
     }
 
     .template input {

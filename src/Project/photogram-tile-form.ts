@@ -124,6 +124,7 @@ export class PhotogramTileForm extends LitElement {
     }
 
     .button-container button {
+      font: inherit;
       background: none;
       border: none;
       color: var(--pg-color-on-chrome);
