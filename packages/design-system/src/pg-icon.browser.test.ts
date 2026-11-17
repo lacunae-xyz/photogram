@@ -29,6 +29,7 @@ describe('pg-icon', () => {
     expect([...iconNames].sort()).toEqual([
       'arrow-back',
       'auto-fix-high',
+      'brightness-4',
       'clear-day',
       'clear-night',
       'delete',
@@ -36,7 +37,6 @@ describe('pg-icon', () => {
       'link-off',
       'print',
       'wb-twilight',
-      'wb-twilight-2',
     ]);
   });
 

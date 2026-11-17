@@ -4,10 +4,12 @@ import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { indicatorStyles } from './indicator-styles';
 import { toPeriod } from './period';
 
+// Four silhouettes: the set has no sunrise or sunset, and wb_twilight_2 is wb_twilight without its rays. Morning is the
+// sun on the horizon, evening the sun turning to the moon.
 const icons = {
   morning: 'wb-twilight',
   day: 'clear-day',
-  evening: 'wb-twilight-2',
+  evening: 'brightness-4',
   night: 'clear-night',
 };
 

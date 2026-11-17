@@ -98,6 +98,19 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       expect(getComputedStyle(sequence).color).toBe('rgb(255, 255, 255)');
     });
 
+    it('shows each period with its own icon', async () => {
+      const paths = new Set();
+      for (const period of ['matin', 'jour', 'soir', 'nuit']) {
+        const tile = await renderTile({ ...shot, period });
+        await part<LitElement>(tile, ['photogram-period', 'pg-icon'])
+          .updateComplete;
+        paths.add(
+          part(tile, ['photogram-period', 'pg-icon', 'path']).getAttribute('d'),
+        );
+      }
+      expect(paths.size).toBe(4);
+    });
+
     it('names the period it shows', async () => {
       await renderTile({ ...shot, period: 'nuit' });
       await expect
