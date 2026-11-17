@@ -25,6 +25,9 @@ const tokens = new Map([
 
 const paint = /\b(fill|stroke|stop-color)="(#[0-9a-f]{3,6})"/gi;
 
+// pg: 6.5 dark mode. A computed custom property keeps `light-dark()` unresolved, and the image only
+// changes on a render. Resolve each token to a colour (through a probe's `color`), and re-render
+// when the scheme or `<html data-theme>` changes.
 function recolour(svg: string, style: CSSStyleDeclaration) {
   return svg.replace(paint, (attribute, name: string, colour: string) => {
     const token = tokens.get(colour.toLowerCase());
