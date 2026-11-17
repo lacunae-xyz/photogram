@@ -36,20 +36,12 @@ test('the tutorial names the file data.csv', async ({ page }) => {
   await expect(page.getByText('nommé data.csv')).toBeVisible();
 });
 
-// B16: no catch-all route, an unknown URL renders an empty app. Phase 6 adds a 404 page.
-test('unknown route renders an empty app (B16)', async ({ page, pageErrors }) => {
+// B16: there was no catch-all route, an unknown URL rendered an empty app.
+test('unknown route shows a not found page (B16)', async ({ page, pageErrors }) => {
   const response = await page.goto('/does-not-exist');
   expect(response?.status()).toBe(200);
-  await expect(page.locator('#root .App')).toBeAttached();
-  await expect(page.locator('#root .App')).toBeEmpty();
-  expect(pageErrors).toEqual([]);
-});
-
-// B16: fixed in phase 6, where photogram-app has a catch-all route. Remove test.fail with the fix.
-test('unknown route shows a not found page (B16)', async ({ page }) => {
-  test.fail(true, 'B16');
-  await page.goto('/does-not-exist');
   await expect(page.getByRole('heading', { name: /not found|404/i })).toBeVisible({ timeout: 2_000 });
+  expect(pageErrors).toEqual([]);
 });
 
 // Fixor iframes photogram.app/fixor until phase 7. Only meaningful against Netlify (BASE_URL), `serve` sends no such headers.

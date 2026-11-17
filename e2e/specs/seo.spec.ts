@@ -62,6 +62,7 @@ const routeMeta = [
     description: 'Photogram keeps your projects on your device. What it counts, and who hosts it.',
   },
   { path: '/fixor', ...defaultMeta },
+  { path: '/does-not-exist', ...defaultMeta, title: 'Photogram · Page not found' },
 ];
 
 async function expectMeta(page: Page, { title, description }: { title: string; description: string }) {
