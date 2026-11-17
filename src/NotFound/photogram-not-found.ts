@@ -28,6 +28,10 @@ export class PhotogramNotFound extends LitElement {
     pg-empty-state::part(illustration) {
       width: 38.4rem;
     }
+
+    a {
+      color: var(--pg-color-accent-text);
+    }
   `;
 
   render() {

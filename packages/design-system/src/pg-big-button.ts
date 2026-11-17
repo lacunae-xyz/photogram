@@ -30,8 +30,11 @@ export class PgBigButton extends PgButton {
 
     button:hover {
       box-shadow: var(--pg-shadow-2);
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      color: #ffffffff;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--pg-color-focus);
+      outline-offset: 2px;
     }
 
     button:disabled {

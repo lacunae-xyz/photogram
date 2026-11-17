@@ -30,9 +30,19 @@ export class PgButton extends LitElement {
       background-color: transparent;
     }
 
-    button:hover,
+    /* :enabled keeps the browser's disabled colour. */
+    button:enabled {
+      color: var(--pg-color-accent-text);
+    }
+
+    button:enabled:hover,
     button:focus {
       background-color: var(--pg-color-hover);
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--pg-color-focus);
+      outline-offset: 2px;
     }
 
     :host([variant='icon']) button {
@@ -42,6 +52,14 @@ export class PgButton extends LitElement {
       line-height: 0;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
       border-radius: 100rem;
+    }
+
+    :host([variant='icon']) button:enabled {
+      color: inherit;
+    }
+
+    :host([variant='icon']) button:enabled:hover {
+      color: var(--pg-color-accent-text);
     }
   `;
 

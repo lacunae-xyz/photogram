@@ -13,8 +13,7 @@ export class PhotogramFx extends LitElement {
       }
 
       .dot-green::part(icon) {
-        /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-        background-color: #77df4e;
+        background-color: var(--pg-color-accent);
       }
     `,
   ];

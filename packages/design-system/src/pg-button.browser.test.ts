@@ -7,6 +7,25 @@ import '../tokens.css';
 
 afterEach(() => render(null, document.body));
 
+/** The computed colour of a token, as the browser resolves it. */
+function token(name: string) {
+  const probe = document.createElement('span');
+  probe.style.color = `var(${name})`;
+  document.body.append(probe);
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color;
+}
+
+async function innerOf(template: ReturnType<typeof html>, tag: string) {
+  render(template, document.body);
+  const host = document.body.querySelector(tag) as HTMLElement & {
+    updateComplete: Promise<boolean>;
+  };
+  await host.updateComplete;
+  return host.shadowRoot!.querySelector('button')!;
+}
+
 for (const tag of ['pg-button', 'pg-big-button'] as const) {
   describe(tag, () => {
     async function renderButton(template: ReturnType<typeof html>) {
@@ -166,6 +185,52 @@ for (const tag of ['pg-button', 'pg-big-button'] as const) {
   });
 }
 
+describe('pg-button', () => {
+  it('is green: accent text, green hover tint', async () => {
+    const inner = await innerOf(
+      html`<pg-button>Close</pg-button>`,
+      'pg-button',
+    );
+    expect(getComputedStyle(inner).color).toBe(token('--pg-color-accent-text'));
+    await userEvent.hover(inner);
+    expect(getComputedStyle(inner).backgroundColor).toBe(
+      token('--pg-color-hover'),
+    );
+  });
+
+  it("doesn't draw a disabled button in the accent colour", async () => {
+    const inner = await innerOf(
+      html`<pg-button disabled>Close</pg-button>`,
+      'pg-button',
+    );
+    expect(getComputedStyle(inner).color).not.toBe(
+      token('--pg-color-accent-text'),
+    );
+  });
+
+  it("doesn't tint a disabled button on hover", async () => {
+    const inner = await innerOf(
+      html`<pg-button disabled>Close</pg-button>`,
+      'pg-button',
+    );
+    await userEvent.hover(inner, { force: true });
+    expect(getComputedStyle(inner).backgroundColor).not.toBe(
+      token('--pg-color-hover'),
+    );
+  });
+
+  it('rings the keyboard focus in the focus colour', async () => {
+    const inner = await innerOf(
+      html`<pg-button>Close</pg-button>`,
+      'pg-button',
+    );
+    await userEvent.tab();
+    expect(getComputedStyle(inner).outlineColor).toBe(
+      token('--pg-color-focus'),
+    );
+  });
+});
+
 describe('pg-button variant="icon"', () => {
   it('reflects the variant and is round', async () => {
     render(
@@ -190,5 +255,16 @@ describe('pg-big-button', () => {
     await host.updateComplete;
     const inner = host.shadowRoot!.querySelector('button')!;
     expect(getComputedStyle(inner).boxShadow).not.toBe('none');
+  });
+
+  it('is red, the only button that is', async () => {
+    const inner = await innerOf(
+      html`<pg-big-button>Open</pg-big-button>`,
+      'pg-big-button',
+    );
+    expect(getComputedStyle(inner).backgroundColor).toBe(
+      token('--pg-color-action'),
+    );
+    expect(getComputedStyle(inner).color).toBe(token('--pg-color-on-action'));
   });
 });

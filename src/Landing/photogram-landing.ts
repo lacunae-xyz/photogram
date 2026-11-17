@@ -55,6 +55,10 @@ export class PhotogramLanding extends LitElement {
       padding: 3.2rem 0;
     }
 
+    .landing-footer a {
+      color: var(--pg-color-accent-text);
+    }
+
     .list-project-container {
       display: flex;
       overflow-x: scroll;

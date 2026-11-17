@@ -31,6 +31,10 @@ export class PhotogramPrivacy extends LitElement {
     h1 {
       font-family: var(--pg-font-mono);
     }
+
+    a {
+      color: var(--pg-color-accent-text);
+    }
   `;
 
   render() {

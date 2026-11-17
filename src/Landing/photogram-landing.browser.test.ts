@@ -5,11 +5,22 @@ import Application from '../Application';
 import IndexedDBProjectsDataSource from '../Application/IndexedDBProjectsDataSource';
 import type { Project } from '../Application/types';
 import './photogram-landing';
+import '@lacunae-xyz/photogram-design-system/tokens.css';
 
 afterEach(() => {
   render(null, document.body);
   vi.restoreAllMocks();
 });
+
+/** The computed colour of a token, as the browser resolves it. */
+function token(name: string) {
+  const probe = document.createElement('span');
+  probe.style.color = `var(${name})`;
+  document.body.append(probe);
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color;
+}
 
 const project = (key: string, name: string): Project => ({
   key,
@@ -68,6 +79,15 @@ describe('photogram-landing', () => {
     await expect
       .element(page.getByRole('link', { name: 'Privacy policy' }))
       .toHaveAttribute('href', '/privacy-policy');
+  });
+
+  it('draws the footer link in the accent text colour', async () => {
+    await renderLanding();
+    const privacy = page.getByRole('link', { name: 'Privacy policy' });
+    await expect.element(privacy).toBeVisible();
+    expect(getComputedStyle(privacy.element()).color).toBe(
+      token('--pg-color-accent-text'),
+    );
   });
 
   it('draws an illustration in every cell', async () => {

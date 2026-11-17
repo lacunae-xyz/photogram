@@ -14,6 +14,13 @@
   --pg-grey-900: #222;
   --pg-grey-950: #111;
 
+  /* Accent green. 300 is the unDraw green, for fills only: it's 1.9:1 on white. */
+  --pg-green-300: #38d39f;
+  --pg-green-500: #1f9e74; /* 3.4:1 on white */
+  --pg-green-700: #16805d; /* 4.9:1 on white */
+
+  --pg-red-600: #d32f2f; /* 5.0:1 on white */
+
   --pg-color-surface: #fff;
   --pg-color-surface-raised: #fff;
   --pg-color-border: var(--pg-grey-300);
@@ -30,16 +37,22 @@
   --pg-color-text-muted: var(--pg-grey-700);
   --pg-color-text-subtle: var(--pg-grey-600);
 
-  --pg-color-hover: rgba(180, 220, 220, 0.5);
-
-  --pg-color-accent: #38d39f;
+  /* Green carries focus, links, illustrations, active state and pg-button. */
+  --pg-color-accent: var(--pg-green-300);
+  --pg-color-on-accent: var(--pg-grey-950);
+  --pg-color-accent-icon: var(--pg-green-500);
+  --pg-color-focus: var(--pg-green-500);
+  --pg-color-accent-text: var(--pg-green-700);
+  /* 10%, not 14%: keeps accent-text on the tint at 4.59:1 (14% gave 4.46). */
+  --pg-color-hover: color-mix(in srgb, var(--pg-green-300) 10%, transparent);
 
   /* Illustration fills, the unDraw colours each one replaces in pg-illustration. */
   --pg-illus-bg: var(--pg-grey-200);
   --pg-illus-ink: #3f3d56;
   --pg-illus-paper: #fff;
 
-  --pg-color-action: #d32f2f;
+  /* Red: pg-big-button only. */
+  --pg-color-action: var(--pg-red-600);
   --pg-color-on-action: #ffffffee;
 
   --pg-color-shadow: rgba(0, 0, 0, 0.26);
