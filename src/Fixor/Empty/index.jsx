@@ -16,7 +16,7 @@ function Empty(props) {
       </div>
       <img
         className="projects-empty"
-        src="/illus/undraw_empty_street_sfxm.svg"
+        src="/illus/empty-street.svg"
         alt="No project"
       />
     </div>
