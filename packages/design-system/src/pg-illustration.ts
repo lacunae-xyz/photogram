@@ -64,7 +64,10 @@ export class PgIllustration extends LitElement {
   }
 
   async #load(name: string) {
-    const svg = await loaders.get(name)?.();
+    // The import fails when the page is left mid-load (WebKit) or its chunk is gone after a deploy. The illustration is decoration.
+    const svg = await loaders
+      .get(name)?.()
+      .catch(() => undefined);
     if (name === this.name) {
       this.svg = svg;
     }

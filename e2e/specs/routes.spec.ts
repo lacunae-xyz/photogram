@@ -127,3 +127,13 @@ test('/project/:id loads the permission illustration (B11)', async ({ page, brow
   await expect(page.getByRole('button', { name: 'Grant permission' })).toBeVisible();
   await expectIllustrations(page, ['secure-files']);
 });
+
+// Leaving a page while its illustration loads fails the import in WebKit. Stale chunks after a deploy fail it too.
+test('an illustration that fails to load leaves the page without errors', async ({ page, pageErrors }) => {
+  await page.route('**/assets/empty-street-*.js', route => route.abort());
+  await page.goto('/projects');
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  expect(await illustrations(page)).toEqual([{ name: 'empty-street', loaded: false }]);
+  expect(pageErrors).toEqual([]);
+});
