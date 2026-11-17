@@ -2,7 +2,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 /**
- * A card: media with an optional badge, in a light circle in its bottom-right corner, a heading, and actions shown on hover or focus.
+ * A card: media with an optional badge, in a light circle in its bottom-right corner, a heading, and actions beside it, shown on hover or focus.
  * With an `href`, the heading is a link. Size it from outside (`width`, `margin`).
  *
  * Slots: `media`, `badge`, `actions`.
@@ -56,7 +56,13 @@ export class PgCard extends LitElement {
       display: none;
     }
 
+    .body {
+      display: flex;
+      align-items: center;
+    }
+
     .heading {
+      flex-grow: 1;
       padding: 1rem;
       display: block;
       color: var(--pg-color-text-muted);
@@ -64,9 +70,6 @@ export class PgCard extends LitElement {
     }
 
     .actions {
-      position: absolute;
-      top: -0.8125rem;
-      left: -0.8125rem;
       display: flex;
       opacity: 0;
       transition: opacity 0.4s;
@@ -96,14 +99,16 @@ export class PgCard extends LitElement {
           <slot name="badge" @slotchange=${this.#onBadgeChange}></slot>
         </div>
       </div>
-      ${
-        this.href === undefined
-          ? html`<span class="heading" part="heading">${this.heading}</span>`
-          : html`<a class="heading" part="heading" href=${this.href}
-              >${this.heading}</a
-            >`
-      }
-      <div class="actions"><slot name="actions"></slot></div>`;
+      <div class="body">
+        ${
+          this.href === undefined
+            ? html`<span class="heading" part="heading">${this.heading}</span>`
+            : html`<a class="heading" part="heading" href=${this.href}
+                >${this.heading}</a
+              >`
+        }
+        <div class="actions"><slot name="actions"></slot></div>
+      </div>`;
   }
 }
 
