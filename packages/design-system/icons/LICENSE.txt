@@ -1,15 +1,18 @@
-Two sets, both under the Apache License, Version 2.0, copied below.
+Material Symbols, under the Apache License, Version 2.0, copied below. Copyright Google LLC. From
+https://github.com/google/material-design-icons, commit 10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7, the 48px SVGs
+under symbols/web/<symbol>/materialsymbolsoutlined/. Each file is the symbol's name with "-" for "_", in grade 0,
+optical size 48.
 
-Material Symbols (arrow-back, delete, link, link-off, print): Outlined style, fill 0, weight 400, grade 0, optical
-size 48. The 48px SVGs from https://github.com/google/material-design-icons, commit
-10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7, symbols/web/<name>/materialsymbolsoutlined/<name>_48px.svg,
-unmodified. Each file is the symbol's name with "-" for "_".
-Copyright Google LLC.
+arrow-back, delete, link, link-off, print: fill 0, weight 400, <symbol>_48px.svg, unmodified.
 
-Material Design Icons by Pictogrammers (auto-fix, weather-night, weather-sunny, weather-sunset-down,
-weather-sunset-up): the SVGs from https://github.com/Templarian/MaterialDesign, commit
-2424e748e0cc63ab7b9c095a099b9fe239b737c0, svg/<name>.svg, unmodified. Pictogrammers Free License: the icons are
-Apache 2.0 (see LICENSE in that repository).
+sunny, moon-stars, auto-fix-high: fill 1, weight 600, <symbol>_wght600fill1_48px.svg. sunny and moon-stars are
+unmodified; auto-fix-high (auto_fix_high) has viewBox="0 0 48 48" added, its path unmodified.
+
+wb-twilight-up, wb-twilight-down: modified, derived from wb_twilight_wght600fill1_48px.svg and
+unfold_more_double_wght600fill1_48px.svg. The sun and horizon of wb_twilight, then one chevron of
+unfold_more_double below it (its topmost, pointing up, in wb-twilight-up; its bottommost, pointing down, in
+wb-twilight-down), a horizon's thickness apart, both scaled by the same factor and centred to fill a 24-unit
+viewBox, one unit from its top and bottom edges, merged into one path.
 
 
                                  Apache License
