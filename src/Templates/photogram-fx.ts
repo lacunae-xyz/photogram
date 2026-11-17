@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { indicatorStyles } from './indicator-styles';
 
-/** The fx icon, in `--pg-color-accent-icon`, or the tile's indicator colour on a label-coloured tile. Hidden without fx. */
+/** The fx dot: the icon on the accent fill. Hidden without fx. */
 @customElement('photogram-fx')
 export class PhotogramFx extends LitElement {
   static styles = [
@@ -13,8 +13,10 @@ export class PhotogramFx extends LitElement {
         display: contents;
       }
 
-      .fx {
-        color: var(--photogram-indicator-color, var(--pg-color-accent-icon));
+      /* 9.9:1 */
+      .fx::part(icon) {
+        background-color: var(--pg-color-accent);
+        color: var(--pg-color-on-accent);
       }
     `,
   ];

@@ -1,9 +1,11 @@
 import { html, render, type LitElement } from 'lit';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { page } from 'vitest/browser';
 import './photogram-tile-large';
 import './photogram-tile-small';
 import type { Tile } from './tile';
+import { palette } from '../Application/colors';
+import tokens from '@lacunae-xyz/photogram-design-system/tokens.css?inline';
 
 const shot = {
   sequence: '12',
@@ -15,6 +17,27 @@ const shot = {
 };
 
 afterEach(() => render(null, document.body));
+
+/** Paints the dot's fill over the tile, then the icon over the dot, and returns their WCAG contrast ratio. */
+function contrast(tile: string, dot: string, icon: string) {
+  const context = new OffscreenCanvas(1, 1).getContext('2d')!;
+  const paint = (...colors: string[]) => {
+    for (const color of colors) {
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+    }
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    const linear = (channel: number) => {
+      const c = channel / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+  };
+  const [lighter, darker] = [paint(tile, dot), paint(tile, dot, icon)].sort(
+    (a, b) => b - a,
+  );
+  return (lighter + 0.05) / (darker + 0.05);
+}
 
 async function frames(count: number) {
   for (let i = 0; i < count; i++) {
@@ -118,46 +141,36 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
         .toBeVisible();
     });
 
-    it('paints fx in the accent, and in the text colour on a label-coloured tile', async () => {
-      document.body.style.setProperty('--pg-color-accent-icon', 'rgb(1, 2, 3)');
-      document.body.style.color = 'rgb(4, 5, 6)';
-      try {
-        const tile = await renderTile({
-          ...shot,
-          colorDistribution: 'indicator',
-        });
-        const fx = part(tile, ['photogram-fx', 'pg-icon', 'svg']);
-        expect(getComputedStyle(fx).fill).toBe('rgb(1, 2, 3)');
-        tile.colorDistribution = 'card';
-        await tile.updateComplete;
-        expect(getComputedStyle(fx).fill).toBe('rgb(4, 5, 6)');
-      } finally {
-        document.body.removeAttribute('style');
-      }
-    });
-
-    it('paints period and fx white on the darkest label colours, where the text is unreadable', async () => {
-      document.body.style.color = 'rgb(4, 5, 6)';
-      try {
-        const tile = await renderTile({
-          ...shot,
-          color: '#3F51B5',
-          colorDistribution: 'card',
-        });
-        const icons = () =>
-          [
-            part(tile, ['photogram-period', 'pg-icon', 'svg']),
-            part(tile, ['photogram-fx', 'pg-icon', 'svg']),
-          ].map(icon => getComputedStyle(icon).fill);
-        expect(icons()).toEqual(['rgb(255, 255, 255)', 'rgb(255, 255, 255)']);
-        tile.color = '#F44336';
-        await tile.updateComplete;
-        expect(icons()).toEqual(['rgb(4, 5, 6)', 'rgb(4, 5, 6)']);
-        tile.colorDistribution = 'indicator';
-        await tile.updateComplete;
-        expect(icons()[0]).toBe('rgb(4, 5, 6)');
-      } finally {
-        document.body.removeAttribute('style');
+    it('draws period and fx as dots their icons read on (3:1), on any label colour', async () => {
+      const style = document.createElement('style');
+      style.textContent = tokens;
+      document.head.append(style);
+      onTestFinished(() => style.remove());
+      const labels = [undefined, '#FFFFFF', ...palette, '#000000'];
+      for (const value of ['matin', 'jour', 'soir', 'nuit']) {
+        for (const color of labels) {
+          const tile = await renderTile({
+            ...shot,
+            period: value,
+            color,
+            colorDistribution: 'card',
+          });
+          for (const indicator of ['photogram-period', 'photogram-fx']) {
+            const svg = part(tile, [indicator, 'pg-icon', 'svg']);
+            const style = getComputedStyle(svg);
+            expect(style.width, `${indicator} ${value} size`).toBe('20px');
+            expect(style.borderRadius).not.toBe('0px');
+            const ratio = contrast(
+              getComputedStyle(tile).backgroundColor,
+              style.backgroundColor,
+              style.fill,
+            );
+            expect(
+              ratio,
+              `${indicator} ${value} on ${color ?? 'white'}`,
+            ).toBeGreaterThanOrEqual(3);
+          }
+        }
       }
     });
 

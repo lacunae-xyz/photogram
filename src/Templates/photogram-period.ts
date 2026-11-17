@@ -13,7 +13,7 @@ const icons = {
   night: 'clear-night',
 };
 
-/** The period icon, in the tile's text colour, or its indicator colour on a label-coloured tile. Without a period, a hidden icon holds its place, as fx's does. */
+/** The period dot: lighter by day, darker by night. Without a period, a hidden dot holds its place, as fx's does. */
 @customElement('photogram-period')
 export class PhotogramPeriod extends LitElement {
   static styles = [
@@ -23,8 +23,37 @@ export class PhotogramPeriod extends LitElement {
         display: contents;
       }
 
-      .period {
-        color: var(--photogram-indicator-color, currentColor);
+      /* Translucent, as they always were: the contrasts are the lowest over white, black or any palette colour. */
+      .morning::part(icon) {
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-400) 73.3%,
+          transparent
+        );
+        color: var(--pg-grey-950); /* 4.6:1 */
+      }
+
+      .day::part(icon) {
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-200) 73.3%,
+          transparent
+        );
+        color: var(--pg-grey-950); /* 8.5:1 */
+      }
+
+      .evening::part(icon) {
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-600) 73.3%,
+          transparent
+        );
+        color: var(--pg-color-on-chrome); /* 3.0:1 */
+      }
+
+      .night::part(icon) {
+        background-color: var(--pg-color-backdrop);
+        color: var(--pg-color-on-chrome); /* 7.2:1 */
       }
     `,
   ];
@@ -34,7 +63,7 @@ export class PhotogramPeriod extends LitElement {
   render() {
     const period = toPeriod(this.value);
     return html`<pg-icon
-      class="indicator period ${period ? '' : 'hide'}"
+      class="indicator period ${period ?? 'hide'}"
       name=${icons[period ?? 'day']}
       label=${period ? `period: ${period}` : 'period'}
     ></pg-icon>`;
