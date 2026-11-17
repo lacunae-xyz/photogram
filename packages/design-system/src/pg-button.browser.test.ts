@@ -208,6 +208,17 @@ describe('pg-button', () => {
     );
   });
 
+  it("doesn't tint a disabled button on hover", async () => {
+    const inner = await innerOf(
+      html`<pg-button disabled>Close</pg-button>`,
+      'pg-button',
+    );
+    await userEvent.hover(inner, { force: true });
+    expect(getComputedStyle(inner).backgroundColor).not.toBe(
+      token('--pg-color-hover'),
+    );
+  });
+
   it('rings the keyboard focus in the focus colour', async () => {
     const inner = await innerOf(
       html`<pg-button>Close</pg-button>`,

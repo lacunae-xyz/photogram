@@ -35,7 +35,7 @@ export class PgButton extends LitElement {
       color: var(--pg-color-accent-text);
     }
 
-    button:hover,
+    button:enabled:hover,
     button:focus {
       background-color: var(--pg-color-hover);
     }
