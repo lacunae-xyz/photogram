@@ -1,7 +1,7 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import '@lacunae-xyz/photogram-design-system/pg-big-button.js';
 import { canOpenFolder, pickFolder } from './folder-picker';
-import { raisedButtonStyles } from './raised-button-styles';
 
 /**
  * The Open project button: picks a folder to link. Renders nothing where the browser has no folder picker.
@@ -10,14 +10,11 @@ import { raisedButtonStyles } from './raised-button-styles';
  */
 @customElement('photogram-open-project')
 export class PhotogramOpenProject extends LitElement {
-  static styles = [
-    raisedButtonStyles,
-    css`
-      :host {
-        display: block;
-      }
-    `,
-  ];
+  static styles = css`
+    :host {
+      display: block;
+    }
+  `;
 
   async #onClick() {
     const dirHandle = await pickFolder();
@@ -28,14 +25,9 @@ export class PhotogramOpenProject extends LitElement {
 
   render() {
     return canOpenFolder()
-      ? html`<button
-          type="button"
-          class="raised"
-          id="open-project-label"
-          @click=${this.#onClick}
-        >
-          Open project
-        </button>`
+      ? html`<pg-big-button id="open-project-label" @click=${this.#onClick}
+          >Open project</pg-big-button
+        >`
       : nothing;
   }
 }

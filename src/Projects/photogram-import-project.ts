@@ -1,6 +1,6 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { raisedButtonStyles } from './raised-button-styles';
+import '@lacunae-xyz/photogram-design-system/pg-big-button.js';
 
 /**
  * The Import project button: picks a folder through a file input.
@@ -9,18 +9,15 @@ import { raisedButtonStyles } from './raised-button-styles';
  */
 @customElement('photogram-import-project')
 export class PhotogramImportProject extends LitElement {
-  static styles = [
-    raisedButtonStyles,
-    css`
-      :host {
-        display: block;
-      }
+  static styles = css`
+    :host {
+      display: block;
+    }
 
-      #import-project-file {
-        display: none;
-      }
-    `,
-  ];
+    #import-project-file {
+      display: none;
+    }
+  `;
 
   @query('input') private accessor input!: HTMLInputElement;
 
@@ -41,14 +38,11 @@ export class PhotogramImportProject extends LitElement {
         directory
         multiple
         @change=${this.#onChange}
-      /><button
-        type="button"
-        class="raised"
+      /><pg-big-button
         id="import-project-label"
         @click=${() => this.input.click()}
-      >
-        Import project
-      </button>`;
+        >Import project</pg-big-button
+      >`;
   }
 }
 
