@@ -94,6 +94,13 @@ export class PhotogramProject extends LitElement {
   /** The shot in the tile form. */
   @state() private accessor shot: EditedShot | undefined;
 
+  // Render in a task of its own, as React did. A use case on the in-memory demo resolves in microtasks, which
+  // put the font change's re-created tiles, and their layout, in the input event's task.
+  protected async scheduleUpdate() {
+    await new Promise(resolve => setTimeout(resolve));
+    super.scheduleUpdate();
+  }
+
   protected willUpdate(changed: PropertyValues<this>) {
     this.application ??= Application.create();
     if (changed.has('projectId') || changed.has('application')) {
