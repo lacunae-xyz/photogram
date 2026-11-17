@@ -16,6 +16,7 @@ export class PgHeader extends LitElement {
 
     header {
       display: flex;
+      font-family: var(--pg-font-mono);
       align-items: center;
       padding: 20px 0;
     }
@@ -33,13 +34,14 @@ export class PgHeader extends LitElement {
     }
 
     h1 {
-      font-size: var(--pg-font-size-5);
+      font-size: var(--pg-font-size-4);
       margin: 0;
     }
 
     p {
       margin: 0;
       margin-left: 0.125rem;
+      font-size: var(--pg-font-size-1);
     }
 
     ul {
@@ -54,7 +56,7 @@ export class PgHeader extends LitElement {
       color: var(--pg-grey-950);
       border-bottom: 0.1875rem solid var(--pg-color-border);
       margin-left: 0.5rem;
-      font-size: var(--pg-font-size-3);
+      font-size: var(--pg-font-size-2);
     }
 
     nav a[aria-current='page'] {
