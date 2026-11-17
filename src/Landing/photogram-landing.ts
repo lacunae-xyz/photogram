@@ -141,6 +141,7 @@ export class PhotogramLanding extends LitElement {
 
     .empty-project-item h1 {
       margin: 1rem;
+      font-size: var(--pg-font-size-5);
       text-decoration: none;
     }
 
