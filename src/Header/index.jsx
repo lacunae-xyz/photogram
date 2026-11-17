@@ -4,7 +4,7 @@ import './index.css';
 class Header extends Component {
   render() {
     return (
-      <header className="header-container">
+      <header className="header-container" slot={this.props.slot}>
         <img src={logo} className="header-logo" alt="logo of Photogram" />
         <a className="header-text" href="/">
           <h1 className="App-title">Photogram</h1>
