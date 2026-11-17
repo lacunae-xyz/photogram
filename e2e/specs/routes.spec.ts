@@ -23,6 +23,28 @@ for (const { path, ready } of routes) {
   });
 }
 
+// React 19's element type: in React's own chunks, in no other code.
+const reactMarker = 'react.transitional.element';
+
+for (const { path, ready } of routes) {
+  const fixor = path === '/fixor';
+  test(`${path} ${fixor ? 'loads' : 'does not load'} React`, async ({ page, baseURL }) => {
+    const { origin } = new URL(baseURL!);
+    const scripts: Promise<string>[] = [];
+    page.on('response', response => {
+      if (response.request().resourceType() === 'script' && new URL(response.url()).origin === origin) {
+        scripts.push(response.text());
+      }
+    });
+    await page.goto(path);
+    await expect(page.locator(ready).first()).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    const bodies = await Promise.all(scripts);
+    expect(bodies.length).toBeGreaterThan(0);
+    expect(bodies.some(body => body.includes(reactMarker))).toBe(fixor);
+  });
+}
+
 test('the privacy policy is linked from /', async ({ page }) => {
   await page.goto('/');
   await markWindow(page);
