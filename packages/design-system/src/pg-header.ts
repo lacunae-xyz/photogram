@@ -13,10 +13,7 @@ export class PgHeader extends LitElement {
   static styles = css`
     :host {
       display: block;
-      color: var(--pg-color-on-chrome);
-      /* The band spans the viewport, the content keeps its page's column. Ink overflow: no scrollbar. */
-      border-image: linear-gradient(var(--pg-color-chrome) 0 0) fill 0 / 0 / 0
-        100vw;
+      color: var(--pg-color-text);
     }
 
     /* Wraps what doesn't fit, the children first: they go to their own row, at the end, and the logo, name and
@@ -30,7 +27,7 @@ export class PgHeader extends LitElement {
       padding: var(--pg-space-4) 0;
     }
 
-    /* A mask, not an <img>: a one-colour logo takes the text colour, on the chrome and in print. */
+    /* A mask, not an <img>: a one-colour logo takes the text colour, in both schemes and in print. */
     .logo {
       height: 3.125rem;
       width: 3.125rem;
@@ -65,12 +62,10 @@ export class PgHeader extends LitElement {
       margin: 0;
       margin-left: 0.125rem;
       font-size: var(--pg-font-size-1);
-      color: var(--pg-color-on-chrome-muted);
     }
 
     ul {
       display: flex;
-      gap: var(--pg-space-2);
       list-style: none;
     }
 
@@ -81,62 +76,35 @@ export class PgHeader extends LitElement {
 
     nav a {
       display: block;
-      padding: var(--pg-space-2) var(--pg-space-3);
-      border-radius: var(--pg-radius-pill);
+      padding: var(--pg-space-4);
+      border-bottom: 0.1875rem solid var(--pg-color-border);
+      margin-left: var(--pg-space-2);
       font-size: var(--pg-font-size-2);
     }
 
-    nav a:hover {
-      background-color: color-mix(
-        in srgb,
-        var(--pg-color-on-chrome) 10%,
-        transparent
-      );
-    }
-
+    /* accent-icon, not accent: the underline is the current page's only mark, 3:1 on the surface. */
     nav a[aria-current='page'] {
-      background-color: var(--pg-color-accent);
-      color: var(--pg-color-on-accent);
-      font-weight: 700;
+      border-bottom-color: var(--pg-color-accent-icon);
     }
 
-    /* The chrome is dark in both schemes: so are the tokens on it, the focus ring among them. */
-    @media screen {
-      :host {
-        color-scheme: dark;
-      }
+    nav a:hover,
+    nav a:focus {
+      background-color: var(--pg-color-fill);
+    }
+
+    nav a:active {
+      background-color: var(--pg-color-hover);
     }
 
     @media (forced-colors: active) {
-      /* Forced colours keep a gradient border-image: the band would stay dark under CanvasText. */
-      :host {
-        border-image-source: none;
-      }
-
       .logo {
         forced-color-adjust: none;
         background-color: CanvasText;
       }
 
+      /* Forced colours paint every underline in CanvasText. */
       nav a[aria-current='page'] {
         text-decoration: underline;
-      }
-    }
-
-    @media print {
-      :host {
-        color: var(--pg-color-text);
-        /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
-        border-image-source: none;
-      }
-
-      p {
-        color: var(--pg-color-text-subtle);
-      }
-
-      nav a[aria-current='page'] {
-        background-color: transparent;
-        color: inherit;
       }
     }
   `;

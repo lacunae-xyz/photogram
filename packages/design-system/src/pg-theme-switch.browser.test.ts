@@ -12,6 +12,9 @@ afterEach(() => {
   delete root.dataset.theme;
   localStorage.removeItem(themeStorageKey);
   document.querySelector('meta[name="color-scheme"]')?.remove();
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.remove();
+  }
 });
 
 async function renderSwitch() {
@@ -63,6 +66,31 @@ describe('pg-theme-switch', () => {
     expect(root.dataset.theme).toBeUndefined();
     expect(localStorage.getItem(themeStorageKey)).toBeNull();
     expect(meta.content).toBe('light dark');
+  });
+
+  it("applies the picked scheme's theme-color, the OS's under Auto", async () => {
+    const metas = (['light', 'dark'] as const).map(scheme =>
+      Object.assign(document.createElement('meta'), {
+        name: 'theme-color',
+        media: `(prefers-color-scheme: ${scheme})`,
+      }),
+    );
+    metas.forEach((meta, index) => {
+      meta.dataset.scheme = index === 0 ? 'light' : 'dark';
+      document.head.append(meta);
+    });
+    const media = () => metas.map(meta => meta.media);
+    await renderSwitch();
+
+    await button('Dark').click();
+    expect(media()).toEqual(['not all', 'all']);
+    await button('Light').click();
+    expect(media()).toEqual(['all', 'not all']);
+    await button('Auto').click();
+    expect(media()).toEqual([
+      '(prefers-color-scheme: light)',
+      '(prefers-color-scheme: dark)',
+    ]);
   });
 
   it('switches the tokens', async () => {

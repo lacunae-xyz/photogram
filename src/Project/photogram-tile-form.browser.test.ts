@@ -87,6 +87,18 @@ describe('photogram-tile-form', () => {
     ]);
   });
 
+  // Save was a red pg-big-button (§6.2): the dialog's actions are flat accent-text buttons, as before the port.
+  it('draws Save like Close, not in the action red', async () => {
+    await renderForm();
+    const style = (name: string) => {
+      const { color, backgroundColor } = getComputedStyle(
+        page.getByRole('button', { name }).element(),
+      );
+      return { color, backgroundColor };
+    };
+    expect(style('Save')).toEqual(style('Close'));
+  });
+
   it('saves on Enter in a text field', async () => {
     const element = await renderForm();
     const saved = listen(element, 'save');

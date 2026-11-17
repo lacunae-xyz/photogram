@@ -24,7 +24,10 @@ export function storedTheme(): Theme {
   }
 }
 
-/** Applies `theme` to the document. The meta tag sets the canvas until tokens.css has loaded. */
+/**
+ * Applies `theme` to the document. The color-scheme meta sets the canvas until tokens.css has loaded. Each
+ * `<meta name="theme-color" data-scheme>` applies under its scheme: the OS's under `auto`, the picked one otherwise.
+ */
 export function applyTheme(theme: Theme) {
   const root = document.documentElement;
   if (isForced(theme)) {
@@ -35,6 +38,16 @@ export function applyTheme(theme: Theme) {
   document
     .querySelector('meta[name="color-scheme"]')
     ?.setAttribute('content', isForced(theme) ? theme : 'light dark');
+  for (const meta of document.querySelectorAll<HTMLMetaElement>(
+    'meta[name="theme-color"][data-scheme]',
+  )) {
+    const { scheme } = meta.dataset;
+    if (!isForced(theme)) {
+      meta.media = `(prefers-color-scheme: ${scheme})`;
+    } else {
+      meta.media = scheme === theme ? 'all' : 'not all';
+    }
+  }
 }
 
 /** Applies `theme` and keeps it for the next visits. */

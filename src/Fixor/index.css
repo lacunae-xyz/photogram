@@ -4,27 +4,18 @@
   padding: 0 4rem;
 }
 
-/* Photogram's header, pg-header's chrome: the band spans the viewport. */
+/* Photogram's header, as pg-header draws it. */
 .header-container {
   display: flex;
   align-items: center;
   padding: 20px 0;
-  color: var(--pg-color-on-chrome);
-  border-image: linear-gradient(var(--pg-color-chrome) 0 0) fill 0 / 0 / 0 100vw;
-}
-
-/* The chrome is dark in both schemes: so are the tokens on it, the focus ring among them. */
-@media screen {
-  .header-container {
-    color-scheme: dark;
-  }
 }
 
 .header-text {
   margin: 1.5rem;
   flex-grow: 1;
   text-decoration: none;
-  color: inherit;
+  color: var(--pg-color-text);
 }
 
 .header-text:focus-visible {
@@ -42,17 +33,4 @@
   margin: 0;
   margin-left: 0.125rem;
   font-size: var(--pg-font-size-1);
-  color: var(--pg-color-on-chrome-muted);
-}
-
-@media print, (forced-colors: active) {
-  .header-container {
-    color: var(--pg-color-text);
-    /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
-    border-image-source: none;
-  }
-
-  .header-text > p {
-    color: var(--pg-color-text-subtle);
-  }
 }

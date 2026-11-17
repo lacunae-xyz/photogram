@@ -92,9 +92,9 @@ describe('pg-header', () => {
       .element(link('Tutorial'))
       .toHaveAttribute('aria-current', 'page');
     await expect.element(link('Projects')).not.toHaveAttribute('aria-current');
-    const fill = (name: string) =>
-      getComputedStyle(link(name).element()).backgroundColor;
-    expect(fill('Tutorial')).not.toBe(fill('Projects'));
+    const underline = (name: string) =>
+      getComputedStyle(link(name).element()).borderBottomColor;
+    expect(underline('Tutorial')).not.toBe(underline('Projects'));
 
     header.current = undefined;
     await header.updateComplete;
@@ -116,50 +116,59 @@ describe('pg-header', () => {
     );
   });
 
-  it('reads on the chrome: text 4.5:1, logo, current fill and focus ring 3:1', async () => {
-    const header = await renderHeader(
-      html`<pg-header
-        heading="Photogram"
-        tagline="A tool for editor assistants"
-        logo="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'/>"
-        logo-label="logo of Photogram"
-        .links=${links}
-        current="/tutorial"
-      ></pg-header>`,
-    );
-    const chrome = rgba(probe('var(--pg-color-chrome)'));
-    const style = (element: Element) => getComputedStyle(element);
-    const root = header.shadowRoot!;
-    const tagline = root.querySelector('p')!;
-    const current = page
-      .getByRole('link', { name: 'Tutorial' })
-      .element() as HTMLElement;
-    const currentFill = over(rgba(style(current).backgroundColor), chrome);
+  for (const scheme of ['light', 'dark'] as const) {
+    it(`reads on the surface in ${scheme}: text 4.5:1, logo, current underline and focus ring 3:1`, async () => {
+      document.documentElement.dataset.theme = scheme;
+      try {
+        const header = await renderHeader(
+          html`<pg-header
+            heading="Photogram"
+            tagline="A tool for editor assistants"
+            logo="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'/>"
+            logo-label="logo of Photogram"
+            .links=${links}
+            current="/tutorial"
+          ></pg-header>`,
+        );
+        const surface = rgba(probe('var(--pg-color-surface)'));
+        const style = (element: Element) => getComputedStyle(element);
+        const on = (color: string, background = surface) =>
+          contrast(over(rgba(color), background), background);
+        const link = (name: string) =>
+          page.getByRole('link', { name }).element() as HTMLElement;
+        const current = link('Tutorial');
 
-    expect(
-      contrast(over(rgba(style(header).color), chrome), chrome),
-    ).toBeGreaterThanOrEqual(4.5);
-    const taglineColor = rgba(style(tagline).color);
-    taglineColor[3] *= Number(style(tagline).opacity);
-    expect(contrast(over(taglineColor, chrome), chrome)).toBeGreaterThanOrEqual(
-      4.5,
-    );
-    const logo = page.getByRole('img', { name: 'logo of Photogram' }).element();
-    expect(
-      contrast(over(rgba(style(logo).backgroundColor), chrome), chrome),
-    ).toBeGreaterThanOrEqual(3);
-    expect(contrast(currentFill, chrome)).toBeGreaterThanOrEqual(3);
-    expect(
-      contrast(over(rgba(style(current).color), currentFill), currentFill),
-    ).toBeGreaterThanOrEqual(4.5);
+        expect(on(style(header).color)).toBeGreaterThanOrEqual(4.5);
+        expect(
+          on(style(header.shadowRoot!.querySelector('p')!).color),
+        ).toBeGreaterThanOrEqual(4.5);
+        for (const name of ['Projects', 'Tutorial']) {
+          expect(on(style(link(name)).color)).toBeGreaterThanOrEqual(4.5);
+        }
+        const logo = page
+          .getByRole('img', { name: 'logo of Photogram' })
+          .element();
+        expect(on(style(logo).backgroundColor)).toBeGreaterThanOrEqual(3);
+        expect(on(style(current).borderBottomColor)).toBeGreaterThanOrEqual(3);
 
-    current.focus();
-    expect(current.matches(':focus-visible')).toBe(true);
-    expect(style(current).outlineStyle).toBe('solid');
-    expect(
-      contrast(over(rgba(style(current).outlineColor), chrome), chrome),
-    ).toBeGreaterThanOrEqual(3);
-  });
+        link('Projects').focus();
+        expect(link('Projects').matches(':focus-visible')).toBe(true);
+        expect(style(link('Projects')).outlineStyle).toBe('solid');
+        expect(on(style(link('Projects')).outlineColor)).toBeGreaterThanOrEqual(
+          3,
+        );
+        const hover = over(
+          rgba(style(link('Projects')).backgroundColor),
+          surface,
+        );
+        expect(on(style(link('Projects')).color, hover)).toBeGreaterThanOrEqual(
+          4.5,
+        );
+      } finally {
+        delete document.documentElement.dataset.theme;
+      }
+    });
+  }
 });
 
 type Rgba = [number, number, number, number];
