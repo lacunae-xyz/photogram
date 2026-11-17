@@ -4,8 +4,8 @@ import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { indicatorStyles } from './indicator-styles';
 import { toPeriod } from './period';
 
-// Filled Material Symbols at weight 600, bold enough for a 20px dot. Morning and evening add an arrow to the horizon,
-// as master's MDI weather-sunset-up and -down did: no Material Symbol tells sunrise from sunset.
+// Filled Material Symbols at weight 600, bold enough for a 20px dot. No Material Symbol tells sunrise from sunset, so
+// morning and evening put a chevron, up or down, under wb_twilight's horizon (see icons/LICENSE.txt).
 const icons = {
   morning: 'wb-twilight-up',
   day: 'sunny',
