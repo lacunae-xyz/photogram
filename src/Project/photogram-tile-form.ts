@@ -52,7 +52,7 @@ export class PhotogramTileForm extends LitElement {
     }
 
     label {
-      padding: 0.625rem;
+      padding: var(--pg-space-3);
     }
 
     #form-action {
@@ -77,7 +77,7 @@ export class PhotogramTileForm extends LitElement {
     }
 
     .photogram-form-container {
-      margin-bottom: 0.625rem;
+      margin-bottom: var(--pg-space-3);
       text-align: center;
       position: relative;
     }
