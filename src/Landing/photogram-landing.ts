@@ -155,6 +155,17 @@ export class PhotogramLanding extends LitElement {
       grid-template-areas: 'creator-title creator-title' 'creator-one creator-two';
       align-content: center;
       padding-bottom: 4.5rem;
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* Its own layer, so the backgrounds fade without fading the creators. */
+    .creator-layout::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.8;
 
       /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
       background-image:
@@ -168,7 +179,7 @@ export class PhotogramLanding extends LitElement {
       transition-duration: 0.5s;
     }
 
-    .creator-layout:hover {
+    .creator-layout:hover::before {
       background-size: 10.25rem;
     }
 
