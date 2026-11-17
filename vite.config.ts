@@ -75,6 +75,9 @@ export default defineConfig({
             'lit/directives/ref.js',
             'lit/directives/repeat.js',
             'lit/directives/style-map.js',
+            'react',
+            'react-dom/client',
+            'react/jsx-dev-runtime',
           ],
         },
         test: {
