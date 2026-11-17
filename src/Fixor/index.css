@@ -13,6 +13,13 @@
   border-image: linear-gradient(var(--pg-color-chrome) 0 0) fill 0 / 0 / 0 100vw;
 }
 
+/* The chrome is dark in both schemes: so are the tokens on it, the focus ring among them. */
+@media screen {
+  .header-container {
+    color-scheme: dark;
+  }
+}
+
 .header-text {
   margin: 1.5rem;
   flex-grow: 1;

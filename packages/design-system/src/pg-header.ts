@@ -100,6 +100,13 @@ export class PgHeader extends LitElement {
       font-weight: 700;
     }
 
+    /* The chrome is dark in both schemes: so are the tokens on it, the focus ring among them. */
+    @media screen {
+      :host {
+        color-scheme: dark;
+      }
+    }
+
     @media (forced-colors: active) {
       /* Forced colours keep a gradient border-image: the band would stay dark under CanvasText. */
       :host {
