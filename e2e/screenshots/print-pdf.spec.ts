@@ -12,26 +12,33 @@ const actionWords: Record<string, string> = {
 };
 const expectedPages = { small: 2, large: 3 };
 
-type PdfPage = { texts: string[]; imageWidths: number[] };
+type PdfPage = { texts: string[]; imageWidths: number[]; fonts: string[] };
 
 async function readPdf(buffer: Buffer): Promise<PdfPage[]> {
-  const pdf = await getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pdf = await getDocument({ data: new Uint8Array(buffer), fontExtraProperties: true }).promise;
   const pages: PdfPage[] = [];
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const text = await page.getTextContent();
     const operators = await page.getOperatorList();
     const widths: number[] = [];
+    const fonts = new Set<string>();
     operators.fnArray.forEach((fn, index) => {
       if (fn === OPS.paintImageXObject) {
         const id = operators.argsArray[index][0];
         const image = id.startsWith('g_') ? page.commonObjs.get(id) : page.objs.get(id);
         widths.push(image.width);
       }
+      if (fn === OPS.setFont) {
+        // Embedded fonts are subsets named like AAAAAA+CourierPrime-Bold.
+        fonts.add(page.commonObjs.get(operators.argsArray[index][0]).name.replace(/^[A-Z]{6}\+/, ''));
+      }
     });
     pages.push({
-      texts: text.items.map(item => ('str' in item ? item.str.trim() : '')).filter(s => s.length > 0),
+      // Words, not text items: how pdf.js groups words into items depends on the font's spacing.
+      texts: text.items.flatMap(item => ('str' in item ? item.str.split(/\s+/) : [])).filter(s => s.length > 0),
       imageWidths: widths,
+      fonts: [...fonts],
     });
   }
   return pages;
@@ -48,6 +55,8 @@ for (const template of ['small', 'large'] as const) {
     const pages = await readPdf(await page.pdf({ format: 'A4', printBackground: true }));
 
     expect(pages).toHaveLength(expectedPages[template]);
+    // The demo has no font of its own, so its tiles print in --pg-font-mono's web font, not a system fallback.
+    expect(new Set(pages.flatMap(p => p.fonts))).toEqual(new Set(['CourierPrime-Regular', 'CourierPrime-Bold']));
     for (const row of demoRows) {
       const sequence = row.split(' ');
       const textPages = pages.filter(p => sequence.every(part => p.texts.includes(part)));

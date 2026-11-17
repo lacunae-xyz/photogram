@@ -74,8 +74,7 @@ export class PhotogramTutorial extends LitElement {
     }
 
     .tutorial-example-tile {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-family: Courier New;
+      font-family: var(--pg-font-mono);
     }
   `;
 

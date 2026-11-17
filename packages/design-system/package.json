@@ -16,6 +16,7 @@
   },
   "files": [
     "tokens.css",
+    "fonts",
     "icons",
     "illustrations",
     "src"
