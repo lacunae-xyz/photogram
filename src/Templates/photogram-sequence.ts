@@ -29,12 +29,12 @@ export class PhotogramSequence extends LitElement {
     }
 
     .sequence-colored-dark {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
+      /* stylelint-disable-next-line color-no-hex -- black or white, whichever reads on the label colour */
       color: #000000;
     }
 
     .sequence-colored-light {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
+      /* stylelint-disable-next-line color-no-hex -- black or white, whichever reads on the label colour */
       color: #ffffff;
     }
   `;
