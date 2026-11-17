@@ -87,18 +87,32 @@ describe('pg-illustration', () => {
       renderIllustration(
         html`<pg-illustration
           name="folder"
-          style="--pg-color-accent: #00ff00; --pg-illus-ink: #111111; --pg-illus-bg: #222222; --pg-illus-paper: #333333"
+          style="--pg-color-accent: #00ff00; --pg-illus-ink: #111111; --pg-illus-bg: #222222; --pg-illus-shape: #444444; --pg-illus-line: #555555; --pg-illus-paper: #333333"
         ></pg-illustration>`,
       ),
     );
-    for (const colour of ['#38d39f', '#3f3d56', '#f2f2f2', '"#fff"']) {
+    for (const colour of [
+      '#38d39f',
+      '#3f3d56',
+      '#f2f2f2',
+      '#e6e6e6',
+      '"#ccc"',
+      '"#fff"',
+    ]) {
       expect(svg).not.toContain(colour);
     }
-    for (const colour of ['#00ff00', '#111111', '#222222', '#333333']) {
+    for (const colour of [
+      '#00ff00',
+      '#111111',
+      '#222222',
+      '#444444',
+      '#555555',
+      '#333333',
+    ]) {
       expect(svg).toContain(`fill="${colour}"`);
     }
-    // No token for this one.
-    expect(svg).toContain('fill="#e6e6e6"');
+    // No token for skin.
+    expect(svg).toContain('fill="#9e616a"');
   });
 
   it('switches illustration with its name', async () => {

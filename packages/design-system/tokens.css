@@ -124,7 +124,9 @@
 
   /* Illustration fills, the unDraw colours each one replaces in pg-illustration. */
   --pg-illus-bg: var(--pg-grey-200);
-  --pg-illus-ink: #3f3d56;
+  --pg-illus-shape: var(--pg-grey-300);
+  --pg-illus-line: var(--pg-grey-400);
+  --pg-illus-ink: var(--pg-grey-950);
   --pg-illus-paper: #fff;
 
   /* Red: pg-big-button only. */
