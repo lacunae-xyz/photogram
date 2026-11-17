@@ -141,18 +141,34 @@ export function createTitleSizer<T extends Title>(
 }
 
 /**
- * Calls `callback` now, or once `fonts` have loaded if some are loading: sizing measures the text, and a title measured
- * in the fallback font while the web font loads would keep a size that doesn't fit.
+ * How long sizing waits for loading fonts. A stalled font would otherwise leave titles unsized: past this, they're
+ * measured in the fallback font, and `loadingdone` re-sizes them once the font lands.
+ */
+const fontWaitMs = 1000;
+
+/**
+ * Calls `callback` now, or once `fonts` have loaded if some are loading, at most `timeoutMs` later: sizing measures the
+ * text, and a title measured in the fallback font while the web font loads would keep a size that doesn't fit.
  */
 export function afterFontsLoad(
   fonts: Pick<FontFaceSet, 'status' | 'ready'> | undefined,
   callback: () => void,
+  timeoutMs = fontWaitMs,
 ) {
-  if (fonts?.status === 'loading') {
-    void fonts.ready.then(() => callback());
-  } else {
+  if (fonts?.status !== 'loading') {
     callback();
+    return;
   }
+  let called = false;
+  const once = () => {
+    if (!called) {
+      called = true;
+      clearTimeout(timer);
+      callback();
+    }
+  };
+  const timer = setTimeout(once, timeoutMs);
+  void fonts.ready.then(once);
 }
 
 let observer: ReturnType<typeof createObserver> | undefined;

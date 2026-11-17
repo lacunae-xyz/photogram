@@ -394,6 +394,28 @@ describe('observeTitle', () => {
     }
   });
 
+  test('sizes in the fallback font when loading fonts stall', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    Object.defineProperty(document, 'fonts', {
+      configurable: true,
+      value: { status: 'loading', ready: new Promise<void>(() => {}) },
+    });
+    try {
+      const action = title('Action');
+      observeTitle(action);
+      runFrames();
+      expect(action.style.fontSize).toEqual('');
+
+      vi.advanceTimersByTime(1000);
+      runFrames();
+      expect(action.style.fontSize).toEqual('1.25rem');
+      unobserveTitle(action);
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
+      vi.useRealTimers();
+    }
+  });
+
   test('stops after unobserveTitle', async () => {
     const action = title('Action');
     observeTitle(action);
