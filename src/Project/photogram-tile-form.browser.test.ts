@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import type { EditedShot, PhotogramTileForm } from './photogram-tile-form';
 import './photogram-tile-form';
+import '@lacunae-xyz/photogram-design-system/tokens.css';
 
 afterEach(() => render(null, document.body));
 
