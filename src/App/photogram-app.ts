@@ -69,6 +69,18 @@ export class PhotogramApp extends LitElement {
     :host {
       display: block;
     }
+
+    .announcer {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   `;
 
   /** index.html's, for the pages that have none of their own. */
@@ -188,7 +200,8 @@ export class PhotogramApp extends LitElement {
   }
 
   render() {
-    return this.#routes.outlet();
+    return html`${this.#routes.outlet()}
+      <div class="announcer" role="status"></div>`;
   }
 
   /** Adds `path` to the history and shows its page. */
@@ -201,6 +214,15 @@ export class PhotogramApp extends LitElement {
     await this.updateComplete;
     // The new page starts at its top, as after a load. Back and forward restore their own position.
     window.scrollTo(0, 0);
+    this.#announce();
+  }
+
+  /**
+   * Screen readers read the new page's title, as they did after a load. The focus stays where it is: Tab
+   * already starts from the top of the new page, and focusing the app upset Firefox's scroll restoration on back.
+   */
+  #announce() {
+    this.renderRoot.querySelector('.announcer')!.textContent = document.title;
   }
 
   #enter(meta = this.#defaultMeta, { fixor = false, noindex = false } = {}) {
@@ -224,8 +246,10 @@ export class PhotogramApp extends LitElement {
     return true;
   }
 
-  readonly #onPopState = () => {
-    this.#routes.goto(location.pathname);
+  readonly #onPopState = async () => {
+    await this.#routes.goto(location.pathname);
+    await this.updateComplete;
+    this.#announce();
   };
 
   #onNavigate(event: CustomEvent<{ path: string }>) {
