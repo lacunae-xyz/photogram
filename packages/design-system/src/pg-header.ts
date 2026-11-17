@@ -91,6 +91,11 @@ export class PgHeader extends LitElement {
     }
 
     @media (forced-colors: active) {
+      /* Forced colours keep a gradient border-image: the band would stay dark under CanvasText. */
+      :host {
+        border-image-source: none;
+      }
+
       .logo {
         forced-color-adjust: none;
         background-color: CanvasText;

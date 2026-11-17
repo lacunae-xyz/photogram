@@ -38,7 +38,7 @@
   opacity: 0.7;
 }
 
-@media print {
+@media print, (forced-colors: active) {
   .header-container {
     color: var(--pg-color-text);
     /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
