@@ -42,6 +42,10 @@ function shownPage(app: HTMLElement) {
   return app.shadowRoot!.querySelector('*:not(style)')?.localName;
 }
 
+function announced(app: HTMLElement) {
+  return app.shadowRoot!.querySelector('[role="status"]')!.textContent;
+}
+
 function meta() {
   return { title: document.title, description: description.content };
 }
@@ -216,6 +220,29 @@ describe('photogram-app', () => {
     await vi.waitFor(() => expect(shownPage(app)).toBe('photogram-tutorial'));
     await vi.waitFor(() => expect(window.scrollY).toBe(0));
     spacer.remove();
+  });
+
+  it('reads nothing on load', async () => {
+    const app = await renderApp('/projects');
+    expect(announced(app)).toBe('');
+  });
+
+  it('reads the new page’s title after a link', async () => {
+    const app = await renderApp('/projects');
+    clickOutcome();
+    headerLink(app, 'Tutorial').click();
+    await vi.waitFor(() =>
+      expect(announced(app)).toBe('Photogram · Comment utiliser Photogram'),
+    );
+    expect(shownPage(app)).toBe('photogram-tutorial');
+  });
+
+  it('reads the title on back and forward', async () => {
+    const app = await renderApp('/projects');
+    await app.navigate('/tutorial');
+    history.replaceState(null, '', '/projects');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.waitFor(() => expect(announced(app)).toBe('Photogram · Projects'));
   });
 
   it('follows links in pages too', async () => {

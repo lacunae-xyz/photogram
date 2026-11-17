@@ -19,19 +19,20 @@ export default defineConfig(
     },
   },
   {
-    files: ['src/**/*.{js,jsx,ts,tsx}'],
-    extends: [eslintReact.configs.recommended],
-    plugins: { 'react-hooks': reactHooks },
+    files: ['src/**/*.{js,jsx,ts}'],
     languageOptions: {
       globals: globals.browser,
     },
+  },
+  {
+    // The Fixor island is the last React code. It leaves for its own repo in phase 7.
+    files: ['src/Fixor/**/*.{js,jsx}'],
+    extends: [eslintReact.configs.recommended],
+    plugins: { 'react-hooks': reactHooks },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      // React rules CRA didn't have. Phase 6 replaces these components with Lit.
-      '@eslint-react/no-access-state-in-setstate': 'off',
-      '@eslint-react/no-set-state-in-component-did-update': 'off',
-      '@eslint-react/no-unused-class-component-members': 'off',
+      // Not in CRA's rules. Fixor stays as it is until phase 7 ports it to Lit.
       '@eslint-react/set-state-in-effect': 'off',
     },
   },

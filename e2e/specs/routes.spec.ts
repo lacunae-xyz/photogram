@@ -110,6 +110,26 @@ test('back and forward show the page of the address, without loading it', async 
   expect(await windowMarked(page)).toBe(true);
 });
 
+// A load made screen readers read the new page. In-app navigation was silent.
+test('in-app navigation reads the title of the new page', async ({ page }) => {
+  await page.goto('/projects');
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  const status = page.locator('photogram-app').getByRole('status');
+  await expect(status).toHaveText('');
+
+  await headerLink(page, 'Tutorial').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('nommé data.csv')).toBeVisible();
+  await expect(status).toHaveText('Photogram · Comment utiliser Photogram');
+  // As after a load, the next Tab starts from the top of the new page.
+  await page.keyboard.press('Tab');
+  await expect(page.locator('pg-header a.home')).toBeFocused();
+
+  await page.goBack();
+  await expect(page.locator('#import-project-label')).toBeVisible();
+  await expect(status).toHaveText('Photogram · Projects');
+});
+
 test('a modified click on a header link opens it in a new page', async ({ page, context }) => {
   await page.goto('/projects');
   await expect(page.locator('#import-project-label')).toBeVisible();

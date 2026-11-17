@@ -1,7 +1,6 @@
 import ts from 'typescript';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 
 // Oxc only lowers legacy decorators, and browsers don't run standard ones yet.
@@ -37,7 +36,7 @@ function standardDecorators(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [standardDecorators(), react()],
+  plugins: [standardDecorators()],
   // standardDecorators adds the tslib imports after the dependency scan.
   optimizeDeps: { include: ['tslib'] },
   build: {
@@ -57,7 +56,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['src/**/*.test.{js,jsx,ts,tsx}'],
+          include: ['src/**/*.test.{js,ts}'],
           exclude: ['**/*.browser.test.ts'],
           environment: 'jsdom',
           globals: true,
