@@ -131,7 +131,7 @@ test('a new image stored after the form closed does not reopen it', async ({ pag
   await expect(form).toHaveCount(0);
 
   await page.waitForFunction(() => (window as unknown as { imageStored?: boolean }).imageStored);
-  // A macrotask for React to render whatever the stored image led to.
+  // Two frames for the page to render whatever the stored image led to.
   await page.evaluate(() => new Promise(requestAnimationFrame).then(() => new Promise(requestAnimationFrame)));
   await expect(form).toHaveCount(0);
   expect(pageErrors).toEqual([]);

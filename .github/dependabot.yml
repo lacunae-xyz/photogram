@@ -7,13 +7,11 @@ updates:
     groups:
       dev-dependencies: { dependency-type: development, update-types: [minor, patch] }
       dependencies: { dependency-type: production, update-types: [minor, patch] }
-    # Phase 6 removes React. The types follow React's major.
+    # React only runs the Fixor island, which leaves in phase 7. The types follow React's major.
     ignore:
       - dependency-name: react
         update-types: ['version-update:semver-major']
       - dependency-name: react-dom
-        update-types: ['version-update:semver-major']
-      - dependency-name: react-router-dom
         update-types: ['version-update:semver-major']
       - dependency-name: '@types/react'
         update-types: ['version-update:semver-major']
