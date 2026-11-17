@@ -174,7 +174,7 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       }
     });
 
-    describe('in the dark scheme', () => {
+    describe('in each colour scheme', () => {
       const withTokens = (scheme: string) => {
         const style = document.createElement('style');
         style.textContent = tokens;
@@ -185,6 +185,16 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
           document.documentElement.style.colorScheme = '';
         });
       };
+
+      it('keeps black text in the light scheme, the printed one', async () => {
+        withTokens('light');
+        for (const colorDistribution of ['indicator', 'card']) {
+          const tile = await renderTile({ ...shot, colorDistribution });
+          expect(getComputedStyle(tile).color, colorDistribution).toBe(
+            'rgb(0, 0, 0)',
+          );
+        }
+      });
 
       it('draws on the dark surface, in the light text colour', async () => {
         withTokens('dark');
@@ -203,7 +213,7 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
         const tile = await renderTile({ ...shot, colorDistribution: 'card' });
         expect(getComputedStyle(tile)).toMatchObject({
           backgroundColor: 'rgb(255, 235, 59)',
-          color: 'rgb(34, 34, 34)',
+          color: 'rgb(0, 0, 0)',
           borderTopColor: 'rgb(170, 170, 170)',
         });
         tile.colorDistribution = 'indicator';
