@@ -20,9 +20,11 @@ export class PgButton extends LitElement {
     }
 
     button {
+      font: inherit;
       height: 1.75rem;
       padding: 0.625rem;
       line-height: 0.625rem;
+      font-family: var(--pg-font-mono);
       font-size: var(--pg-font-size-2);
       text-transform: uppercase;
       border: none;
