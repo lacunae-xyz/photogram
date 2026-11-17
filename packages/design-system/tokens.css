@@ -76,6 +76,8 @@
 }
 
 :root {
+  color-scheme: light dark;
+
   /* Neutral scale. White isn't a step: surfaces use #fff. */
   --pg-grey-50: #fafafa;
   --pg-grey-100: #f5f5f5;
@@ -97,11 +99,26 @@
 
   --pg-red-600: #d32f2f; /* 5.0:1 on white */
 
-  --pg-color-surface: #fff;
-  --pg-color-surface-raised: #fff;
-  --pg-color-border: var(--pg-grey-300);
+  /* Semantic colours: light-dark(light, dark). They follow the OS, <html data-theme="light|dark"> overrides it on
+     screen, and print is always light (the color-scheme rules below). A computed custom property keeps light-dark()
+     unresolved: read a token through a property that resolves it, like an element's color. */
+  --pg-color-surface: light-dark(#fff, var(--pg-grey-900));
+  --pg-color-surface-raised: light-dark(#fff, var(--pg-grey-850));
+  --pg-color-surface-alt: light-dark(var(--pg-grey-100), var(--pg-grey-850));
+  /* Fields, the tile board, selected and hovered rows: one step deeper than the surfaces. Not in 06's table. */
+  --pg-color-fill: light-dark(var(--pg-grey-200), var(--pg-grey-800));
+  --pg-color-border: light-dark(var(--pg-grey-300), var(--pg-grey-700));
+  /* Tile, card and swatch outlines, the cut lines in print. Not in 06's table. */
+  --pg-color-border-strong: light-dark(var(--pg-grey-400), var(--pg-grey-600));
+  /* The chrome is dark in both schemes. */
   --pg-color-chrome: var(--pg-grey-950);
   --pg-color-on-chrome: #ffffffee;
+  /* The header's tagline: on-chrome at the 70% opacity it had. */
+  --pg-color-on-chrome-muted: color-mix(
+    in srgb,
+    var(--pg-color-on-chrome) 70%,
+    transparent
+  );
   /* 73.3% is today's bb alpha. */
   --pg-color-backdrop: color-mix(
     in srgb,
@@ -109,31 +126,32 @@
     transparent
   );
 
-  --pg-color-text: var(--pg-grey-900);
-  --pg-color-text-muted: var(--pg-grey-700);
-  --pg-color-text-subtle: var(--pg-grey-600);
+  --pg-color-text: light-dark(var(--pg-grey-900), var(--pg-grey-200));
+  --pg-color-text-muted: light-dark(var(--pg-grey-700), var(--pg-grey-300));
+  --pg-color-text-subtle: light-dark(var(--pg-grey-600), var(--pg-grey-400));
+  --pg-color-disabled: light-dark(var(--pg-grey-400), var(--pg-grey-600));
 
   /* Green carries focus, links, illustrations, active state and pg-button. */
   --pg-color-accent: var(--pg-green-300);
   --pg-color-on-accent: var(--pg-grey-950);
-  --pg-color-accent-icon: var(--pg-green-500);
-  --pg-color-focus: var(--pg-green-500);
-  --pg-color-accent-text: var(--pg-green-700);
+  --pg-color-accent-icon: light-dark(var(--pg-green-500), var(--pg-green-300));
+  --pg-color-focus: light-dark(var(--pg-green-500), var(--pg-green-300));
+  --pg-color-accent-text: light-dark(var(--pg-green-700), var(--pg-green-300));
   /* 10%, not 14%: keeps accent-text on the tint at 4.59:1 (14% gave 4.46). */
   --pg-color-hover: color-mix(in srgb, var(--pg-green-300) 10%, transparent);
 
   /* Illustration fills, the unDraw colours each one replaces in pg-illustration. */
-  --pg-illus-bg: var(--pg-grey-200);
-  --pg-illus-shape: var(--pg-grey-300);
-  --pg-illus-line: var(--pg-grey-400);
+  --pg-illus-bg: light-dark(var(--pg-grey-200), var(--pg-grey-800));
+  --pg-illus-shape: light-dark(var(--pg-grey-300), var(--pg-grey-700));
+  --pg-illus-line: light-dark(var(--pg-grey-400), var(--pg-grey-600));
   --pg-illus-ink: var(--pg-grey-950);
-  --pg-illus-paper: #fff;
+  --pg-illus-paper: light-dark(#fff, var(--pg-grey-700));
 
   /* Red: pg-big-button only. */
   --pg-color-action: var(--pg-red-600);
   --pg-color-on-action: #ffffffee;
 
-  --pg-color-shadow: rgba(0, 0, 0, 0.26);
+  --pg-color-shadow: light-dark(rgb(0 0 0 / 0.26), rgb(0 0 0 / 0.6));
   --pg-shadow-1: 0 2px 5px var(--pg-color-shadow);
   --pg-shadow-2: 0 4px 10px var(--pg-color-shadow);
 
@@ -162,4 +180,45 @@
   --pg-font-size-3: 1rem;
   --pg-font-size-4: 1.5rem;
   --pg-font-size-5: 2.25rem;
+}
+
+/* The override is screen only: a [data-theme='dark'] outside @media screen would win over print's light. */
+@media screen {
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+}
+
+/* Browsers without light-dark() (Chrome < 123, Firefox < 120, Safari < 17.5): the light scheme. */
+@supports not (color: light-dark(#000, #fff)) {
+  :root {
+    --pg-color-surface: #fff;
+    --pg-color-surface-raised: #fff;
+    --pg-color-surface-alt: var(--pg-grey-100);
+    --pg-color-fill: var(--pg-grey-200);
+    --pg-color-border: var(--pg-grey-300);
+    --pg-color-border-strong: var(--pg-grey-400);
+    --pg-color-text: var(--pg-grey-900);
+    --pg-color-text-muted: var(--pg-grey-700);
+    --pg-color-text-subtle: var(--pg-grey-600);
+    --pg-color-disabled: var(--pg-grey-400);
+    --pg-color-accent-icon: var(--pg-green-500);
+    --pg-color-focus: var(--pg-green-500);
+    --pg-color-accent-text: var(--pg-green-700);
+    --pg-illus-bg: var(--pg-grey-200);
+    --pg-illus-shape: var(--pg-grey-300);
+    --pg-illus-line: var(--pg-grey-400);
+    --pg-illus-paper: #fff;
+    --pg-color-shadow: rgb(0 0 0 / 0.26);
+  }
 }
