@@ -1,7 +1,6 @@
-import { LitElement, css, html, unsafeCSS } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import editable from '@lacunae-xyz/photogram-design-system/illustrations/editable.svg';
-import theSearch from '@lacunae-xyz/photogram-design-system/illustrations/the-search.svg';
+import '@lacunae-xyz/photogram-design-system/pg-illustration.js';
 import { colors } from '../Application';
 import '../Templates/photogram-tile-small';
 
@@ -34,15 +33,31 @@ export class PhotogramTutorial extends LitElement {
     }
 
     .tutorial-container {
-      /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
-      background-image:
-        url(${unsafeCSS(editable)}), url(${unsafeCSS(theSearch)});
-      background-position:
-        left 1rem bottom,
-        right 1rem bottom;
-      background-size: 16rem;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      isolation: isolate;
+    }
+
+    /* Fixed to the window's bottom corners, behind the layout: pg-illustrations so they take the scheme's colours. */
+    .tutorial-art {
+      position: fixed;
+      right: 1rem;
+      bottom: 0;
+      left: 1rem;
+      z-index: -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+
+    .tutorial-art pg-illustration::part(image) {
+      display: block;
+      width: 16rem;
+    }
+
+    @media print {
+      .tutorial-art {
+        display: none;
+      }
     }
 
     .tutorial-layout {
@@ -104,6 +119,10 @@ export class PhotogramTutorial extends LitElement {
   render() {
     const { sequence, action, label, period, fx } = this.example;
     return html`<div class="tutorial-container">
+      <div class="tutorial-art">
+        <pg-illustration name="editable"></pg-illustration>
+        <pg-illustration name="the-search"></pg-illustration>
+      </div>
       <div class="tutorial-layout">
         <slot name="header"></slot>
         <article>
@@ -137,9 +156,10 @@ export class PhotogramTutorial extends LitElement {
                 etc.)
               </li>
               <li>
-                Périodes : 4 mots possibles : <em>Matin, soir, jour, nuit</em>.
-                A choisir en fonction de la temporalité souhaitée. Ces mots
-                restent en français, même si l'interface est en anglais.
+                Périodes : 4 mots possibles :
+                <em>Matin, soir, jour, nuit</em>. A choisir en fonction de la
+                temporalité souhaitée. Ces mots restent en français, même si
+                l'interface est en anglais.
               </li>
               <li>
                 FX : Pour indiquer une séquence truquée, il suffit de mettre une

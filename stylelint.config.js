@@ -1,5 +1,4 @@
 // Raw colours, radii, shadows and fonts belong in the design-system tokens.
-// The ones 06 §6.5 still has to fold into the scale carry `-- pg: 6.5` on their disable comment.
 const notAToken = /^(?!var\(--pg-|(inherit|initial|unset|none|0)$)/;
 
 export default {

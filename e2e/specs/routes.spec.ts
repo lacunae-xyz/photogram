@@ -188,8 +188,18 @@ async function expectIllustrations(page: Page, names: string[]) {
 
 // B11: the landing loaded an illustration from a relative URL, which only resolved on `/`.
 const routeIllustrations = [
-  { path: '/', names: ({ chromium }: { chromium: boolean }) => ['learning', 'upload-image', ...(chromium ? ['folder'] : []), 'presentation'] },
-  { path: '/tutorial', names: () => [] },
+  {
+    path: '/',
+    names: ({ chromium }: { chromium: boolean }) => [
+      'learning',
+      'upload-image',
+      ...(chromium ? ['folder'] : []),
+      'presentation',
+      'web-developer',
+      'videographer',
+    ],
+  },
+  { path: '/tutorial', names: () => ['editable', 'the-search'] },
   { path: '/projects', names: () => ['empty-street'] },
   { path: '/project-demo', names: () => [] },
   { path: '/privacy-policy', names: () => [] },

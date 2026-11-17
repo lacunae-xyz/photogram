@@ -1,8 +1,6 @@
-import { LitElement, css, html, nothing, unsafeCSS } from 'lit';
+import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import videographer from '@lacunae-xyz/photogram-design-system/illustrations/videographer.svg';
-import webDeveloper from '@lacunae-xyz/photogram-design-system/illustrations/web-developer.svg';
 import '@lacunae-xyz/photogram-design-system/pg-illustration.js';
 import Application from '../Application';
 import { canOpenFolder, pickFolder } from '../Projects/folder-picker';
@@ -159,33 +157,39 @@ export class PhotogramLanding extends LitElement {
       isolation: isolate;
     }
 
-    /* Its own layer, so the backgrounds fade without fading the creators. */
-    .creator-layout::before {
-      content: '';
+    /* The artwork behind the creators, pg-illustrations so they take the scheme's colours. Its own layer, so it fades
+       without fading the creators. */
+    .creator-art {
       position: absolute;
       inset: 0;
       z-index: -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+      overflow: hidden;
       opacity: 0.8;
-
-      /* pg: 6.5 dark mode. Backgrounds keep the files' unDraw colours, not the --pg-illus-* tokens. */
-      background-image:
-        url(${unsafeCSS(webDeveloper)}), url(${unsafeCSS(videographer)});
-      background-position:
-        left 1rem center,
-        right 1rem center;
-      background-size: 12rem;
-      background-repeat: no-repeat;
-      transition-property: background-size background-position;
-      transition-duration: 0.5s;
+      pointer-events: none;
     }
 
-    .creator-layout:hover::before {
-      background-size: 10.25rem;
+    .creator-art pg-illustration::part(image) {
+      width: 12rem;
+      transition: width 0.5s;
     }
 
-    /* Narrower, the creators sit on the artwork. The tutorial's backgrounds go at the same width, under its 50rem layout. */
+    .creator-layout:hover pg-illustration::part(image) {
+      width: 10.25rem;
+    }
+
+    /* Narrower, the creators sit on the artwork. The tutorial's artwork goes at the same width, under its 50rem layout. */
     @media (max-width: 50rem) {
-      .creator-layout::before {
+      .creator-art {
+        display: none;
+      }
+    }
+
+    @media print {
+      .creator-art {
         display: none;
       }
     }
@@ -347,6 +351,10 @@ export class PhotogramLanding extends LitElement {
 
   #creators() {
     return html`<div class="creator-layout">
+      <div class="creator-art">
+        <pg-illustration name="web-developer"></pg-illustration>
+        <pg-illustration name="videographer"></pg-illustration>
+      </div>
       <h2>Creators</h2>
       ${creators.map(
         creator =>
