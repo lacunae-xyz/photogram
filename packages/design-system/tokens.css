@@ -43,7 +43,8 @@
   --pg-color-accent-icon: var(--pg-green-500);
   --pg-color-focus: var(--pg-green-500);
   --pg-color-accent-text: var(--pg-green-700);
-  --pg-color-hover: color-mix(in srgb, var(--pg-green-300) 14%, transparent);
+  /* 10%, not 14%: keeps accent-text on the tint at 4.59:1 (14% gave 4.46). */
+  --pg-color-hover: color-mix(in srgb, var(--pg-green-300) 10%, transparent);
 
   /* Illustration fills, the unDraw colours each one replaces in pg-illustration. */
   --pg-illus-bg: var(--pg-grey-200);
