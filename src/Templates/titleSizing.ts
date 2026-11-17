@@ -183,19 +183,28 @@ function createObserver() {
     return `${container?.clientWidth}×${container?.clientHeight}×${title.offsetHeight}`;
   };
 
+  const idle = (callback: () => void) => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(callback, { timeout: 100 });
+    } else {
+      setTimeout(callback);
+    }
+  };
+
+  // A font that finishes loading swaps in on the next frame, which lays out every title again: like after a large
+  // render, leave that frame free of our script. Once the wait timed out, go ahead even if fonts still load.
+  const frame = (callback: () => void, waited = false) => {
+    if (!waited && document.fonts?.status === 'loading') {
+      afterFontsLoad(document.fonts, () => idle(() => frame(callback, true)));
+    } else {
+      requestAnimationFrame(callback);
+    }
+  };
+
   const sizer = createTitleSizer<HTMLElement>(
     {
-      request: callback =>
-        afterFontsLoad(document.fonts, () => requestAnimationFrame(callback)),
-      requestAfterNext: callback => {
-        const next = () =>
-          afterFontsLoad(document.fonts, () => requestAnimationFrame(callback));
-        if (typeof requestIdleCallback === 'function') {
-          requestIdleCallback(next, { timeout: 100 });
-        } else {
-          setTimeout(next);
-        }
-      },
+      request: callback => frame(callback),
+      requestAfterNext: callback => idle(() => frame(callback)),
       now: () => performance.now(),
     },
     {
