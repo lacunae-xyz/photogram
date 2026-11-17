@@ -145,7 +145,8 @@
   --pg-illus-shape: light-dark(var(--pg-grey-300), var(--pg-grey-700));
   --pg-illus-line: light-dark(var(--pg-grey-400), var(--pg-grey-600));
   --pg-illus-ink: var(--pg-grey-950);
-  --pg-illus-paper: light-dark(#fff, var(--pg-grey-700));
+  /* Dark: as dark as a card, not the shapes' grey-700, where windows, sheets and screen details vanished. */
+  --pg-illus-paper: light-dark(#fff, var(--pg-grey-850));
 
   /* Red: pg-big-button only. */
   --pg-color-action: var(--pg-red-600);
