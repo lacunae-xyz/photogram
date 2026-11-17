@@ -4,13 +4,12 @@ import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import { indicatorStyles } from './indicator-styles';
 import { toPeriod } from './period';
 
-// Four silhouettes: the set has no sunrise or sunset, and wb_twilight_2 is wb_twilight without its rays. Morning is the
-// sun on the horizon, evening the sun turning to the moon.
+// Master's MDI glyphs: the arrows tell sunrise from sunset, which no Material Symbol does.
 const icons = {
-  morning: 'wb-twilight',
-  day: 'clear-day',
-  evening: 'brightness-4',
-  night: 'clear-night',
+  morning: 'weather-sunset-up',
+  day: 'weather-sunny',
+  evening: 'weather-sunset-down',
+  night: 'weather-night',
 };
 
 /** The period dot: lighter by day, darker by night. Without a period, a hidden dot holds its place, as fx's does. */

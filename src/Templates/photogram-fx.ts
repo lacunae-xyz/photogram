@@ -26,7 +26,7 @@ export class PhotogramFx extends LitElement {
   render() {
     return html`<pg-icon
       class="indicator fx ${this.value ? '' : 'hide'}"
-      name="auto-fix-high"
+      name="auto-fix"
       label="special effects indicator"
     ></pg-icon>`;
   }

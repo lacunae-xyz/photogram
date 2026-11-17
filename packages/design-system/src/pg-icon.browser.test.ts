@@ -28,23 +28,25 @@ describe('pg-icon', () => {
   it('knows every icon file', () => {
     expect([...iconNames].sort()).toEqual([
       'arrow-back',
-      'auto-fix-high',
-      'brightness-4',
-      'clear-day',
-      'clear-night',
+      'auto-fix',
       'delete',
       'link',
       'link-off',
       'print',
-      'wb-twilight',
+      'weather-night',
+      'weather-sunny',
+      'weather-sunset-down',
+      'weather-sunset-up',
     ]);
   });
 
   it('renders the named icon file inline, 24px', async () => {
-    const icon = await renderIcon(html`<pg-icon name="clear-day"></pg-icon>`);
+    const icon = await renderIcon(
+      html`<pg-icon name="weather-sunny"></pg-icon>`,
+    );
     const svg = icon.shadowRoot?.querySelector('svg');
     expect(svg?.querySelector('path')?.getAttribute('d')).toBe(
-      pathData('clear-day'),
+      pathData('weather-sunny'),
     );
     expect(svg?.getBoundingClientRect()).toMatchObject({
       width: 24,
@@ -52,15 +54,16 @@ describe('pg-icon', () => {
     });
   });
 
-  it('scales files that only have a size to its box', async () => {
-    const icon = await renderIcon(
-      html`<pg-icon name="auto-fix-high"></pg-icon>`,
-    );
-    const svg = icon.shadowRoot?.querySelector('svg');
-    expect(svg?.getAttribute('viewBox')).toBe('0 0 48 48');
-    const path = svg?.querySelector('path')?.getBoundingClientRect();
-    expect(path?.width).toBeGreaterThan(16);
-    expect(path?.width).toBeLessThanOrEqual(24);
+  it('scales every file to its box, whatever its viewBox', async () => {
+    for (const name of iconNames) {
+      const icon = await renderIcon(html`<pg-icon name=${name}></pg-icon>`);
+      const svg = icon.shadowRoot?.querySelector('svg');
+      expect(svg?.getAttribute('viewBox'), name).toMatch(/^\S+ \S+ \d+ \d+$/);
+      const path = svg?.querySelector('path')?.getBoundingClientRect();
+      expect(path?.width, name).toBeGreaterThan(14);
+      expect(path?.width, name).toBeLessThanOrEqual(24);
+      render(null, document.body);
+    }
   });
 
   it('paints in the current colour', async () => {
@@ -81,19 +84,21 @@ describe('pg-icon', () => {
   });
 
   it('swaps the icon when the name changes', async () => {
-    const icon = await renderIcon(html`<pg-icon name="clear-day"></pg-icon>`);
-    icon.name = 'auto-fix-high';
+    const icon = await renderIcon(
+      html`<pg-icon name="weather-sunny"></pg-icon>`,
+    );
+    icon.name = 'auto-fix';
     await icon.updateComplete;
     const svgs = icon.shadowRoot?.querySelectorAll('svg');
     expect(svgs).toHaveLength(1);
     expect(svgs?.[0].querySelector('path')?.getAttribute('d')).toBe(
-      pathData('auto-fix-high'),
+      pathData('auto-fix'),
     );
   });
 
   it('is an image named by its label', async () => {
     await renderIcon(
-      html`<pg-icon name="auto-fix-high" label="special effects"></pg-icon>`,
+      html`<pg-icon name="auto-fix" label="special effects"></pg-icon>`,
     );
     await expect
       .element(page.getByRole('img', { name: 'special effects' }))
@@ -102,7 +107,7 @@ describe('pg-icon', () => {
 
   it('names an HTML element, not the svg, so axe keeps the content around it in one region', async () => {
     const icon = await renderIcon(
-      html`<pg-icon name="auto-fix-high" label="special effects"></pg-icon>`,
+      html`<pg-icon name="auto-fix" label="special effects"></pg-icon>`,
     );
     const image = icon.shadowRoot?.querySelector('[role="img"]');
     expect(image?.localName).toBe('span');
@@ -119,9 +124,7 @@ describe('pg-icon', () => {
   });
 
   it('is decorative without a label', async () => {
-    const icon = await renderIcon(
-      html`<pg-icon name="auto-fix-high"></pg-icon>`,
-    );
+    const icon = await renderIcon(html`<pg-icon name="auto-fix"></pg-icon>`);
     await expect.element(page.getByRole('img')).not.toBeInTheDocument();
     icon.label = 'special effects';
     await icon.updateComplete;
@@ -140,7 +143,7 @@ describe('pg-icon', () => {
             background-color: rgb(1, 2, 3);
           }
         </style>
-        <pg-icon class="dot" name="auto-fix-high"></pg-icon>`,
+        <pg-icon class="dot" name="auto-fix"></pg-icon>`,
       document.body,
     );
     const icon = document.body.querySelector('pg-icon');

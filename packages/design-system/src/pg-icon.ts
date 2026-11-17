@@ -8,13 +8,10 @@ const files = import.meta.glob<string>('../icons/*.svg', {
   eager: true,
 });
 
-/** The file's `viewBox` (older files only have a size) and the markup inside its `<svg>`. */
+/** The file's `viewBox` and the markup inside its `<svg>`. */
 function parse(file: string) {
   const open = file.slice(0, file.indexOf('>'));
-  const attribute = (name: string) =>
-    new RegExp(`\\s${name}="([^"]*)"`).exec(open)?.[1];
-  const viewBox =
-    attribute('viewBox') ?? `0 0 ${attribute('width')} ${attribute('height')}`;
+  const viewBox = /\sviewBox="([^"]*)"/.exec(open)?.[1] ?? '';
   const body = file.slice(open.length + 1, file.lastIndexOf('</svg>'));
   return { viewBox: unsafeStatic(viewBox), body: unsafeStatic(body) };
 }
