@@ -29,7 +29,7 @@ export class PgDialog extends LitElement {
     }
 
     .content {
-      padding: 20px;
+      padding: var(--pg-space-5);
     }
   `;
 
