@@ -227,7 +227,7 @@ test('/project/:id loads the permission illustration (B11)', async ({ page, brow
   });
   await page.reload();
   await expect(page.getByRole('button', { name: 'Grant permission' })).toBeVisible();
-  await expectIllustrations(page, ['secure-files']);
+  await expectIllustrations(page, ['private-files']);
 });
 
 // Leaving a page while its illustration loads fails the import in WebKit. Stale chunks after a deploy fail it too.

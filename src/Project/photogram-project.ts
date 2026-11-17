@@ -192,7 +192,7 @@ export class PhotogramProject extends LitElement {
   #promptPermission() {
     return html`<pg-empty-state
       class="prompt-permission"
-      illustration="secure-files"
+      illustration="private-files"
     >
       <p class="prompt-permission-description">
         Permission needs to be given again to access to the files.

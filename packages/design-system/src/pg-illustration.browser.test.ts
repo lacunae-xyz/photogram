@@ -36,7 +36,7 @@ describe('pg-illustration', () => {
       'folder',
       'learning',
       'presentation',
-      'secure-files',
+      'private-files',
       'upload-image',
     ]);
   });
@@ -86,7 +86,7 @@ describe('pg-illustration', () => {
     const svg = await svgOf(
       renderIllustration(
         html`<pg-illustration
-          name="empty-street"
+          name="folder"
           style="--pg-color-accent: #00ff00; --pg-illus-ink: #111111; --pg-illus-bg: #222222; --pg-illus-paper: #333333"
         ></pg-illustration>`,
       ),

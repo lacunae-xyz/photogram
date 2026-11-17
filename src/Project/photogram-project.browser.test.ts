@@ -180,7 +180,7 @@ describe('photogram-project', () => {
     const illustration = element
       .shadowRoot!.querySelector('pg-empty-state')!
       .shadowRoot!.querySelector('pg-illustration')!;
-    expect(illustration.name).toBe('secure-files');
+    expect(illustration.name).toBe('private-files');
 
     await grant.click();
     expect(requestPermission).toHaveBeenCalledWith('p1');
