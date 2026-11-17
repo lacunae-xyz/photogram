@@ -56,6 +56,21 @@ describe('pg-card', () => {
     expect(slotted('actions')).toEqual(['Delete']);
   });
 
+  it('draws the badge circle only around a badge', async () => {
+    const card = await renderCard(
+      html`<pg-card heading="Le fardeau"></pg-card>`,
+    );
+    const badge = card.shadowRoot!.querySelector<HTMLElement>('.badge')!;
+    expect(badge.checkVisibility()).toBe(false);
+    const icon = document.createElement('span');
+    icon.slot = 'badge';
+    icon.textContent = 'badge';
+    card.append(icon);
+    await vi.waitFor(() => expect(badge.checkVisibility()).toBe(true));
+    icon.remove();
+    await vi.waitFor(() => expect(badge.checkVisibility()).toBe(false));
+  });
+
   it('shows the actions on hover', async () => {
     const card = await renderCard(
       html`<pg-card heading="Le fardeau" style="width: 200px">

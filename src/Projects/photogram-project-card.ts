@@ -34,11 +34,6 @@ export class PhotogramProjectCard extends LitElement {
       display: block;
       width: 24px;
       height: 24px;
-      padding: 6px;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 30px;
-      /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
-      background-color: rgba(255, 255, 255, 0.6);
     }
 
     .btn-delete::part(button) {

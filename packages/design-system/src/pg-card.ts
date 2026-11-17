@@ -1,8 +1,8 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 /**
- * A card: media with an optional badge in its bottom-right corner, a heading, and actions shown on hover or focus.
+ * A card: media with an optional badge, in a light circle in its bottom-right corner, a heading, and actions shown on hover or focus.
  * With an `href`, the heading is a link. Size it from outside (`width`, `margin`).
  *
  * Slots: `media`, `badge`, `actions`.
@@ -41,7 +41,19 @@ export class PgCard extends LitElement {
       bottom: 0;
       right: 0;
       display: flex;
-      margin: 6px;
+      margin: var(--pg-space-2);
+      padding: var(--pg-space-1);
+      border-radius: var(--pg-radius-pill);
+      /* Light, for the dark icons: --pg-color-backdrop once pg-icon paints in currentColor. */
+      background-color: color-mix(
+        in srgb,
+        var(--pg-color-surface-raised) 60%,
+        transparent
+      );
+    }
+
+    .badge[hidden] {
+      display: none;
     }
 
     .heading {
@@ -70,10 +82,19 @@ export class PgCard extends LitElement {
 
   @property() accessor href: string | undefined;
 
+  @state() private accessor hasBadge = false;
+
+  #onBadgeChange(event: Event) {
+    this.hasBadge =
+      (event.target as HTMLSlotElement).assignedElements().length > 0;
+  }
+
   render() {
     return html`<div class="media" part="media">
         <slot name="media"></slot>
-        <div class="badge"><slot name="badge"></slot></div>
+        <div class="badge" ?hidden=${!this.hasBadge}>
+          <slot name="badge" @slotchange=${this.#onBadgeChange}></slot>
+        </div>
       </div>
       ${
         this.href === undefined
