@@ -19,6 +19,8 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.01,
+      // The default 0.2 let a one-step grey shift (silver to #aaa borders) through: §6.5 colour changes must fail here.
+      threshold: 0.05,
       animations: 'disabled',
       caret: 'hide',
     },
