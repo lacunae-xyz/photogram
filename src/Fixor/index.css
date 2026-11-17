@@ -24,6 +24,12 @@
   margin: 0;
 }
 
+/* Was photogram's header CSS, global before pg-header. */
+.header-text > p {
+  margin: 0;
+  margin-left: 0.2rem;
+}
+
 #new-project-file {
   display: none;
 }

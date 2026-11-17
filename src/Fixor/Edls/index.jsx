@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import compare from '../compare';
 import Table from '../Table';
 import CompareTable from '../CompareTable';
-import logo from '../../Header/logo.svg';
+import logo from '../../App/logo.svg';
 import './index.css';
 
 function Edls(props) {

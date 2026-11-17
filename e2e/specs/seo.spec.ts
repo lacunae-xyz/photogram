@@ -62,12 +62,25 @@ const routeMeta = [
     description: 'Photogram keeps your projects on your device. What it counts, and who hosts it.',
   },
   { path: '/fixor', ...defaultMeta },
+  { path: '/does-not-exist', ...defaultMeta, title: 'Photogram · Page not found' },
 ];
 
 async function expectMeta(page: Page, { title, description }: { title: string; description: string }) {
   await expect(page).toHaveTitle(title);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', description);
 }
+
+test('only the not found page asks not to be indexed', async ({ page }) => {
+  await routeDemo(page);
+  const robots = page.locator('meta[name="robots"]');
+  await page.goto('/does-not-exist');
+  await expect(robots).toHaveAttribute('content', 'noindex');
+  for (const { path, ...meta } of routeMeta.filter(({ path }) => path !== '/does-not-exist')) {
+    await page.goto(path);
+    await expectMeta(page, meta);
+    await expect(robots, path).toHaveCount(0);
+  }
+});
 
 for (const { path, ...meta } of routeMeta) {
   test(`${path} has its title and description`, async ({ page }) => {

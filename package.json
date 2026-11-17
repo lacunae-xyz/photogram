@@ -8,13 +8,13 @@
   ],
   "dependencies": {
     "@lacunae-xyz/photogram-design-system": "*",
-    "history": "^4.10.1",
+    "@lit-labs/router": "^0.1.4",
     "lit": "^3.3.3",
     "papaparse": "^5.3.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^5.3.4",
-    "tslib": "^2.9.1"
+    "tslib": "^2.9.1",
+    "urlpattern-polyfill": "^10.1.0"
   },
   "scripts": {
     "start": "vite",

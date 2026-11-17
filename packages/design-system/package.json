@@ -10,6 +10,7 @@
     "./pg-card.js": "./src/pg-card.ts",
     "./pg-dialog.js": "./src/pg-dialog.ts",
     "./pg-empty-state.js": "./src/pg-empty-state.ts",
+    "./pg-header.js": "./src/pg-header.ts",
     "./pg-icon.js": "./src/pg-icon.ts",
     "./pg-illustration.js": "./src/pg-illustration.ts"
   },
