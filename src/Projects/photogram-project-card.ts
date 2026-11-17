@@ -22,7 +22,7 @@ export class PhotogramProjectCard extends LitElement {
     pg-card {
       width: 15rem;
       min-width: 7.5rem;
-      margin: 0.75rem;
+      margin: var(--pg-space-3);
     }
 
     .img-project-cover {
@@ -34,32 +34,6 @@ export class PhotogramProjectCard extends LitElement {
       display: block;
       width: 24px;
       height: 24px;
-      padding: 6px;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 30px;
-      /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
-      background-color: rgba(255, 255, 255, 0.6);
-    }
-
-    .btn-delete::part(button) {
-      display: block;
-      height: 1.625rem;
-      width: 1.625rem;
-      padding: 0;
-      line-height: normal;
-      font-size: var(--pg-font-size-2);
-      font-weight: bold;
-      text-transform: none;
-      background: var(--pg-color-surface-raised);
-      color: var(--pg-color-text-muted);
-      border: 1px solid var(--pg-grey-400);
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 100px;
-    }
-
-    .btn-delete::part(button):active {
-      background: var(--pg-grey-300);
-      color: var(--pg-color-text);
     }
   `;
 
@@ -133,8 +107,8 @@ export class PhotogramProjectCard extends LitElement {
         class="btn-delete"
         label=${`Delete ${project.name}`}
         @click=${this.#onDelete}
-        >✕</pg-button
-      >
+        ><pg-icon name="delete"></pg-icon
+      ></pg-button>
     </pg-card>`;
   }
 }

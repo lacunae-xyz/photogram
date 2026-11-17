@@ -1,8 +1,8 @@
 import { LitElement, css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 /**
- * A card: media with an optional badge in its bottom-right corner, a heading, and actions shown on hover or focus.
+ * A card: media with an optional badge, in a light circle in its bottom-right corner, a centred heading, and actions beside it, shown on hover or focus (always without hover).
  * With an `href`, the heading is a link. Size it from outside (`width`, `margin`).
  *
  * Slots: `media`, `badge`, `actions`.
@@ -14,7 +14,7 @@ export class PgCard extends LitElement {
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 0.5rem;
+      padding: var(--pg-space-2);
       padding-bottom: 0;
       text-align: center;
       border: 1px solid var(--pg-grey-400);
@@ -41,20 +41,39 @@ export class PgCard extends LitElement {
       bottom: 0;
       right: 0;
       display: flex;
-      margin: 6px;
+      margin: var(--pg-space-2);
+      padding: var(--pg-space-1);
+      border-radius: var(--pg-radius-pill);
+      /* Light, for the dark icons: --pg-color-backdrop once pg-icon paints in currentColor. */
+      background-color: color-mix(
+        in srgb,
+        var(--pg-color-surface-raised) 60%,
+        transparent
+      );
+    }
+
+    .badge[hidden] {
+      display: none;
+    }
+
+    /* The heading in the middle column, so the actions beside it don't push it off centre. */
+    .body {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
     }
 
     .heading {
-      padding: 1rem;
+      grid-column: 2;
+      padding: var(--pg-space-4);
       display: block;
       color: var(--pg-color-text-muted);
       text-decoration: none;
     }
 
     .actions {
-      position: absolute;
-      top: -0.8125rem;
-      left: -0.8125rem;
+      grid-column: 3;
+      justify-self: end;
       display: flex;
       opacity: 0;
       transition: opacity 0.4s;
@@ -64,25 +83,43 @@ export class PgCard extends LitElement {
     :host(:focus-within) .actions {
       opacity: 1;
     }
+
+    /* No hover to reveal them on touch screens. */
+    @media (hover: none) {
+      .actions {
+        opacity: 1;
+      }
+    }
   `;
 
   @property() accessor heading = '';
 
   @property() accessor href: string | undefined;
 
+  @state() private accessor hasBadge = false;
+
+  #onBadgeChange(event: Event) {
+    this.hasBadge =
+      (event.target as HTMLSlotElement).assignedElements().length > 0;
+  }
+
   render() {
     return html`<div class="media" part="media">
         <slot name="media"></slot>
-        <div class="badge"><slot name="badge"></slot></div>
+        <div class="badge" ?hidden=${!this.hasBadge}>
+          <slot name="badge" @slotchange=${this.#onBadgeChange}></slot>
+        </div>
       </div>
-      ${
-        this.href === undefined
-          ? html`<span class="heading" part="heading">${this.heading}</span>`
-          : html`<a class="heading" part="heading" href=${this.href}
-              >${this.heading}</a
-            >`
-      }
-      <div class="actions"><slot name="actions"></slot></div>`;
+      <div class="body">
+        ${
+          this.href === undefined
+            ? html`<span class="heading" part="heading">${this.heading}</span>`
+            : html`<a class="heading" part="heading" href=${this.href}
+                >${this.heading}</a
+              >`
+        }
+        <div class="actions"><slot name="actions"></slot></div>
+      </div>`;
   }
 }
 

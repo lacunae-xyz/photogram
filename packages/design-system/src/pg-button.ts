@@ -22,7 +22,7 @@ export class PgButton extends LitElement {
     button {
       font: inherit;
       height: 1.75rem;
-      padding: 0.625rem;
+      padding: var(--pg-space-3) var(--pg-space-4);
       line-height: 0.625rem;
       font-family: var(--pg-font-mono);
       font-size: var(--pg-font-size-2);
@@ -49,10 +49,9 @@ export class PgButton extends LitElement {
     :host([variant='icon']) button {
       display: flex;
       height: auto;
-      padding: 0.5rem;
+      padding: var(--pg-space-2);
       line-height: 0;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 62.5rem;
+      border-radius: var(--pg-radius-pill);
     }
 
     :host([variant='icon']) button:enabled {

@@ -56,6 +56,35 @@ describe('pg-card', () => {
     expect(slotted('actions')).toEqual(['Delete']);
   });
 
+  it('draws the badge circle only around a badge', async () => {
+    const card = await renderCard(
+      html`<pg-card heading="Le fardeau"></pg-card>`,
+    );
+    const badge = card.shadowRoot!.querySelector<HTMLElement>('.badge')!;
+    expect(badge.checkVisibility()).toBe(false);
+    const icon = document.createElement('span');
+    icon.slot = 'badge';
+    icon.textContent = 'badge';
+    card.append(icon);
+    await vi.waitFor(() => expect(badge.checkVisibility()).toBe(true));
+    icon.remove();
+    await vi.waitFor(() => expect(badge.checkVisibility()).toBe(false));
+  });
+
+  it('keeps the heading centred beside the actions', async () => {
+    const card = await renderCard(
+      html`<pg-card heading="Le fardeau" style="width: 240px">
+        <button slot="actions" style="width: 40px">Delete</button>
+      </pg-card>`,
+    );
+    const centre = (element: Element) => {
+      const { left, width } = element.getBoundingClientRect();
+      return left + width / 2;
+    };
+    const heading = card.shadowRoot!.querySelector('.heading')!;
+    expect(centre(heading)).toBeCloseTo(centre(card), 0);
+  });
+
   it('shows the actions on hover', async () => {
     const card = await renderCard(
       html`<pg-card heading="Le fardeau" style="width: 200px">

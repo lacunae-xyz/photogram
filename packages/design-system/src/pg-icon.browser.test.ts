@@ -18,6 +18,7 @@ describe('pg-icon', () => {
     expect([...iconNames].sort()).toEqual([
       'arrow-back',
       'auto-fix',
+      'delete',
       'link',
       'link-off',
       'print',

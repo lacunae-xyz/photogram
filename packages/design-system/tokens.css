@@ -1,4 +1,5 @@
-/* Photogram design tokens. The palette steps, then the semantic tokens elements use, built from them. */
+/* Photogram design tokens. The palette steps, then the semantic tokens elements use, built from them.
+   The pg-* elements need this sheet on the page: their var()s have no fallbacks. */
 
 /* Courier Prime (SIL OFL 1.1, fonts/OFL.txt), from @fontsource/courier-prime 5.3.0: regular, bold and italic, the
    styles the app uses, in Google Fonts' latin and latin-ext subsets. index.html preloads latin regular and bold. */
@@ -135,6 +136,15 @@
   --pg-shadow-2: 0 4px 10px var(--pg-color-shadow);
 
   --pg-radius-s: 3px;
+  --pg-radius-pill: 999px;
+
+  /* 4, 8, 12, 16, 24, 32px. */
+  --pg-space-1: 0.25rem;
+  --pg-space-2: 0.5rem;
+  --pg-space-3: 0.75rem;
+  --pg-space-4: 1rem;
+  --pg-space-5: 1.5rem;
+  --pg-space-6: 2rem;
 
   /* Courier New and Courier aren't on Linux and Android, where the stack fell through to monospace. */
   --pg-font-mono: 'Courier Prime', 'Courier New', Courier, monospace;

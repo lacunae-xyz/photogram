@@ -43,17 +43,16 @@ export class PhotogramTileForm extends LitElement {
     #label,
     #periode,
     #fx {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 2px;
+      border-radius: var(--pg-radius-s);
       background-color: var(--pg-grey-200);
       border: none;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--pg-space-2);
       font-family: var(--pg-font-mono);
       font-size: var(--pg-font-size-4);
     }
 
     label {
-      padding: 0.625rem;
+      padding: var(--pg-space-3);
     }
 
     #form-action {
@@ -78,7 +77,7 @@ export class PhotogramTileForm extends LitElement {
     }
 
     .photogram-form-container {
-      margin-bottom: 0.625rem;
+      margin-bottom: var(--pg-space-3);
       text-align: center;
       position: relative;
     }
@@ -118,7 +117,7 @@ export class PhotogramTileForm extends LitElement {
       width: 100%;
       position: absolute;
       min-height: 3rem;
-      bottom: 0.25rem;
+      bottom: var(--pg-space-1);
       background: color-mix(in srgb, var(--pg-grey-950) 25%, transparent);
       text-align: start;
     }

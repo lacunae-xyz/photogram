@@ -23,8 +23,7 @@ export class PhotogramColors extends LitElement {
       width: 2rem;
       height: 2rem;
       padding: 2px;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 4px;
+      border-radius: var(--pg-radius-s);
       cursor: pointer;
     }
 
@@ -34,14 +33,12 @@ export class PhotogramColors extends LitElement {
 
     input[type='color']::-webkit-color-swatch {
       border: none;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 2px;
+      border-radius: var(--pg-radius-s);
     }
 
     input[type='color']::-moz-color-swatch {
       border: none;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 2px;
+      border-radius: var(--pg-radius-s);
     }
 
     .btn-color {
@@ -52,8 +49,7 @@ export class PhotogramColors extends LitElement {
       color: var(--pg-color-text-muted);
       font-weight: bold;
       border: 1px solid var(--pg-grey-400);
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 100px;
+      border-radius: var(--pg-radius-pill);
       transition: opacity 0.4s;
     }
 

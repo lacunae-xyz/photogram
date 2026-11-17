@@ -19,8 +19,7 @@ export class PhotogramToolbar extends LitElement {
     .toolbar {
       display: flex;
       background-color: var(--pg-color-surface);
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      box-shadow: 0px 0px 4px var(--pg-color-shadow);
+      box-shadow: var(--pg-shadow-1);
       height: 100%;
       align-items: center;
     }
@@ -33,14 +32,13 @@ export class PhotogramToolbar extends LitElement {
     }
 
     pg-button {
-      margin: 0 0.5rem;
+      margin: 0 var(--pg-space-2);
     }
 
     .button-export::part(button) {
       height: auto;
-      padding: 0.5rem 0.75rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.25rem;
+      padding: var(--pg-space-2) var(--pg-space-3);
+      border-radius: var(--pg-radius-s);
       font: inherit;
       font-weight: bold;
       text-transform: none;
