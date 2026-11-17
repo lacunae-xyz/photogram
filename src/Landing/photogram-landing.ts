@@ -183,6 +183,13 @@ export class PhotogramLanding extends LitElement {
       background-size: 10.25rem;
     }
 
+    /* Narrower, the creators sit on the artwork. The tutorial's backgrounds go at the same width, under its 50rem layout. */
+    @media (max-width: 50rem) {
+      .creator-layout::before {
+        display: none;
+      }
+    }
+
     .creator-layout h2 {
       grid-area: creator-title;
     }

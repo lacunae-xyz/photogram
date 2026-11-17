@@ -162,4 +162,20 @@ describe('photogram-landing', () => {
       .element(page.getByRole('link', { name: /Thomas Heurtier/ }))
       .toHaveAttribute('target', '_blank');
   });
+
+  it("hides the creators' artwork when the page is narrower than 50rem", async () => {
+    const creators = async (width: number) => {
+      await page.viewport(width, 900);
+      const landing = await renderLanding();
+      const layout = landing.shadowRoot!.querySelector('.creator-layout')!;
+      return getComputedStyle(layout, '::before').display;
+    };
+    try {
+      expect(await creators(1280)).not.toBe('none');
+      expect(await creators(700)).toBe('none');
+      expect(await creators(390)).toBe('none');
+    } finally {
+      await page.viewport(414, 896);
+    }
+  });
 });
