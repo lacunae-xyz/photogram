@@ -16,14 +16,14 @@ export class PhotogramPrivacy extends LitElement {
     }
 
     .privacy-layout {
-      max-width: 80rem;
+      max-width: 50rem;
       margin: auto;
     }
 
     article {
-      max-width: 64rem;
+      max-width: 40rem;
       margin: auto;
-      padding: 0 6.4rem 3.2rem;
+      padding: 0 4rem 2rem;
       text-align: left;
       font-family: var(--pg-font-text);
     }

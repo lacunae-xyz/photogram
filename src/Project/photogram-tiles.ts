@@ -31,13 +31,13 @@ export class PhotogramTiles extends LitElement {
 
     @media print {
       .print-space-around > photogram-tile-small {
-        margin: 2.2rem;
+        margin: 1.375rem;
       }
       .print-no-space > photogram-tile-small {
         margin: 0rem;
       }
       .print-space-around > photogram-tile-large {
-        margin: 2rem;
+        margin: 1.25rem;
       }
       .print-no-space > photogram-tile-large {
         margin: 0rem;

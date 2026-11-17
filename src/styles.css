@@ -1,11 +1,8 @@
 html {
   height: 100%;
-  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-  font-size: 62.5%;
 }
 
+/* No font-size: a medium-derived size keeps the browser's 13px for <code>, which a 1rem would make 16px. */
 body {
-  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-  font-size: 1.6em;
   margin: 0;
 }

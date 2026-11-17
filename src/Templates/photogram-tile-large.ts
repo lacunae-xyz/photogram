@@ -9,15 +9,15 @@ export class PhotogramTileLarge extends Tile {
     tileStyles,
     css`
       :host {
-        width: 80rem;
-        height: 23.6rem;
-        margin: 0.8rem;
-        padding: 0.8rem;
+        width: 50rem;
+        height: 14.75rem;
+        margin: 0.5rem;
+        padding: 0.5rem;
         display: inline-grid;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 3fr 7fr;
         grid-template-areas: 'img indicators' 'img action';
-        grid-column-gap: 0.8rem;
+        grid-column-gap: 0.5rem;
       }
 
       photogram-image::part(img) {
@@ -35,7 +35,7 @@ export class PhotogramTileLarge extends Tile {
         display: flex;
         align-items: center;
         align-content: flex-start;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.5rem;
       }
     `,
   ];

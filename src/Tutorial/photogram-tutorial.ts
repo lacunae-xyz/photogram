@@ -37,18 +37,18 @@ export class PhotogramTutorial extends LitElement {
       background-image:
         url(${unsafeCSS(editable)}), url(${unsafeCSS(examination)});
       background-position:
-        left 1.6rem bottom,
-        right 1.6rem bottom;
-      background-size: 25.6rem;
+        left 1rem bottom,
+        right 1rem bottom;
+      background-size: 16rem;
       background-repeat: no-repeat;
       background-attachment: fixed;
     }
 
     .tutorial-layout {
       background-color: var(--pg-color-surface);
-      max-width: 80rem;
+      max-width: 50rem;
       margin: auto;
-      padding-bottom: 1.6rem;
+      padding-bottom: 1rem;
     }
 
     article {
@@ -62,14 +62,14 @@ export class PhotogramTutorial extends LitElement {
     .tutorial-example-layout {
       display: grid;
       grid-template-columns: 50% 50%;
-      grid-column-gap: 1.6rem;
-      margin-bottom: 1.6rem;
+      grid-column-gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .tutorial-example-form {
       display: grid;
       grid-template-columns: 50% 50%;
-      grid-row-gap: 1.6rem;
+      grid-row-gap: 1rem;
       align-content: center;
     }
 
