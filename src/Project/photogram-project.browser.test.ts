@@ -61,6 +61,33 @@ describe('photogram-project', () => {
     expect(inShadow('photogram-configuration').colors).toEqual(stored.colors);
   });
 
+  it('shows the last project-id set, whichever load ends first', async () => {
+    const app = Application.createNull({
+      dataSource: IndexedDBProjectsDataSource.createNull({
+        projects: [stored, { ...stored, key: 'p2', name: 'Le second' }],
+      }),
+    });
+    const get = app.get.bind(app);
+    let releaseFirst = () => {};
+    const firstHeld = new Promise<void>(resolve => (releaseFirst = resolve));
+    vi.spyOn(app, 'get').mockImplementation(async key => {
+      const project = await get(key);
+      if (key === 'p1') await firstHeld;
+      return project;
+    });
+    const { element } = renderProject(app);
+    await vi.waitFor(() => expect(app.get).toHaveBeenCalledWith('p1'));
+    element.projectId = 'p2';
+    await expect
+      .element(page.getByRole('heading', { name: 'Le second' }))
+      .toBeVisible();
+    releaseFirst();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    await expect
+      .element(page.getByRole('heading', { name: 'Le second' }))
+      .toBeVisible();
+  });
+
   it('offers export for an imported project', async () => {
     renderProject();
     await expect

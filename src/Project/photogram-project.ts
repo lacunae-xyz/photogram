@@ -106,12 +106,16 @@ export class PhotogramProject extends LitElement {
     if (!application || projectId === undefined) {
       return;
     }
+    // A load for an earlier project-id or application may end after this one.
+    const current = () =>
+      application === this.application && projectId === this.projectId;
     try {
       if (await application.needsPermission(projectId)) {
-        this.permission = true;
+        if (current()) this.permission = true;
         return;
       }
       const project = await application.get(projectId);
+      if (!current()) return;
       project.template ??= 'small';
       project.colorDistribution ??= 'indicator';
       this.project = project;
