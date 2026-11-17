@@ -92,9 +92,9 @@ describe('pg-header', () => {
       .element(link('Tutorial'))
       .toHaveAttribute('aria-current', 'page');
     await expect.element(link('Projects')).not.toHaveAttribute('aria-current');
-    const border = (name: string) =>
-      getComputedStyle(link(name).element()).borderBottomColor;
-    expect(border('Tutorial')).not.toBe(border('Projects'));
+    const fill = (name: string) =>
+      getComputedStyle(link(name).element()).backgroundColor;
+    expect(fill('Tutorial')).not.toBe(fill('Projects'));
 
     header.current = undefined;
     await header.updateComplete;
@@ -115,4 +115,85 @@ describe('pg-header', () => {
       page.getByRole('link', { name: 'Projects' }).element(),
     );
   });
+
+  it('reads on the chrome: text 4.5:1, logo, current fill and focus ring 3:1', async () => {
+    const header = await renderHeader(
+      html`<pg-header
+        heading="Photogram"
+        tagline="A tool for editor assistants"
+        logo="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'/>"
+        logo-label="logo of Photogram"
+        .links=${links}
+        current="/tutorial"
+      ></pg-header>`,
+    );
+    const chrome = rgba(probe('var(--pg-color-chrome)'));
+    const style = (element: Element) => getComputedStyle(element);
+    const root = header.shadowRoot!;
+    const tagline = root.querySelector('p')!;
+    const current = page
+      .getByRole('link', { name: 'Tutorial' })
+      .element() as HTMLElement;
+    const currentFill = over(rgba(style(current).backgroundColor), chrome);
+
+    expect(
+      contrast(over(rgba(style(header).color), chrome), chrome),
+    ).toBeGreaterThanOrEqual(4.5);
+    const taglineColor = rgba(style(tagline).color);
+    taglineColor[3] *= Number(style(tagline).opacity);
+    expect(contrast(over(taglineColor, chrome), chrome)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    const logo = page.getByRole('img', { name: 'logo of Photogram' }).element();
+    expect(
+      contrast(over(rgba(style(logo).backgroundColor), chrome), chrome),
+    ).toBeGreaterThanOrEqual(3);
+    expect(contrast(currentFill, chrome)).toBeGreaterThanOrEqual(3);
+    expect(
+      contrast(over(rgba(style(current).color), currentFill), currentFill),
+    ).toBeGreaterThanOrEqual(4.5);
+
+    current.focus();
+    expect(current.matches(':focus-visible')).toBe(true);
+    expect(style(current).outlineStyle).toBe('solid');
+    expect(
+      contrast(over(rgba(style(current).outlineColor), chrome), chrome),
+    ).toBeGreaterThanOrEqual(3);
+  });
 });
+
+type Rgba = [number, number, number, number];
+
+/** The computed colour of a background. */
+function probe(background: string) {
+  const element = document.createElement('div');
+  element.style.background = background;
+  document.body.append(element);
+  const color = getComputedStyle(element).backgroundColor;
+  element.remove();
+  return color;
+}
+
+function rgba(color: string): Rgba {
+  const [r = 0, g = 0, b = 0, a = 1] = (color.match(/[\d.]+/g) ?? []).map(
+    Number,
+  );
+  return [r, g, b, a];
+}
+
+function over([r, g, b, a]: Rgba, [br, bg, bb]: Rgba): Rgba {
+  return [r * a + br * (1 - a), g * a + bg * (1 - a), b * a + bb * (1 - a), 1];
+}
+
+function luminance([r, g, b]: Rgba) {
+  const [lr = 0, lg = 0, lb = 0] = [r, g, b].map(v => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+}
+
+function contrast(a: Rgba, b: Rgba) {
+  const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (high! + 0.05) / (low! + 0.05);
+}
