@@ -1,5 +1,6 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import '@lacunae-xyz/photogram-design-system/pg-button.js';
 import '@lacunae-xyz/photogram-design-system/pg-card.js';
 import '@lacunae-xyz/photogram-design-system/pg-icon.js';
 import type { Project } from '../Application/types';
@@ -40,21 +41,26 @@ export class PhotogramProjectCard extends LitElement {
       background-color: rgba(255, 255, 255, 0.6);
     }
 
-    .btn-delete {
-      display: inline-block;
+    .btn-delete::part(button) {
+      display: block;
+      height: 2.6rem;
+      width: 2.6rem;
+      padding: 0;
+      line-height: normal;
+      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-transform: none;
       /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
       background: #fff;
       color: var(--pg-color-text-muted);
-      font-weight: bold;
       /* stylelint-disable-next-line color-named -- pg: 6.5 */
       border: 1px solid silver;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
       border-radius: 100px;
-      height: 2.6rem;
-      width: 2.6rem;
     }
 
-    .btn-delete:active {
+    .btn-delete::part(button):active {
       /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
       background: #ddd;
       color: var(--pg-color-text);
@@ -125,14 +131,14 @@ export class PhotogramProjectCard extends LitElement {
             : 'Imported project inside the browser (unlinked)'
         }
       ></pg-icon>
-      <button
+      <pg-button
         slot="actions"
+        variant="icon"
         class="btn-delete"
-        aria-label=${`Delete ${project.name}`}
+        label=${`Delete ${project.name}`}
         @click=${this.#onDelete}
+        >✕</pg-button
       >
-        ✕
-      </button>
     </pg-card>`;
   }
 }
