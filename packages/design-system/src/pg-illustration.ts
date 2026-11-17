@@ -1,5 +1,6 @@
 import { LitElement, css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { observeColorScheme } from './theme';
 
 const files = import.meta.glob<string>('../illustrations/*.svg', {
   query: '?raw',
@@ -27,13 +28,25 @@ const tokens = new Map([
 
 const paint = /\b(fill|stroke|stop-color)="(#[0-9a-f]{3,6})"/gi;
 
-// pg: 6.5 dark mode. A computed custom property keeps `light-dark()` unresolved, and the image only
-// changes on a render. Resolve each token to a colour (through a probe's `color`), and re-render
-// when the scheme or `<html data-theme>` changes.
-function recolour(svg: string, style: CSSStyleDeclaration) {
+/**
+ * Each defined token's colour, read through a probe's `color`: a computed custom property keeps `light-dark()`
+ * unresolved.
+ */
+function resolve(probe: HTMLElement) {
+  const style = getComputedStyle(probe);
+  const colours = new Map<string, string>();
+  for (const [colour, token] of tokens) {
+    if (style.getPropertyValue(token).trim()) {
+      probe.style.color = `var(${token})`;
+      colours.set(colour, style.color);
+    }
+  }
+  return colours;
+}
+
+function recolour(svg: string, colours: Map<string, string>) {
   return svg.replace(paint, (attribute, name: string, colour: string) => {
-    const token = tokens.get(colour.toLowerCase());
-    const value = token && style.getPropertyValue(token).trim();
+    const value = colours.get(colour.toLowerCase());
     return value ? `${name}="${value}"` : attribute;
   });
 }
@@ -42,7 +55,8 @@ function recolour(svg: string, style: CSSStyleDeclaration) {
  * An unDraw illustration from `illustrations/`, its colours read from the `--pg-color-accent` and `--pg-illus-*` tokens.
  * Decorative unless it has a `label`. Size it through `::part(image)`.
  *
- * An `<img>` of the recoloured SVG, so it lays out and paints like the file did. It reads the tokens when it renders.
+ * An `<img>` of the recoloured SVG, so it lays out and paints like the file did. It reads the tokens when it renders,
+ * and renders again when the colour scheme changes: OS setting, `<html data-theme>`, print.
  */
 @customElement('pg-illustration')
 export class PgIllustration extends LitElement {
@@ -57,6 +71,24 @@ export class PgIllustration extends LitElement {
   @property() accessor label = '';
 
   @state() private accessor svg: string | undefined;
+
+  /** Where the tokens resolve as they would on the image: in this element's colour scheme. */
+  readonly #probe = Object.assign(document.createElement('span'), {
+    hidden: true,
+  });
+
+  #unobserve: (() => void) | undefined;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.renderRoot.append(this.#probe);
+    this.#unobserve = observeColorScheme(() => this.requestUpdate());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.#unobserve?.();
+  }
 
   protected willUpdate(changed: PropertyValues<this>) {
     if (changed.has('name')) {
@@ -79,7 +111,7 @@ export class PgIllustration extends LitElement {
     if (this.svg === undefined) {
       return nothing;
     }
-    const svg = recolour(this.svg, getComputedStyle(this));
+    const svg = recolour(this.svg, resolve(this.#probe));
     return html`<img
       part="image"
       src=${`data:image/svg+xml,${encodeURIComponent(svg)}`}

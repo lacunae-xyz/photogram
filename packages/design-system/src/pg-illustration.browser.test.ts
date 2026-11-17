@@ -106,17 +106,107 @@ describe('pg-illustration', () => {
       expect(svg).not.toContain(colour);
     }
     for (const colour of [
-      '#00ff00',
-      '#111111',
-      '#222222',
-      '#444444',
-      '#555555',
-      '#333333',
+      'rgb(0, 255, 0)',
+      'rgb(17, 17, 17)',
+      'rgb(34, 34, 34)',
+      'rgb(68, 68, 68)',
+      'rgb(85, 85, 85)',
+      'rgb(51, 51, 51)',
     ]) {
       expect(svg).toContain(`fill="${colour}"`);
     }
     // No token for skin.
     expect(svg).toContain('fill="#9e616a"');
+  });
+
+  describe('with light-dark() tokens', () => {
+    const style =
+      '--pg-color-accent: #00ff00; --pg-illus-bg: light-dark(#eeeeee, #333333)';
+
+    afterEach(() => {
+      delete document.documentElement.dataset.theme;
+      document.documentElement.style.colorScheme = '';
+    });
+
+    it('paints in the light scheme', async () => {
+      document.documentElement.style.colorScheme = 'light';
+      const svg = await svgOf(
+        renderIllustration(
+          html`<pg-illustration
+            name="folder"
+            style=${style}
+          ></pg-illustration>`,
+        ),
+      );
+      expect(svg).toContain('fill="rgb(238, 238, 238)"');
+      expect(svg).not.toContain('light-dark');
+    });
+
+    it('paints in the dark scheme', async () => {
+      document.documentElement.style.colorScheme = 'dark';
+      const svg = await svgOf(
+        renderIllustration(
+          html`<pg-illustration
+            name="folder"
+            style=${style}
+          ></pg-illustration>`,
+        ),
+      );
+      expect(svg).toContain('fill="rgb(51, 51, 51)"');
+    });
+
+    it("paints in its own element's scheme", async () => {
+      document.documentElement.style.colorScheme = 'dark';
+      const svg = await svgOf(
+        renderIllustration(
+          html`<div style="color-scheme: light">
+            <pg-illustration name="folder" style=${style}></pg-illustration>
+          </div>`,
+        ),
+      );
+      expect(svg).toContain('fill="rgb(238, 238, 238)"');
+    });
+
+    it('paints again when <html data-theme> changes', async () => {
+      // What tokens.css does with data-theme, without the screen-only media query vitest's page doesn't need.
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(
+        ":root[data-theme='light'] { color-scheme: light } :root[data-theme='dark'] { color-scheme: dark }",
+      );
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+      try {
+        document.documentElement.dataset.theme = 'light';
+        const illustration = renderIllustration(
+          html`<pg-illustration
+            name="folder"
+            style=${style}
+          ></pg-illustration>`,
+        );
+        expect(await svgOf(illustration)).toContain(
+          'fill="rgb(238, 238, 238)"',
+        );
+        document.documentElement.dataset.theme = 'dark';
+        await vi.waitFor(async () =>
+          expect(await svgOf(illustration)).toContain('fill="rgb(51, 51, 51)"'),
+        );
+      } finally {
+        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+          adopted => adopted !== sheet,
+        );
+      }
+    });
+
+    it('stops listening once disconnected', async () => {
+      const illustration = renderIllustration(
+        html`<pg-illustration name="folder" style=${style}></pg-illustration>`,
+      );
+      await loadedImage(illustration);
+      render(null, document.body);
+      const update = vi.spyOn(illustration, 'requestUpdate');
+      document.documentElement.dataset.theme = 'dark';
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(update).not.toHaveBeenCalled();
+    });
   });
 
   it('switches illustration with its name', async () => {
