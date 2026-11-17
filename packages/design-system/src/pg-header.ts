@@ -33,8 +33,7 @@ export class PgHeader extends LitElement {
     }
 
     h1 {
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 2rem;
+      font-size: var(--pg-font-size-5);
       margin: 0;
     }
 
@@ -55,8 +54,7 @@ export class PgHeader extends LitElement {
       color: var(--pg-grey-950);
       border-bottom: 0.1875rem solid var(--pg-color-border);
       margin-left: 0.5rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.125rem;
+      font-size: var(--pg-font-size-3);
     }
 
     nav a[aria-current='page'] {

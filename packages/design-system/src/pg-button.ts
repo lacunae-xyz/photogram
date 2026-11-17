@@ -23,8 +23,7 @@ export class PgButton extends LitElement {
       height: 1.75rem;
       padding: 0.625rem;
       line-height: 0.625rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 0.875rem;
+      font-size: var(--pg-font-size-2);
       text-transform: uppercase;
       border: none;
       background-color: transparent;

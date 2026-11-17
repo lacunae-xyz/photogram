@@ -49,8 +49,7 @@ export class PhotogramTileForm extends LitElement {
       border: none;
       margin-bottom: 0.5rem;
       font-family: var(--pg-font-mono);
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.5rem;
+      font-size: var(--pg-font-size-4);
     }
 
     label {
@@ -129,8 +128,7 @@ export class PhotogramTileForm extends LitElement {
       border: none;
       color: var(--pg-color-on-chrome);
       min-height: 3rem;
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 0.875rem;
+      font-size: var(--pg-font-size-2);
       text-transform: uppercase;
     }
 
