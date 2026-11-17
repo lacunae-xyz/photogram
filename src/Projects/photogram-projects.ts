@@ -22,9 +22,9 @@ export class PhotogramProjects extends LitElement {
     }
 
     .projects-container {
-      max-width: 80rem;
+      max-width: 50rem;
       margin: auto;
-      padding: 0 6.4rem;
+      padding: 0 4rem;
     }
 
     .action-project {
@@ -33,13 +33,13 @@ export class PhotogramProjects extends LitElement {
     }
 
     .projects-empty {
-      margin: 12.8rem 0;
+      margin: 8rem 0;
       /* An overflowing illustration starts at the left edge, as with auto margins. */
       align-items: safe center;
     }
 
     .projects-empty::part(illustration) {
-      width: 51.2rem;
+      width: 32rem;
     }
 
     #grid {
@@ -48,7 +48,7 @@ export class PhotogramProjects extends LitElement {
       margin: auto;
       overflow-y: hidden;
       flex-flow: wrap;
-      padding: 0.4rem;
+      padding: 0.25rem;
     }
   `;
 

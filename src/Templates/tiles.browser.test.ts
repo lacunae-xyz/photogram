@@ -139,7 +139,7 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       const action = part(tile, ['photogram-action', '.action']);
       await vi.waitFor(() => expect(action.style.fontSize).toMatch(/rem$/));
       const sized = action.style.fontSize;
-      expect(sized).not.toBe('2rem');
+      expect(sized).not.toBe('1.25rem');
       document.createElement('div').append(tile);
       tile.action = shot.action;
       await frames(20);

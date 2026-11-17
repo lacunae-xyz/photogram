@@ -63,25 +63,25 @@ async function firstTwoTiles(page: Page, template: keyof typeof printClip) {
   return { x: Math.max(0, Math.floor(box.x) - pad), y: Math.max(0, Math.floor(box.y) - pad), ...printClip[template] };
 }
 
-const printMarginRem = {
-  small: { space: 2.2, noSpace: 0 },
-  large: { space: 2.0, noSpace: 0 },
+const printMarginPx = {
+  small: { space: 22, noSpace: 0 },
+  large: { space: 20, noSpace: 0 },
 };
 
 for (const template of ['small', 'large'] as const) {
   for (const spaceAround of [true, false]) {
-    // B25: the large print rules targeted .tpl-large-ele, so large tiles kept their .8rem screen margin.
+    // B25: the large print rules targeted .tpl-large-ele, so large tiles kept their 8px screen margin.
     test(`${template} print margin, space around ${spaceAround ? 'on' : 'off'}`, async ({ page }) => {
       await prepareDemo(page);
       await setTemplate(page, template);
       await setPrintSpaceAround(page, spaceAround);
       await page.emulateMedia({ media: 'print' });
       await settle(page);
-      const marginRem = await page.locator(tileSelector).first().evaluate((tile) => {
-        const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        return parseFloat(getComputedStyle(tile).marginTop) / rootPx;
-      });
-      expect(marginRem).toBeCloseTo(printMarginRem[template][spaceAround ? 'space' : 'noSpace'], 2);
+      const marginPx = await page
+        .locator(tileSelector)
+        .first()
+        .evaluate((tile) => parseFloat(getComputedStyle(tile).marginTop));
+      expect(marginPx).toBeCloseTo(printMarginPx[template][spaceAround ? 'space' : 'noSpace'], 1);
     });
   }
 }

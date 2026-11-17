@@ -20,11 +20,11 @@ export class PgButton extends LitElement {
     }
 
     button {
-      height: 2.8rem;
-      padding: 1rem;
-      line-height: 1rem;
+      height: 1.75rem;
+      padding: 0.625rem;
+      line-height: 0.625rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.4rem;
+      font-size: 0.875rem;
       text-transform: uppercase;
       border: none;
       background-color: transparent;
@@ -48,10 +48,10 @@ export class PgButton extends LitElement {
     :host([variant='icon']) button {
       display: flex;
       height: auto;
-      padding: 0.8rem;
+      padding: 0.5rem;
       line-height: 0;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 100rem;
+      border-radius: 62.5rem;
     }
 
     :host([variant='icon']) button:enabled {

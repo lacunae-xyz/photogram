@@ -20,8 +20,8 @@ export class PhotogramColors extends LitElement {
     }
 
     input[type='color'] {
-      width: 3.2rem;
-      height: 3.2rem;
+      width: 2rem;
+      height: 2rem;
       padding: 2px;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
       border-radius: 4px;

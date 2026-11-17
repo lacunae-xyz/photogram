@@ -9,9 +9,9 @@ export class PhotogramTileSmall extends Tile {
     tileStyles,
     css`
       :host {
-        width: 31.4rem;
-        margin: 0.8rem;
-        padding: 0.8rem;
+        width: 19.625rem;
+        margin: 0.5rem;
+        padding: 0.5rem;
       }
 
       photogram-action::part(container) {
@@ -23,14 +23,14 @@ export class PhotogramTileSmall extends Tile {
       }
 
       .legend {
-        height: 9.6rem;
+        height: 6rem;
         overflow: hidden;
-        padding-top: 0.8rem;
+        padding-top: 0.5rem;
         display: flex;
       }
 
       photogram-sequence::part(sequence) {
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.5rem;
       }
     `,
   ];

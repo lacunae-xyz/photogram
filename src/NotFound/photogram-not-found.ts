@@ -15,18 +15,18 @@ export class PhotogramNotFound extends LitElement {
     }
 
     .not-found-container {
-      max-width: 80rem;
+      max-width: 50rem;
       margin: auto;
-      padding: 0 6.4rem;
+      padding: 0 4rem;
     }
 
     pg-empty-state {
-      margin: 6.4rem 0;
+      margin: 4rem 0;
       align-items: safe center;
     }
 
     pg-empty-state::part(illustration) {
-      width: 38.4rem;
+      width: 24rem;
     }
 
     a {

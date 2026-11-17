@@ -72,12 +72,12 @@ export class PhotogramConfiguration extends LitElement {
 
     h2 {
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 2rem;
-      margin: 1.6rem;
+      font-size: 1.25rem;
+      margin: 1rem;
     }
 
     #font-family {
-      margin-left: 1.6rem;
+      margin-left: 1rem;
     }
 
     .template input {
@@ -100,13 +100,13 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     .labels {
-      margin-left: 1.6rem;
-      margin-right: 1.6rem;
+      margin-left: 1rem;
+      margin-right: 1rem;
     }
 
     .preview {
       overflow: hidden;
-      height: 12rem;
+      height: 7.5rem;
     }
 
     .preview:hover {

@@ -30,18 +30,18 @@ export class PhotogramToolbar extends LitElement {
       margin: 0;
       text-align: left;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 2rem;
+      font-size: 1.25rem;
     }
 
     pg-button {
-      margin: 0 0.8rem;
+      margin: 0 0.5rem;
     }
 
     .button-export::part(button) {
       height: auto;
-      padding: 0.8rem 1.2rem;
+      padding: 0.5rem 0.75rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.4rem;
+      border-radius: 0.25rem;
       font: inherit;
       font-weight: bold;
       text-transform: none;

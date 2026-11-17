@@ -20,9 +20,9 @@ export class PhotogramProjectCard extends LitElement {
     }
 
     pg-card {
-      width: 24rem;
-      min-width: 12rem;
-      margin: 1.2rem;
+      width: 15rem;
+      min-width: 7.5rem;
+      margin: 0.75rem;
     }
 
     .img-project-cover {
@@ -43,12 +43,12 @@ export class PhotogramProjectCard extends LitElement {
 
     .btn-delete::part(button) {
       display: block;
-      height: 2.6rem;
-      width: 2.6rem;
+      height: 1.625rem;
+      width: 1.625rem;
       padding: 0;
       line-height: normal;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.3rem;
+      font-size: 0.8125rem;
       font-weight: bold;
       text-transform: none;
       background: var(--pg-color-surface-raised);

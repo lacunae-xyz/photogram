@@ -14,7 +14,7 @@ export class PgCard extends LitElement {
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 0.8rem;
+      padding: 0.5rem;
       padding-bottom: 0;
       text-align: center;
       border: 1px solid var(--pg-grey-400);
@@ -22,12 +22,12 @@ export class PgCard extends LitElement {
     }
 
     :host(:hover) {
-      outline: 0.3rem solid var(--pg-grey-300);
+      outline: 0.1875rem solid var(--pg-grey-300);
       cursor: pointer;
     }
 
     .media {
-      min-height: 16rem;
+      min-height: 10rem;
       display: flex;
       position: relative;
       align-items: center;
@@ -45,7 +45,7 @@ export class PgCard extends LitElement {
     }
 
     .heading {
-      padding: 1.6rem;
+      padding: 1rem;
       display: block;
       color: var(--pg-color-text-muted);
       text-decoration: none;
@@ -53,8 +53,8 @@ export class PgCard extends LitElement {
 
     .actions {
       position: absolute;
-      top: -1.3rem;
-      left: -1.3rem;
+      top: -0.8125rem;
+      left: -0.8125rem;
       display: flex;
       opacity: 0;
       transition: opacity 0.4s;

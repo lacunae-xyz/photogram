@@ -95,10 +95,31 @@ function fakeFrames(msPerBatch = 0) {
   };
 }
 
-function legacy(overflows: (fontSize: string) => boolean) {
-  const title = fakeTitle('legacy', overflows);
+// FontSizeAdjuster ran under `html { font-size: 62.5% }`; titleSizing runs under the browser's 16px root.
+const legacyRootPx = 10;
+const rootPx = 16;
+
+/** An inline rem font-size in px, rounded so the two searches' floating-point noise compares equal. */
+function px(fontSize: string, root: number) {
+  return Math.round(parseFloat(fontSize) * root * 1e9) / 1e9;
+}
+
+/** A title whose container overflows above `limitPx`, sized by titleSizing. */
+function fitting(name: string, limitPx: number, log?: Log) {
+  return fakeTitle(name, size => px(size, rootPx) > limitPx, log);
+}
+
+/** The px FontSizeAdjuster wrote, last one being its answer. */
+function legacy(overflowsPx: (sizePx: number) => boolean) {
+  const title = fakeTitle('legacy', size =>
+    overflowsPx(px(size, legacyRootPx)),
+  );
   new FontSizeAdjuster(0.2, 2).apply(title);
-  return title;
+  return title.writes.map(size => px(size, legacyRootPx));
+}
+
+function writtenPx(title: FakeTitle) {
+  return title.writes.map(size => px(size, rootPx));
 }
 
 function batched(titles: FakeTitle[], frames = fakeFrames()) {
@@ -117,38 +138,37 @@ function random(seed: number) {
 
 describe('search', () => {
   test('writes the same sizes as FontSizeAdjuster for every fitting size', () => {
-    const limits = [0, 0.1, 0.2, 0.2001, 2, 2.0001, 3];
-    for (let limit = 0; limit <= 2.1; limit += 0.0037) {
+    const limits = [0, 1, 2, 2.001, 20, 20.001, 30];
+    for (let limit = 0; limit <= 21; limit += 0.037) {
       limits.push(limit);
     }
     for (const limit of limits) {
-      const overflows = (size: string) => parseFloat(size) > limit;
-      const title = fakeTitle('new', overflows);
+      const title = fitting('new', limit);
       batched([title]);
-      expect(title.writes, `limit ${limit}`).toEqual(legacy(overflows).writes);
+      expect(writtenPx(title), `limit ${limit}px`).toEqual(
+        legacy(sizePx => sizePx > limit),
+      );
     }
   });
 
   test('writes the same sizes as FontSizeAdjuster for any sequence of measures', () => {
     for (let seed = 1; seed <= 500; seed++) {
       const legacyAnswer = random(seed);
-      const expected = legacy(() => legacyAnswer() < 0.5).writes;
+      const expected = legacy(() => legacyAnswer() < 0.5);
       const answer = random(seed);
       const title = fakeTitle('new', () => answer() < 0.5);
       batched([title]);
-      expect(title.writes, `seed ${seed}`).toEqual(expected);
+      expect(writtenPx(title), `seed ${seed}`).toEqual(expected);
     }
   });
 
   test('titles searched together end on the sizes they would alone', () => {
-    const limits = [0.1, 0.33, 0.5, 1.27, 1.99, 2.5];
-    const titles = limits.map((limit, i) =>
-      fakeTitle(`${i}`, size => parseFloat(size) > limit),
-    );
+    const limits = [1, 3.3, 5, 12.7, 19.9, 25];
+    const titles = limits.map((limit, i) => fitting(`${i}`, limit));
     batched(titles);
     titles.forEach((title, i) => {
-      const alone = legacy(size => parseFloat(size) > limits[i]);
-      expect(title.style.fontSize).toEqual(alone.style.fontSize);
+      const alone = legacy(sizePx => sizePx > limits[i]);
+      expect(px(title.style.fontSize, rootPx)).toEqual(alone.at(-1));
     });
   });
 });
@@ -162,7 +182,7 @@ describe('scheduling', () => {
     frames.run();
     expect(title.style.fontSize).toEqual('');
     frames.run();
-    expect(title.style.fontSize).toEqual('2rem');
+    expect(title.style.fontSize).toEqual('1.25rem');
   });
 
   test('writes every title of a batch before reading any, one layout per search step', () => {
@@ -206,7 +226,9 @@ describe('scheduling', () => {
     expect(titles.filter(title => title.style.fontSize).length).toEqual(10);
     expect(frames.pending()).toEqual(1);
     expect(frames.runAll()).toEqual(3);
-    expect(titles.every(title => title.style.fontSize === '2rem')).toBe(true);
+    expect(titles.every(title => title.style.fontSize === '1.25rem')).toBe(
+      true,
+    );
   });
 
   test('requests one frame for many titles', () => {
@@ -225,7 +247,7 @@ describe('scheduling', () => {
     sizer.size(title);
     sizer.size(title);
     frames.runAll();
-    expect(title.writes).toEqual(['2rem']);
+    expect(title.writes).toEqual(['1.25rem']);
   });
 
   test('a cancelled title is not sized', () => {
@@ -244,12 +266,12 @@ describe('scheduling', () => {
     const sizer = createTitleSizer<FakeTitle>(frames, {
       onSized: title => sized.push(title.style.fontSize),
     });
-    const title = fakeTitle('a', size => parseFloat(size) > 1);
+    const title = fitting('a', 10);
     sizer.size(title);
     frames.runAll();
     expect(sized).toEqual([title.style.fontSize]);
-    expect(sized).toEqual([
-      legacy(size => parseFloat(size) > 1).style.fontSize,
+    expect(sized.map(size => px(size, rootPx))).toEqual([
+      legacy(sizePx => sizePx > 10).at(-1),
     ]);
   });
 });
@@ -310,7 +332,7 @@ describe('observeTitle', () => {
     observeTitle(action);
     expect(action.style.fontSize).toEqual('');
     runFrames();
-    expect(action.style.fontSize).toEqual('2rem');
+    expect(action.style.fontSize).toEqual('1.25rem');
     unobserveTitle(action);
   });
 
@@ -322,7 +344,7 @@ describe('observeTitle', () => {
     (action.firstChild as Text).nodeValue = 'Une autre action';
     await Promise.resolve();
     runFrames();
-    expect(action.style.fontSize).toEqual('2rem');
+    expect(action.style.fontSize).toEqual('1.25rem');
     unobserveTitle(action);
   });
 
@@ -342,7 +364,7 @@ describe('observeTitle', () => {
     Object.defineProperty(container, 'clientWidth', { value: 100 });
     resize([container]);
     runFrames();
-    expect(action.style.fontSize).toEqual('2rem');
+    expect(action.style.fontSize).toEqual('1.25rem');
     unobserveTitle(action);
     expect(observed.size).toEqual(0);
   });

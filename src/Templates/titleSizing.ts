@@ -1,6 +1,6 @@
-const minRem = 0.2;
-const maxRem = 2;
-const thresholdRem = 0.05;
+const minRem = 0.125;
+const maxRem = 1.25;
+const thresholdRem = 0.03125;
 
 type Search = Readonly<{
   phase: 'max' | 'min' | 'half';
@@ -247,7 +247,7 @@ function createObserver() {
 }
 
 /**
- * Keeps `title`'s inline font-size the largest that fits its parent, between .2 and 2 rem: now, and again when the
+ * Keeps `title`'s inline font-size the largest that fits its parent, between .125 and 1.25 rem: now, and again when the
  * title's text, its parent's size or the fonts change. Call `unobserveTitle` when the title leaves the document.
  */
 export function observeTitle(title: HTMLElement) {

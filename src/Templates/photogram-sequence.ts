@@ -12,18 +12,18 @@ export class PhotogramSequence extends LitElement {
 
     .sequence {
       display: inline-flex;
-      min-width: 6rem;
-      min-height: 4rem;
-      padding: 0.6rem;
+      min-width: 3.75rem;
+      min-height: 2.5rem;
+      padding: 0.375rem;
       justify-content: center;
       align-items: center;
       text-align: center;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      border-radius: 0.4rem;
+      border-radius: 0.25rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 2.6rem;
+      font-size: 1.625rem;
       font-weight: bold;
-      margin-right: 0.8rem;
+      margin-right: 0.5rem;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }

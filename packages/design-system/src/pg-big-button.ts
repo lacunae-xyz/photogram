@@ -21,7 +21,7 @@ export class PgBigButton extends PgButton {
       background-color: var(--pg-color-action);
       font-family: inherit;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 16px;
+      font-size: 1rem;
       font-weight: bold;
       text-align: center;
       text-transform: uppercase;

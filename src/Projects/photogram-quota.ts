@@ -14,10 +14,10 @@ export class PhotogramQuota extends LitElement {
       display: inline-flex;
       background-color: var(--pg-color-surface);
       margin: auto;
-      min-height: 3.2rem;
+      min-height: 2rem;
       align-items: center;
       justify-content: center;
-      padding: 0.8rem 1.6rem;
+      padding: 0.5rem 1rem;
       position: fixed;
       bottom: 0;
       max-width: 560px;
@@ -26,7 +26,7 @@ export class PhotogramQuota extends LitElement {
     }
 
     progress {
-      margin: 0 0.8rem;
+      margin: 0 0.5rem;
     }
   `;
 

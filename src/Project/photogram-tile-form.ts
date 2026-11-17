@@ -21,7 +21,7 @@ export type EditedShot = Omit<Shot, 'url' | 'fx'> & {
 export class PhotogramTileForm extends LitElement {
   static styles = css`
     pg-dialog::part(dialog) {
-      max-width: 62rem;
+      max-width: 38.75rem;
     }
 
     #form {
@@ -47,14 +47,14 @@ export class PhotogramTileForm extends LitElement {
       border-radius: 2px;
       background-color: var(--pg-grey-200);
       border: none;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.5rem;
       font-family: var(--pg-font-mono);
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 2.4rem;
+      font-size: 1.5rem;
     }
 
     label {
-      padding: 1rem;
+      padding: 0.625rem;
     }
 
     #form-action {
@@ -62,15 +62,15 @@ export class PhotogramTileForm extends LitElement {
     }
 
     #form-sequence {
-      width: 6rem;
+      width: 3.75rem;
     }
 
     #periode {
-      width: 14rem;
+      width: 8.75rem;
     }
 
     #label {
-      width: 16rem;
+      width: 10rem;
     }
 
     #form pg-button,
@@ -79,7 +79,7 @@ export class PhotogramTileForm extends LitElement {
     }
 
     .photogram-form-container {
-      margin-bottom: 1rem;
+      margin-bottom: 0.625rem;
       text-align: center;
       position: relative;
     }
@@ -118,8 +118,8 @@ export class PhotogramTileForm extends LitElement {
       display: block;
       width: 100%;
       position: absolute;
-      min-height: 4.8rem;
-      bottom: 0.4rem;
+      min-height: 3rem;
+      bottom: 0.25rem;
       background: color-mix(in srgb, var(--pg-grey-950) 25%, transparent);
       text-align: start;
     }
@@ -128,9 +128,9 @@ export class PhotogramTileForm extends LitElement {
       background: none;
       border: none;
       color: var(--pg-color-on-chrome);
-      min-height: 4.8rem;
+      min-height: 3rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.4rem;
+      font-size: 0.875rem;
       text-transform: uppercase;
     }
 

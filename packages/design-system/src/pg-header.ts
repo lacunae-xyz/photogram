@@ -21,12 +21,12 @@ export class PgHeader extends LitElement {
     }
 
     .logo {
-      height: 5rem;
-      width: 5rem;
+      height: 3.125rem;
+      width: 3.125rem;
     }
 
     .home {
-      margin: 2.4rem;
+      margin: 1.5rem;
       flex-grow: 1;
       text-decoration: none;
       color: var(--pg-grey-950);
@@ -34,13 +34,13 @@ export class PgHeader extends LitElement {
 
     h1 {
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 3.2rem;
+      font-size: 2rem;
       margin: 0;
     }
 
     p {
       margin: 0;
-      margin-left: 0.2rem;
+      margin-left: 0.125rem;
     }
 
     ul {
@@ -50,13 +50,13 @@ export class PgHeader extends LitElement {
 
     nav a {
       display: block;
-      padding: 1.6rem 1.6rem;
+      padding: 1rem 1rem;
       text-decoration: none;
       color: var(--pg-grey-950);
-      border-bottom: 0.3rem solid var(--pg-color-border);
-      margin-left: 0.8rem;
+      border-bottom: 0.1875rem solid var(--pg-color-border);
+      margin-left: 0.5rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      font-size: 1.8rem;
+      font-size: 1.125rem;
     }
 
     nav a[aria-current='page'] {

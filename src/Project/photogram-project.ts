@@ -26,8 +26,8 @@ export class PhotogramProject extends LitElement {
 
     .layout-parent {
       display: grid;
-      grid-template-columns: auto 24rem;
-      grid-template-rows: 5.4rem auto;
+      grid-template-columns: auto 15rem;
+      grid-template-rows: 3.375rem auto;
       grid-template-areas: 'layout-top layout-top' 'layout-left layout-right';
       height: 100vh;
     }
