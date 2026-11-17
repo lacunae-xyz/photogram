@@ -110,15 +110,9 @@
   --pg-color-border: light-dark(var(--pg-grey-300), var(--pg-grey-700));
   /* Tile, card and swatch outlines, the cut lines in print. Not in 06's table. */
   --pg-color-border-strong: light-dark(var(--pg-grey-400), var(--pg-grey-600));
-  /* The chrome is dark in both schemes. */
+  /* The image area and card badges: dark in both schemes. The header follows the scheme, on the surface. */
   --pg-color-chrome: var(--pg-grey-950);
   --pg-color-on-chrome: #ffffffee;
-  /* The header's tagline: on-chrome at the 70% opacity it had. */
-  --pg-color-on-chrome-muted: color-mix(
-    in srgb,
-    var(--pg-color-on-chrome) 70%,
-    transparent
-  );
   /* 73.3% is today's bb alpha. */
   --pg-color-backdrop: color-mix(
     in srgb,

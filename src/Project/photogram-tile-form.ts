@@ -1,6 +1,5 @@
 import { LitElement, css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import '@lacunae-xyz/photogram-design-system/pg-big-button.js';
 import '@lacunae-xyz/photogram-design-system/pg-button.js';
 import '@lacunae-xyz/photogram-design-system/pg-dialog.js';
 import type { Colors, Shot } from '../Application/types';
@@ -72,8 +71,7 @@ export class PhotogramTileForm extends LitElement {
       width: 10rem;
     }
 
-    #form pg-button,
-    #form pg-big-button {
+    #form pg-button {
       float: right;
     }
 
@@ -282,7 +280,7 @@ export class PhotogramTileForm extends LitElement {
           rows="4"
           .value=${shot.action ?? ''}
         ></textarea>
-        <pg-big-button type="submit">Save</pg-big-button>
+        <pg-button type="submit">Save</pg-button>
         <pg-button id="form-close" @click=${() => this.#emit('close')}
           >Close</pg-button
         >

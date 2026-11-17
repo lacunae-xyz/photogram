@@ -19,7 +19,8 @@ const labels: Record<Theme, string> = {
 
 /**
  * Picks the colour scheme: Auto follows the OS, Light and Dark override it on this browser.
- * Draws in the text colour around it, so it reads on the header's chrome as on a page. Hidden in print.
+ * On the page's tokens, like pg-header's navigation: the hover fill, and the pressed button filled in accent-icon,
+ * 3:1 on the surface in both schemes (the accent's green-300 is 1.9:1 on white). Hidden in print.
  */
 @customElement('pg-theme-switch')
 export class PgThemeSwitch extends LitElement {
@@ -32,7 +33,7 @@ export class PgThemeSwitch extends LitElement {
       display: flex;
       gap: 2px;
       padding: 2px;
-      border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+      border: 1px solid var(--pg-color-border);
       border-radius: var(--pg-radius-pill);
     }
 
@@ -48,11 +49,11 @@ export class PgThemeSwitch extends LitElement {
     }
 
     button:hover {
-      background-color: color-mix(in srgb, currentColor 10%, transparent);
+      background-color: var(--pg-color-fill);
     }
 
     button[aria-pressed='true'] {
-      background-color: var(--pg-color-accent);
+      background-color: var(--pg-color-accent-icon);
       color: var(--pg-color-on-accent);
       font-weight: 700;
     }

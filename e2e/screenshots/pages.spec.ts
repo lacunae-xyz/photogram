@@ -2,7 +2,7 @@ import { test, expect } from '../support/test';
 import type { Page } from '@playwright/test';
 import { waitForImages } from '../support/sizing';
 
-// Whole pages and the header, so a change to the chrome or the theme shows up somewhere. The tiles have their own
+// Whole pages and the header, so a change to the header or the theme shows up somewhere. The tiles have their own
 // baselines in templates.spec.
 
 const pages = {
@@ -97,6 +97,12 @@ test.describe('theme override', () => {
     await page.goto('/');
     expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
     expect(await background(page)).toBe(dark);
+    const themeColors = page.locator('meta[name="theme-color"]');
+    await expect(themeColors).toHaveCount(2);
+    expect(await themeColors.evaluateAll(metas => metas.map(meta => [meta.getAttribute('content'), meta.getAttribute('media')]))).toEqual([
+      ['#ffffff', 'not all'],
+      ['#222222', 'all'],
+    ]);
   });
 
   test('dark, printed light', async ({ page }) => {
@@ -112,11 +118,11 @@ for (const scheme of schemes) {
   test.describe(`${scheme} header`, () => {
     test.use({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
 
-    // The chrome is the same in both schemes: one baseline each.
+    // The header follows the scheme; print is always light, so its print baselines are shared.
     test('nav hover', async ({ page }) => {
       await open(page, '/tutorial');
       await page.getByRole('link', { name: 'Projects' }).hover();
-      await expect(page.locator('pg-header')).toHaveScreenshot('header-hover.png');
+      await expect(page.locator('pg-header')).toHaveScreenshot(`header-hover${suffix(scheme)}.png`);
     });
 
     test('nav focus', async ({ page }) => {
@@ -126,7 +132,7 @@ for (const scheme of schemes) {
         await page.keyboard.press('Tab');
       }
       await expect(link).toBeFocused();
-      await expect(page.locator('pg-header')).toHaveScreenshot('header-focus.png');
+      await expect(page.locator('pg-header')).toHaveScreenshot(`header-focus${suffix(scheme)}.png`);
     });
 
     test('theme switch hover and focus', async ({ page }) => {
@@ -137,7 +143,7 @@ for (const scheme of schemes) {
       }
       await expect(light).toBeFocused();
       await page.getByRole('button', { name: 'Dark' }).hover();
-      await expect(page.locator('pg-theme-switch')).toHaveScreenshot('theme-switch-states.png');
+      await expect(page.locator('pg-theme-switch')).toHaveScreenshot(`theme-switch-states${suffix(scheme)}.png`);
     });
 
     test('print', async ({ page }) => {

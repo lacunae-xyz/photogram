@@ -7,6 +7,7 @@ import {
   importProject,
   importRows,
   legacyKey,
+  storedProject,
   storedProjectKeys,
 } from '../support/projects';
 
@@ -67,6 +68,7 @@ test('re-importing an exported data.json attaches images added since (B27)', asy
   await card.click();
   const tiles = page.locator(tileSelector);
   await expect(tiles.nth(2).locator('.img')).toHaveAttribute('src', /empty\.\w+\.svg$/);
+  const key = page.url().split('/').pop()!;
 
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export data.json' }).click();
@@ -77,6 +79,10 @@ test('re-importing an exported data.json attaches images added since (B27)', asy
   // B28: same key, unlinked, so the import replaces the project instead of adding one.
   const reimported = await importProject(page, folder);
   await expect(page.locator('.projects-card')).toHaveCount(1);
+  // The card is there from the first import: wait for the reimport to be saved before opening it.
+  await expect
+    .poll(async () => ((await storedProject(page, key))?.data as { url?: string }[] | undefined)?.[2]?.url)
+    .toMatch(/\/images\/3\.jpg\/$/);
   await reimported.click();
   await expect(tiles.nth(2).locator('.img')).toHaveAttribute('src', /\/images\/3\.jpg\/$/);
 });
