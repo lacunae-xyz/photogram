@@ -233,7 +233,16 @@ jobs:
 
   deploy-production:
     needs: [unit, lint, build, browser]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # build-base only runs on PRs. Without explicit results, the implicit
+    # success() sees it skipped upstream of browser and skips the deploy.
+    if: >-
+      !cancelled() &&
+      needs.unit.result == 'success' &&
+      needs.lint.result == 'success' &&
+      needs.build.result == 'success' &&
+      needs.browser.result == 'success' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     concurrency:
       group: deploy-production
