@@ -196,6 +196,20 @@ describe('photogram-app', () => {
     expect(document.title).toBe('Photogram · Comment utiliser Photogram');
   });
 
+  it('shows the new page from its top', async () => {
+    const app = await renderApp('/projects');
+    const spacer = document.createElement('div');
+    spacer.style.height = '10000px';
+    document.body.append(spacer);
+    window.scrollTo(0, 5000);
+    expect(window.scrollY).toBeGreaterThan(0);
+    clickOutcome();
+    headerLink(app, 'Tutorial').click();
+    await vi.waitFor(() => expect(shownPage(app)).toBe('photogram-tutorial'));
+    await vi.waitFor(() => expect(window.scrollY).toBe(0));
+    spacer.remove();
+  });
+
   it('follows links in pages too', async () => {
     const app = await renderApp('/');
     const landing = app.shadowRoot!.querySelector('photogram-landing')!;

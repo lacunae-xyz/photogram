@@ -183,12 +183,15 @@ export class PhotogramApp extends LitElement {
   }
 
   /** Adds `path` to the history and shows its page. */
-  navigate(path: string) {
+  async navigate(path: string) {
     const url = new URL(path, location.href);
     if (url.href !== location.href) {
       history.pushState(null, '', url);
     }
-    return this.#routes.goto(url.pathname);
+    await this.#routes.goto(url.pathname);
+    await this.updateComplete;
+    // The new page starts at its top, as after a load. Back and forward restore their own position.
+    window.scrollTo(0, 0);
   }
 
   #enter(meta = this.#defaultMeta, { fixor = false, noindex = false } = {}) {
