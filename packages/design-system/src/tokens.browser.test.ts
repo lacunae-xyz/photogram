@@ -84,34 +84,26 @@ const text: Record<string, Surface[]> = {
     'color-hover over color-surface',
     'color-hover over color-surface-raised',
   ],
-  // The header, the image area, card badges and period dots, the theme switch.
-  'color-on-chrome': [
-    'color-chrome',
-    'color-on-chrome-hover over color-chrome',
-    'color-backdrop over color-chrome',
-  ],
-  'color-on-chrome-muted': ['color-chrome'],
-  // The current nav link, the theme switch's pressed button, the fx dot.
-  'color-on-accent': ['color-accent'],
+  // The image area, card badges and period dots.
+  'color-on-chrome': ['color-chrome', 'color-backdrop over color-chrome'],
+  // The fx dot; the theme switch's pressed button, on accent-icon.
+  'color-on-accent': ['color-accent', 'color-accent-icon'],
   'color-on-action': ['color-action'],
 };
 
-/** Icons and focus rings, 3:1. Not on the fill (2.9:1 in light): no icon or focusable control sits on it. */
+/**
+ * Icons, focus rings, the current nav link's underline and the theme switch's pressed fill, 3:1. Not on the fill
+ * (2.9:1 in light): no icon or focusable control sits on it.
+ */
 const iconSurfaces = page.filter(surface => surface !== 'color-fill');
 const nonText: Record<string, Surface[]> = {
   'color-accent-icon': iconSurfaces,
-  'color-focus': [...iconSurfaces, 'color-chrome'],
+  'color-focus': iconSurfaces,
 };
 
 const schemes: Scheme[] = ['light', 'dark'];
 
 describe('tokens.css contrast', () => {
-  // The nav's hover tint: on-chrome at 10% (pg-header). Not a token, so the test gives it one.
-  document.documentElement.style.setProperty(
-    '--pg-color-on-chrome-hover',
-    'color-mix(in srgb, var(--pg-color-on-chrome) 10%, transparent)',
-  );
-
   for (const scheme of schemes) {
     describe(scheme, () => {
       for (const [token, surfaces] of Object.entries(text)) {

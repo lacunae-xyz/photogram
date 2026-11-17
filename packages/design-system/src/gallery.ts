@@ -23,16 +23,15 @@ const tokens: [string, string][] = [
   ['fill', 'fields, the tile board, selected and hovered rows'],
   ['border', 'dividers'],
   ['border-strong', 'tile, card and swatch outlines'],
-  ['chrome', 'header, image background (same in both)'],
+  ['chrome', 'image background, badges (same in both)'],
   ['on-chrome', 'text on the chrome'],
-  ['on-chrome-muted', 'the tagline'],
   ['text', 'body text'],
   ['text-muted', 'secondary text'],
   ['text-subtle', 'captions, metadata'],
   ['disabled', 'disabled controls'],
-  ['accent', 'illustrations, active nav, fills'],
+  ['accent', 'illustrations, fills'],
   ['on-accent', 'text on the accent'],
-  ['accent-icon', 'icons (3:1)'],
+  ['accent-icon', 'icons, current nav underline, pressed switch (3:1)'],
   ['focus', 'focus ring (3:1)'],
   ['accent-text', 'links, pg-button (4.5:1)'],
   ['hover', 'hover tint'],
@@ -249,7 +248,7 @@ render(
 
       <h2>pg-theme-switch</h2>
       <pg-theme-switch></pg-theme-switch>
-      <p class="note">Also in the header, on the chrome.</p>
+      <p class="note">Also in the header.</p>
 
       <h2 id="illustrations">pg-illustration</h2>
       <div class="illustrations">
