@@ -5,7 +5,7 @@ import Header from '../Header';
 import Creators from './Creators';
 import EmptyProject from './EmptyProject';
 import ListProject from './ListProject';
-import QuotaProgress from '../QuotaProgress';
+import '../Projects/photogram-quota';
 import Application from '../Application';
 import '../styles.css';
 import './index.css';
@@ -93,7 +93,7 @@ export default function Landing() {
         onImportProject={files => onImportProject(files)}
         onOpenProject={dirHandle => onOpenProject(dirHandle)}
       />
-      <QuotaProgress value={quotas.value} max={quotas.max} />
+      <photogram-quota value={quotas.value} max={quotas.max} />
       <Creators />
       <footer className="landing-footer">
         <a href="/privacy-policy">Privacy policy</a>

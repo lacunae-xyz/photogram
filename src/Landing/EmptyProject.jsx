@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { canOpenFolder, pickFolder } from '../OpenProject';
+import { canOpenFolder, pickFolder } from '../Projects/folder-picker';
 import './EmptyProject.css';
 
 class EmptyCell extends Component {

@@ -1,26 +1,28 @@
 import React, { Component } from 'react';
 import './ListProject.css';
-import ImportProject from '../ImportProject';
-import Card from '../Projects/Card';
+import '../Projects/photogram-import-project';
+import '../Projects/photogram-project-card';
 class ListProject extends Component {
   render() {
     return (
       <div className="list-project">
         <div className="list-project-header">
           <h2>Projects</h2>
-          <ImportProject
-            onProject={files => this.props.onImportProject(files)}
+          <photogram-import-project
+            onimport={event => this.props.onImportProject(event.detail.files)}
           />
         </div>
         <div className="list-project-container">
           <ul id="grid">
             {this.props.value.map(project => {
               return (
-                <Card
+                <photogram-project-card
                   key={project.key}
                   project={project}
-                  onDeleteProject={key => this.props.onDeleteProject(key)}
-                  onLinkProject={key => this.props.onLinkProject(key)}
+                  onopen={event => this.props.onLinkProject(event.detail.key)}
+                  ondelete={event =>
+                    this.props.onDeleteProject(event.detail.key)
+                  }
                 />
               );
             })}
