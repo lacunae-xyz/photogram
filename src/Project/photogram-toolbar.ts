@@ -19,8 +19,7 @@ export class PhotogramToolbar extends LitElement {
     .toolbar {
       display: flex;
       background-color: var(--pg-color-surface);
-      /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
-      box-shadow: 0px 0px 4px var(--pg-color-shadow);
+      box-shadow: var(--pg-shadow-1);
       height: 100%;
       align-items: center;
     }
