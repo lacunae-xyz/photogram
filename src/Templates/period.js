@@ -1,30 +1,19 @@
-export function periodToClassName(value) {
+/**
+ * The period a shot's `period` field names, from its first letter (French or English).
+ * @returns {'morning' | 'day' | 'evening' | 'night' | undefined}
+ */
+export function toPeriod(value) {
   switch (toSingleLetter(value)) {
     case 'm':
-      return 'dot-light';
-    case 's':
-      return 'dot-dark';
+      return 'morning';
     case 'j':
-      return 'dot-lighter';
-    case 'n':
-      return 'dot-darker';
-    default:
-      return 'hide';
-  }
-}
-
-export function periodToIcon(value) {
-  switch (toSingleLetter(value)) {
-    case 'm':
-      return 'weather-sunset-up';
+      return 'day';
     case 's':
-      return 'weather-sunset-down';
-    case 'j':
-      return 'weather-sunny';
+      return 'evening';
     case 'n':
-      return 'weather-night';
+      return 'night';
     default:
-      return 'weather-none';
+      return undefined;
   }
 }
 

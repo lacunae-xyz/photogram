@@ -1,44 +1,24 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-icon.js';
-import { dotStyles } from './dot-styles';
-import { periodToClassName, periodToIcon } from './period';
+import { indicatorStyles } from './indicator-styles';
+import { toPeriod } from './period';
 
+const icons = {
+  morning: 'wb-twilight',
+  day: 'clear-day',
+  evening: 'wb-twilight-2',
+  night: 'clear-night',
+};
+
+/** The period icon, in the tile's text colour. Without a period, a hidden icon holds its place, as fx's does. */
 @customElement('photogram-period')
 export class PhotogramPeriod extends LitElement {
   static styles = [
-    dotStyles,
+    indicatorStyles,
     css`
       :host {
         display: contents;
-      }
-
-      .dot-light::part(icon) {
-        background-color: color-mix(
-          in srgb,
-          var(--pg-grey-400) 73.3%,
-          transparent
-        );
-      }
-
-      .dot-dark::part(icon) {
-        background-color: color-mix(
-          in srgb,
-          var(--pg-grey-600) 73.3%,
-          transparent
-        );
-      }
-
-      .dot-lighter::part(icon) {
-        background-color: color-mix(
-          in srgb,
-          var(--pg-grey-200) 73.3%,
-          transparent
-        );
-      }
-
-      .dot-darker::part(icon) {
-        background-color: var(--pg-color-backdrop);
       }
     `,
   ];
@@ -46,10 +26,11 @@ export class PhotogramPeriod extends LitElement {
   @property() accessor value: string | undefined;
 
   render() {
+    const period = toPeriod(this.value);
     return html`<pg-icon
-      class="dot period ${periodToClassName(this.value)}"
-      name=${periodToIcon(this.value)}
-      label="period"
+      class="indicator period ${period ? '' : 'hide'}"
+      name=${icons[period ?? 'day']}
+      label=${period ? `period: ${period}` : 'period'}
     ></pg-icon>`;
   }
 }

@@ -1,19 +1,20 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-icon.js';
-import { dotStyles } from './dot-styles';
+import { indicatorStyles } from './indicator-styles';
 
+/** The fx icon, in `--pg-color-accent-icon`. Hidden without fx. */
 @customElement('photogram-fx')
 export class PhotogramFx extends LitElement {
   static styles = [
-    dotStyles,
+    indicatorStyles,
     css`
       :host {
         display: contents;
       }
 
-      .dot-green::part(icon) {
-        background-color: var(--pg-color-accent);
+      .fx {
+        color: var(--pg-color-accent-icon);
       }
     `,
   ];
@@ -22,8 +23,8 @@ export class PhotogramFx extends LitElement {
 
   render() {
     return html`<pg-icon
-      class="dot dot-green fx ${this.value ? '' : 'hide'}"
-      name="auto-fix"
+      class="indicator fx ${this.value ? '' : 'hide'}"
+      name="auto-fix-high"
       label="special effects indicator"
     ></pg-icon>`;
   }

@@ -62,7 +62,7 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
         '/demo/1.jpg',
       );
       await expect
-        .element(page.getByRole('img', { name: 'period' }))
+        .element(page.getByRole('img', { name: 'period: evening' }))
         .toBeVisible();
       await expect
         .element(page.getByRole('img', { name: 'special effects indicator' }))
@@ -96,6 +96,13 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       await light.updateComplete;
       await part<LitElement>(light, ['photogram-sequence']).updateComplete;
       expect(getComputedStyle(sequence).color).toBe('rgb(255, 255, 255)');
+    });
+
+    it('names the period it shows', async () => {
+      await renderTile({ ...shot, period: 'nuit' });
+      await expect
+        .element(page.getByRole('img', { name: 'period: night' }))
+        .toBeVisible();
     });
 
     it('takes the label colour as background only for the card distribution', async () => {
