@@ -174,6 +174,76 @@ for (const tag of ['photogram-tile-small', 'photogram-tile-large'] as const) {
       }
     });
 
+    describe('in each colour scheme', () => {
+      const withTokens = (scheme: string) => {
+        const style = document.createElement('style');
+        style.textContent = tokens;
+        document.head.append(style);
+        document.documentElement.style.colorScheme = scheme;
+        onTestFinished(() => {
+          style.remove();
+          document.documentElement.style.colorScheme = '';
+        });
+      };
+
+      it('keeps black text in the light scheme, the printed one', async () => {
+        withTokens('light');
+        for (const colorDistribution of ['indicator', 'card']) {
+          const tile = await renderTile({ ...shot, colorDistribution });
+          expect(getComputedStyle(tile).color, colorDistribution).toBe(
+            'rgb(0, 0, 0)',
+          );
+        }
+      });
+
+      it('draws on the dark surface, in the light text colour', async () => {
+        withTokens('dark');
+        const tile = await renderTile({
+          ...shot,
+          colorDistribution: 'indicator',
+        });
+        expect(getComputedStyle(tile)).toMatchObject({
+          backgroundColor: 'rgb(42, 42, 42)',
+          color: 'rgb(238, 238, 238)',
+        });
+      });
+
+      it('keeps a label-coloured tile as in the light scheme', async () => {
+        withTokens('dark');
+        const tile = await renderTile({ ...shot, colorDistribution: 'card' });
+        expect(getComputedStyle(tile)).toMatchObject({
+          backgroundColor: 'rgb(255, 235, 59)',
+          color: 'rgb(0, 0, 0)',
+          borderTopColor: 'rgb(170, 170, 170)',
+        });
+        tile.colorDistribution = 'indicator';
+        await tile.updateComplete;
+        expect(getComputedStyle(tile).color).toBe('rgb(238, 238, 238)');
+      });
+
+      it('draws period and fx as dots their icons read on (3:1)', async () => {
+        withTokens('dark');
+        for (const value of ['matin', 'jour', 'soir', 'nuit']) {
+          const tile = await renderTile({
+            ...shot,
+            period: value,
+            colorDistribution: 'indicator',
+          });
+          for (const indicator of ['photogram-period', 'photogram-fx']) {
+            const style = getComputedStyle(
+              part(tile, [indicator, 'pg-icon', 'svg']),
+            );
+            const ratio = contrast(
+              getComputedStyle(tile).backgroundColor,
+              style.backgroundColor,
+              style.fill,
+            );
+            expect(ratio, `${indicator} ${value}`).toBeGreaterThanOrEqual(3);
+          }
+        }
+      });
+    });
+
     it('takes the label colour as background only for the card distribution', async () => {
       const tile = await renderTile({
         ...shot,

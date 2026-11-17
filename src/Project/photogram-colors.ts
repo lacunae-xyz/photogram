@@ -48,13 +48,13 @@ export class PhotogramColors extends LitElement {
       background: var(--pg-color-surface-raised);
       color: var(--pg-color-text-muted);
       font-weight: bold;
-      border: 1px solid var(--pg-grey-400);
+      border: 1px solid var(--pg-color-border-strong);
       border-radius: var(--pg-radius-pill);
       transition: opacity 0.4s;
     }
 
     .btn-color:active {
-      background: var(--pg-grey-300);
+      background: var(--pg-color-fill);
       color: var(--pg-color-text);
     }
 

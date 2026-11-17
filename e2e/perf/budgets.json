@@ -1,26 +1,26 @@
 {
   "load-1000": {
     "layoutCount": 180,
-    "totalBlockingTimeMs": 614
+    "totalBlockingTimeMs": 180
   },
   "font-family-1000": {
-    "layoutCount": 162,
-    "totalBlockingTimeMs": 212
+    "layoutCount": 142,
+    "totalBlockingTimeMs": 100
   },
   "edit-one-1000": {
-    "layoutCount": 17,
+    "layoutCount": 14,
     "totalBlockingTimeMs": 100
   },
   "load-3000": {
     "layoutCount": 426,
-    "totalBlockingTimeMs": 1545
+    "totalBlockingTimeMs": 900
   },
   "font-family-3000": {
-    "layoutCount": 474,
-    "totalBlockingTimeMs": 968
+    "layoutCount": 418,
+    "totalBlockingTimeMs": 500
   },
   "edit-one-3000": {
-    "layoutCount": 17,
+    "layoutCount": 14,
     "totalBlockingTimeMs": 100
   }
 }

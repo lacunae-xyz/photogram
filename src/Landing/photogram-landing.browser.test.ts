@@ -4,6 +4,7 @@ import { page } from 'vitest/browser';
 import Application from '../Application';
 import IndexedDBProjectsDataSource from '../Application/IndexedDBProjectsDataSource';
 import type { Project } from '../Application/types';
+import type { PgIllustration } from '@lacunae-xyz/photogram-design-system/pg-illustration.js';
 import './photogram-landing';
 import '@lacunae-xyz/photogram-design-system/tokens.css';
 
@@ -93,7 +94,9 @@ describe('photogram-landing', () => {
   it('draws an illustration in every cell', async () => {
     const landing = await renderLanding();
     const names = [
-      ...landing.shadowRoot!.querySelectorAll('pg-illustration'),
+      ...landing.shadowRoot!.querySelectorAll<PgIllustration>(
+        '.empty-project-item pg-illustration',
+      ),
     ].map(illustration => illustration.name);
     expect(names).toEqual([
       'learning',
@@ -101,6 +104,20 @@ describe('photogram-landing', () => {
       'folder',
       'presentation',
     ]);
+  });
+
+  it('draws the artwork behind the creators as decoration', async () => {
+    const landing = await renderLanding();
+    const art = landing.shadowRoot!.querySelectorAll<PgIllustration>(
+      '.creator-layout pg-illustration',
+    );
+    expect([...art].map(illustration => illustration.name)).toEqual([
+      'web-developer',
+      'videographer',
+    ]);
+    for (const illustration of art) {
+      expect(illustration.label).toBe('');
+    }
   });
 
   it('lists the stored projects', async () => {
@@ -167,8 +184,8 @@ describe('photogram-landing', () => {
     const creators = async (width: number) => {
       await page.viewport(width, 900);
       const landing = await renderLanding();
-      const layout = landing.shadowRoot!.querySelector('.creator-layout')!;
-      return getComputedStyle(layout, '::before').display;
+      const art = landing.shadowRoot!.querySelector('.creator-art')!;
+      return getComputedStyle(art).display;
     };
     try {
       expect(await creators(1280)).not.toBe('none');

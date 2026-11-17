@@ -26,7 +26,7 @@ export class PhotogramTiles extends LitElement {
 
     .tiles-container {
       font-family: var(--pg-font-mono);
-      background-color: var(--pg-grey-200);
+      background-color: var(--pg-color-fill);
     }
 
     @media print {

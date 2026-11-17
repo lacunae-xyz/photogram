@@ -41,11 +41,13 @@ export class PhotogramNotFound extends LitElement {
   render() {
     return html`<div class="not-found-container">
       <slot name="header"></slot>
-      <pg-empty-state illustration="empty-street">
-        <h1>Page not found</h1>
-        <p>There is nothing at this address.</p>
-        <a href="/">Go to the home page</a>
-      </pg-empty-state>
+      <main>
+        <pg-empty-state illustration="empty-street">
+          <h1>Page not found</h1>
+          <p>There is nothing at this address.</p>
+          <a href="/">Go to the home page</a>
+        </pg-empty-state>
+      </main>
     </div>`;
   }
 }

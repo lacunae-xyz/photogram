@@ -96,7 +96,7 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     .template input[type='radio']:checked + label {
-      background-color: var(--pg-grey-200);
+      background-color: var(--pg-color-fill);
     }
 
     .labels {
@@ -205,10 +205,11 @@ export class PhotogramConfiguration extends LitElement {
         </div>
       </section>
       <section>
-        <h2>Font</h2>
+        <h2 id="font-heading">Font</h2>
         <form @submit=${preventSubmit}>
           <input
             id="font-family"
+            aria-labelledby="font-heading"
             type="text"
             list="font-list"
             .value=${this.fontFamily ?? ''}

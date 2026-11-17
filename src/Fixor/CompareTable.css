@@ -1,6 +1,5 @@
 .edl-compare-table {
-  /* stylelint-disable-next-line color-named -- pg: 6.5 */
-  background: white;
+  background: var(--pg-color-surface);
   margin: auto;
   border-collapse: collapse;
 }
@@ -8,20 +7,17 @@
 .edl-compare-able,
 .edl-compare-table th,
 .edl-compare-table td {
-  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-  border: 1px solid #111;
+  border: 1px solid var(--pg-color-text);
 }
 
 .edl-compare-table thead th {
   padding-top: 1rem;
   padding-bottom: 1rem;
-  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-  background-color: #bbb;
+  background-color: var(--pg-color-border-strong);
 }
 
 .edl-compare-table tbody tr:nth-child(2n) {
-  /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-  background-color: #eee;
+  background-color: var(--pg-color-fill);
 }
 
 .edl-compare-table img {

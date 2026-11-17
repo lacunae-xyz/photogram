@@ -19,7 +19,7 @@ export class PgDialog extends LitElement {
       width: 100%;
       margin: 4% auto auto;
       padding: 0;
-      border: 1px solid var(--pg-grey-500);
+      border: 1px solid var(--pg-color-border-strong);
       background-color: var(--pg-color-surface-raised);
       color: inherit;
     }

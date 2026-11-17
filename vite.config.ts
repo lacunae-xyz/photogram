@@ -1,3 +1,4 @@
+import { Features } from 'lightningcss';
 import ts from 'typescript';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
@@ -39,11 +40,25 @@ export default defineConfig({
   plugins: [standardDecorators()],
   // standardDecorators adds the tslib imports after the dependency scan.
   optimizeDeps: { include: ['tslib'] },
+  css: {
+    lightningcss: {
+      // Native light-dark(): the polyfill resolves it through variables only CSS files' color-scheme sets, so Lit
+      // styles and inline color-scheme (Fixor, label-coloured tiles) couldn't switch a token. Browsers without
+      // light-dark() get the light tokens from tokens.css' @supports fallback.
+      exclude: Features.LightDark,
+    },
+  },
   build: {
     target: 'es2020',
     // Assets stay files named like CRA's (`empty.<hex>.svg`): edit.spec matches the empty image src on that.
     assetsInlineLimit: 0,
     rolldownOptions: {
+      // The design system's gallery, at /packages/design-system/: the screenshot run and the previews serve it,
+      // the production deploy removes it (ci.yml).
+      input: {
+        main: 'index.html',
+        gallery: 'packages/design-system/index.html',
+      },
       output: {
         hashCharacters: 'hex',
         assetFileNames: 'assets/[name].[hash][extname]',

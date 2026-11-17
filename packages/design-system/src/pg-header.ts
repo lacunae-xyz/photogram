@@ -5,8 +5,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 export type PgHeaderLink = { href: string; label: string };
 
 /**
- * An app's header: its logo, its name and tagline linking home, and its navigation.
- * The link whose `href` is `current` is marked as the current page.
+ * An app's header: its logo, its name and tagline linking home, its navigation, and its children after them
+ * (Photogram's theme switch). The link whose `href` is `current` is marked as the current page.
  */
 @customElement('pg-header')
 export class PgHeader extends LitElement {
@@ -19,8 +19,12 @@ export class PgHeader extends LitElement {
         100vw;
     }
 
+    /* Wraps what doesn't fit, the children first: they go to their own row, at the end, and the logo, name and
+       navigation keep theirs. */
     header {
       display: flex;
+      flex-wrap: wrap;
+      row-gap: var(--pg-space-2);
       font-family: var(--pg-font-mono);
       align-items: center;
       padding: var(--pg-space-4) 0;
@@ -46,9 +50,10 @@ export class PgHeader extends LitElement {
       outline-offset: 2px;
     }
 
+    /* Grows from its narrowest, the tagline wrapped, so the line breaks after the navigation. */
     .home {
       margin: var(--pg-space-5);
-      flex-grow: 1;
+      flex: 1 1 0;
     }
 
     h1 {
@@ -60,13 +65,18 @@ export class PgHeader extends LitElement {
       margin: 0;
       margin-left: 0.125rem;
       font-size: var(--pg-font-size-1);
-      opacity: 0.7;
+      color: var(--pg-color-on-chrome-muted);
     }
 
     ul {
       display: flex;
       gap: var(--pg-space-2);
       list-style: none;
+    }
+
+    ::slotted(*) {
+      margin-left: auto;
+      padding-left: var(--pg-space-4);
     }
 
     nav a {
@@ -90,6 +100,13 @@ export class PgHeader extends LitElement {
       font-weight: 700;
     }
 
+    /* The chrome is dark in both schemes: so are the tokens on it, the focus ring among them. */
+    @media screen {
+      :host {
+        color-scheme: dark;
+      }
+    }
+
     @media (forced-colors: active) {
       /* Forced colours keep a gradient border-image: the band would stay dark under CanvasText. */
       :host {
@@ -111,6 +128,10 @@ export class PgHeader extends LitElement {
         color: var(--pg-color-text);
         /* Not the shorthand: lightningcss 1.33 minifies border-image: none to an empty, invalid border-image. */
         border-image-source: none;
+      }
+
+      p {
+        color: var(--pg-color-text-subtle);
       }
 
       nav a[aria-current='page'] {
@@ -173,6 +194,7 @@ export class PgHeader extends LitElement {
               </ul>
             </nav>`
       }
+      <slot></slot>
     </header>`;
   }
 }

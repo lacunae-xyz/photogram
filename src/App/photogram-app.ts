@@ -2,6 +2,7 @@ import { Routes } from '@lit-labs/router';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-header.js';
+import '@lacunae-xyz/photogram-design-system/pg-theme-switch.js';
 import '../Demo/photogram-demo';
 import '../Fixor/photogram-fixor';
 import '../Landing/photogram-landing';
@@ -29,6 +30,7 @@ function header(current?: string) {
     logo-label="logo of Photogram"
     .links=${links}
     current=${current ?? nothing}
+    ><pg-theme-switch></pg-theme-switch
   ></pg-header>`;
 }
 

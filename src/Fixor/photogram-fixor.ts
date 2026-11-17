@@ -10,9 +10,15 @@ export class PhotogramFixor extends HTMLElement {
   #root: Root | undefined;
 
   connectedCallback() {
-    // Fixor's raw colours don't work on dark tokens.
-    this.style.display = 'block';
-    this.style.colorScheme = 'light';
+    // Fixor stays light until its Lit port (07): the tokens resolve light inside, on a light page that fills the
+    // window. Its text colour is resolved here, not inherited from a dark body.
+    Object.assign(this.style, {
+      display: 'block',
+      minHeight: '100vh',
+      colorScheme: 'light',
+      color: 'var(--pg-color-text)',
+      backgroundColor: 'var(--pg-color-surface)',
+    });
     this.#mount();
   }
 
