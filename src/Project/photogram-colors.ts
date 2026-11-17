@@ -47,20 +47,17 @@ export class PhotogramColors extends LitElement {
     .btn-color {
       display: inline-block;
       opacity: 0;
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background: #fff;
+      background: var(--pg-color-surface-raised);
       color: var(--pg-color-text-muted);
       font-weight: bold;
-      /* stylelint-disable-next-line color-named -- pg: 6.5 */
-      border: 1px solid silver;
+      border: 1px solid var(--pg-grey-400);
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
       border-radius: 100px;
       transition: opacity 0.4s;
     }
 
     .btn-color:active {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background: #ddd;
+      background: var(--pg-grey-300);
       color: var(--pg-color-text);
     }
 

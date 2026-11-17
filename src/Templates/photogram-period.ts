@@ -14,18 +14,27 @@ export class PhotogramPeriod extends LitElement {
       }
 
       .dot-light::part(icon) {
-        /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-        background-color: #aaaaaabb;
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-400) 73.3%,
+          transparent
+        );
       }
 
       .dot-dark::part(icon) {
-        /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-        background-color: #666666bb;
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-600) 73.3%,
+          transparent
+        );
       }
 
       .dot-lighter::part(icon) {
-        /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-        background-color: #eeeeeebb;
+        background-color: color-mix(
+          in srgb,
+          var(--pg-grey-200) 73.3%,
+          transparent
+        );
       }
 
       .dot-darker::part(icon) {

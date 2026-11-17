@@ -4,8 +4,7 @@ import { css } from 'lit';
 export const tileStyles = css`
   :host {
     display: inline-block;
-    /* stylelint-disable-next-line color-named -- pg: 6.5 */
-    border: 1px solid silver;
+    border: 1px solid var(--pg-grey-400);
     overflow: unset;
     background-color: var(--pg-color-surface-raised);
     text-align: left;
