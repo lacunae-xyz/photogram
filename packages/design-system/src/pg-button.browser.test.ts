@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import './pg-big-button';
 import './pg-button';
+import './pg-icon';
 import '../tokens.css';
 
 afterEach(() => render(null, document.body));
@@ -245,6 +246,24 @@ describe('pg-button variant="icon"', () => {
     await expect
       .element(page.getByRole('button', { name: 'Print' }))
       .toBeVisible();
+  });
+  it('paints its icon in the text colour, and in the accent text on hover', async () => {
+    render(
+      html`<p style="color: rgb(1, 2, 3)">
+        <pg-button variant="icon" label="Print"
+          ><pg-icon name="print"></pg-icon
+        ></pg-button>
+      </p>`,
+      document.body,
+    );
+    const host = document.body.querySelector('pg-button')!;
+    const icon = document.body.querySelector('pg-icon')!;
+    await host.updateComplete;
+    await icon.updateComplete;
+    const svg = icon.shadowRoot!.querySelector('svg')!;
+    expect(getComputedStyle(svg).fill).toBe('rgb(1, 2, 3)');
+    await userEvent.hover(host);
+    expect(getComputedStyle(svg).fill).toBe(token('--pg-color-accent-text'));
   });
 });
 
