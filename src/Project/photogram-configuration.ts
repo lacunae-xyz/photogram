@@ -96,8 +96,7 @@ export class PhotogramConfiguration extends LitElement {
     }
 
     .template input[type='radio']:checked + label {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background-color: #eee;
+      background-color: var(--pg-grey-200);
     }
 
     .labels {

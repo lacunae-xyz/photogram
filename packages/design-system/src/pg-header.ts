@@ -29,8 +29,7 @@ export class PgHeader extends LitElement {
       margin: 2.4rem;
       flex-grow: 1;
       text-decoration: none;
-      /* stylelint-disable-next-line color-named -- pg: 6.5 */
-      color: black;
+      color: var(--pg-grey-950);
     }
 
     h1 {
@@ -53,8 +52,7 @@ export class PgHeader extends LitElement {
       display: block;
       padding: 1.6rem 1.6rem;
       text-decoration: none;
-      /* stylelint-disable-next-line color-named -- pg: 6.5 */
-      color: black;
+      color: var(--pg-grey-950);
       border-bottom: 0.3rem solid var(--pg-color-border);
       margin-left: 0.8rem;
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
@@ -68,8 +66,7 @@ export class PgHeader extends LitElement {
 
     nav a:hover,
     nav a:focus {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background-color: #eee;
+      background-color: var(--pg-grey-200);
     }
 
     nav a:active {

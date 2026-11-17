@@ -17,14 +17,12 @@ export class PgCard extends LitElement {
       padding: 0.8rem;
       padding-bottom: 0;
       text-align: center;
-      /* stylelint-disable-next-line color-named -- pg: 6.5 */
-      border: 1px solid silver;
+      border: 1px solid var(--pg-grey-400);
       background-color: var(--pg-color-surface-raised);
     }
 
     :host(:hover) {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      outline: 0.3rem solid #ccc;
+      outline: 0.3rem solid var(--pg-grey-300);
       cursor: pointer;
     }
 
@@ -35,8 +33,7 @@ export class PgCard extends LitElement {
       align-items: center;
       justify-content: center;
       flex-grow: 1;
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background-color: #000;
+      background-color: var(--pg-color-chrome);
     }
 
     .badge {
@@ -50,8 +47,7 @@ export class PgCard extends LitElement {
     .heading {
       padding: 1.6rem;
       display: block;
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      color: #000000bb;
+      color: var(--pg-color-text-muted);
       text-decoration: none;
     }
 

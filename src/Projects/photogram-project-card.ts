@@ -51,18 +51,15 @@ export class PhotogramProjectCard extends LitElement {
       font-size: 1.3rem;
       font-weight: bold;
       text-transform: none;
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background: #fff;
+      background: var(--pg-color-surface-raised);
       color: var(--pg-color-text-muted);
-      /* stylelint-disable-next-line color-named -- pg: 6.5 */
-      border: 1px solid silver;
+      border: 1px solid var(--pg-grey-400);
       /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
       border-radius: 100px;
     }
 
     .btn-delete::part(button):active {
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      background: #ddd;
+      background: var(--pg-grey-300);
       color: var(--pg-color-text);
     }
   `;

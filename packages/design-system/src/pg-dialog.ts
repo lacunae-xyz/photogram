@@ -19,16 +19,13 @@ export class PgDialog extends LitElement {
       width: 100%;
       margin: 4% auto auto;
       padding: 0;
-      /* stylelint-disable-next-line color-no-hex -- pg: 6.5 */
-      border: 1px solid #888;
-      /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
-      background-color: rgba(255, 255, 255, 0.98);
+      border: 1px solid var(--pg-grey-500);
+      background-color: var(--pg-color-surface-raised);
       color: inherit;
     }
 
     dialog::backdrop {
-      /* stylelint-disable-next-line function-disallowed-list -- pg: 6.5 */
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: var(--pg-color-backdrop);
     }
 
     .content {

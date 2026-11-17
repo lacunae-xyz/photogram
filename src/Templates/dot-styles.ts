@@ -8,8 +8,7 @@ export const dotStyles = css`
     width: 2rem;
     /* stylelint-disable-next-line declaration-property-value-disallowed-list -- pg: 6.5 */
     border-radius: 100%;
-    /* stylelint-disable-next-line color-named -- pg: 6.5 */
-    background-color: silver;
+    background-color: var(--pg-grey-400);
     margin-right: 0.8rem;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
