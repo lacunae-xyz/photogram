@@ -3,11 +3,8 @@
   "version": "0.2.1",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "dependencies": {
-    "@lacunae-xyz/photogram-design-system": "*",
+    "@lacunae-xyz/photogram-design-system": "0.1.0",
     "@lit-labs/router": "^0.1.4",
     "lit": "^3.3.3",
     "papaparse": "^5.3.2",
