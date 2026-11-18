@@ -1,7 +1,14 @@
 version: 2
+# The design system lives on GitHub Packages. A Dependabot secret: a classic token with read:packages.
+registries:
+  github-packages:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: ${{ secrets.DEPENDABOT_PACKAGES_TOKEN }}
 updates:
   - package-ecosystem: npm
     directory: /
+    registries: [github-packages]
     schedule: { interval: weekly, day: monday }
     open-pull-requests-limit: 5
     groups:
