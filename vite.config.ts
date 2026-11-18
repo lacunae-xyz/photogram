@@ -53,12 +53,6 @@ export default defineConfig({
     // Assets stay files named like CRA's (`empty.<hex>.svg`): edit.spec matches the empty image src on that.
     assetsInlineLimit: 0,
     rolldownOptions: {
-      // The design system's gallery, at /packages/design-system/: the screenshot run and the previews serve it,
-      // the production deploy removes it (ci.yml).
-      input: {
-        main: 'index.html',
-        gallery: 'packages/design-system/index.html',
-      },
       output: {
         hashCharacters: 'hex',
         assetFileNames: 'assets/[name].[hash][extname]',
@@ -97,10 +91,7 @@ export default defineConfig({
         },
         test: {
           name: 'browser',
-          include: [
-            'src/**/*.browser.test.ts',
-            'packages/*/src/**/*.browser.test.ts',
-          ],
+          include: ['src/**/*.browser.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),

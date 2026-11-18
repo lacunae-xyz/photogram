@@ -30,13 +30,21 @@ permissions:
 jobs:
   unit:
     runs-on: ubuntu-latest
+    # npm ci installs @lacunae-xyz/photogram-design-system from GitHub Packages.
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@lacunae-xyz'
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run typecheck
       # Vitest browser mode runs the Lit element tests in Chromium.
       - run: npx playwright install --with-deps chromium
@@ -49,13 +57,21 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    # npm ci installs @lacunae-xyz/photogram-design-system from GitHub Packages.
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@lacunae-xyz'
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run lint
       - name: actionlint
         uses: docker://rhysd/actionlint:1.7.12
@@ -64,13 +80,21 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    # npm ci installs @lacunae-xyz/photogram-design-system from GitHub Packages.
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@lacunae-xyz'
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
@@ -86,6 +110,11 @@ jobs:
     runs-on: ubuntu-latest
     # A base that doesn't build leaves the Perf step on its absolute budgets rather than failing the PR.
     continue-on-error: true
+    # Bases from before the design system left the repo install it from their workspace, later ones from GitHub
+    # Packages: the registry setup serves both.
+    permissions:
+      contents: read
+      packages: read
     steps:
       # The merge commit build measures, then its first parent, so A and B differ by exactly the PR's changes.
       # pull_request.base.sha can lag the base the merge commit was made on.
@@ -101,7 +130,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@lacunae-xyz'
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
@@ -256,9 +289,6 @@ jobs:
         with:
           name: dist
           path: dist
-      # The design system's gallery is built for the screenshot run and the previews, not for photogram.app: without
-      # its page, the address gets the app's not found page.
-      - run: rm dist/packages/design-system/index.html dist/assets/gallery-*.js dist/assets/gallery.*.css
       - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

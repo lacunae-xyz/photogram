@@ -1,6 +1,5 @@
 import { test, expect } from '../support/test';
 import AxeBuilder from '@axe-core/playwright';
-import { galleryUrl, routeGallery } from '../support/gallery';
 
 // Gating since phase 6: any axe violation fails, in both colour schemes.
 /** Out of scope, each with its reason. Matched by rule and target, so any other node still fails the run. */
@@ -16,7 +15,7 @@ const known = [
 
 const isKnown = (id: string, target: string) => known.some(entry => entry.id === id && entry.target.test(target));
 
-const routes = ['/', '/tutorial', '/projects', '/project-demo', '/privacy-policy', '/fixor', galleryUrl];
+const routes = ['/', '/tutorial', '/projects', '/project-demo', '/privacy-policy', '/fixor'];
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(colorScheme, () => {
@@ -24,7 +23,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     for (const route of routes) {
       test(`axe ${route}`, async ({ page }, testInfo) => {
-        await routeGallery(page);
         await page.goto(route);
         await page.waitForLoadState('networkidle');
         // One main landmark, and the header's banner outside it (Playwright's locators pierce shadow roots).
