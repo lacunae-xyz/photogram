@@ -256,9 +256,6 @@ jobs:
         with:
           name: dist
           path: dist
-      # The design system's gallery is built for the screenshot run and the previews, not for photogram.app: without
-      # its page, the address gets the app's not found page.
-      - run: rm dist/packages/design-system/index.html dist/assets/gallery-*.js dist/assets/gallery.*.css
       - run: npx --yes netlify-cli@27.19.0 deploy --no-build --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
