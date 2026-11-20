@@ -3,13 +3,12 @@ import { test, expect } from '../support/test';
 import { routeDemo } from '../support/demo';
 import { importProject } from '../support/projects';
 
-test('robots.txt points at the sitemap and keeps crawlers out of projects and Fixor', async ({ request }) => {
+test('robots.txt points at the sitemap and keeps crawlers out of projects', async ({ request }) => {
   const response = await request.get('/robots.txt');
   expect(response.ok()).toBe(true);
   const robots = await response.text();
   expect(robots).toContain('Sitemap: https://photogram.app/sitemap.xml');
   expect(robots).toContain('Disallow: /project/*');
-  expect(robots).toContain('Disallow: /fixor');
 });
 
 test('every sitemap URL renders with a title', async ({ page, request }) => {
@@ -61,7 +60,6 @@ const routeMeta = [
     title: 'Photogram · Privacy policy',
     description: 'Photogram keeps your projects on your device. What it counts, and who hosts it.',
   },
-  { path: '/fixor', ...defaultMeta },
   { path: '/does-not-exist', ...defaultMeta, title: 'Photogram · Page not found' },
 ];
 

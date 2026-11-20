@@ -15,7 +15,7 @@ const known = [
 
 const isKnown = (id: string, target: string) => known.some(entry => entry.id === id && entry.target.test(target));
 
-const routes = ['/', '/tutorial', '/projects', '/project-demo', '/privacy-policy', '/fixor'];
+const routes = ['/', '/tutorial', '/projects', '/project-demo', '/privacy-policy'];
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(colorScheme, () => {

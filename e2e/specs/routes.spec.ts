@@ -10,7 +10,6 @@ const routes = [
   { path: '/projects', ready: '.projects-container' },
   { path: '/project-demo', ready: tileSelector },
   { path: '/privacy-policy', ready: 'h1' },
-  { path: '/fixor', ready: '.fixor-empty-container' },
 ];
 
 for (const { path, ready } of routes) {
@@ -203,7 +202,6 @@ const routeIllustrations = [
   { path: '/projects', names: () => ['empty-street'] },
   { path: '/project-demo', names: () => [] },
   { path: '/privacy-policy', names: () => [] },
-  { path: '/fixor', names: () => [] },
 ];
 
 for (const { path, names } of routeIllustrations) {
