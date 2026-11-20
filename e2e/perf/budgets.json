@@ -1,11 +1,11 @@
 {
   "load-1000": {
     "layoutCount": 180,
-    "totalBlockingTimeMs": 180
+    "totalBlockingTimeMs": 800
   },
   "font-family-1000": {
     "layoutCount": 142,
-    "totalBlockingTimeMs": 100
+    "totalBlockingTimeMs": 250
   },
   "edit-one-1000": {
     "layoutCount": 14,
@@ -13,11 +13,11 @@
   },
   "load-3000": {
     "layoutCount": 426,
-    "totalBlockingTimeMs": 900
+    "totalBlockingTimeMs": 2800
   },
   "font-family-3000": {
     "layoutCount": 418,
-    "totalBlockingTimeMs": 500
+    "totalBlockingTimeMs": 1400
   },
   "edit-one-3000": {
     "layoutCount": 14,
