@@ -125,6 +125,18 @@ describe('photogram-app', () => {
     });
   }
 
+  it('shows its logo in the header, named and in the text colour', async () => {
+    const app = await renderApp('/');
+    const header = app.shadowRoot!.querySelector('pg-header')!;
+    header.style.color = 'rgb(1, 2, 3)';
+    const logo = page.getByRole('img', { name: 'logo of Photogram' });
+    await expect.element(logo).toBeVisible();
+    const box = logo.element().getBoundingClientRect();
+    expect(box.width).toBeGreaterThan(0);
+    expect(box.width).toBe(box.height);
+    expect(getComputedStyle(logo.element()).fill).toBe('rgb(1, 2, 3)');
+  });
+
   it('shows a project with the default title and description', async () => {
     const app = await renderApp('/project/42');
     expect(shownPage(app)).toBe('photogram-project');
