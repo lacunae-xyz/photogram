@@ -22,12 +22,11 @@ for (const { path, ready } of routes) {
   });
 }
 
-// React 19's element type: in React's own chunks, in no other code.
+// React 19's element type, in React's own code. Photogram has no React since Fixor left (07).
 const reactMarker = 'react.transitional.element';
 
 for (const { path, ready } of routes) {
-  const fixor = path === '/fixor';
-  test(`${path} ${fixor ? 'loads' : 'does not load'} React`, async ({ page, baseURL }) => {
+  test(`${path} does not load React`, async ({ page, baseURL }) => {
     const { origin } = new URL(baseURL!);
     const scripts: Promise<string>[] = [];
     page.on('response', response => {
@@ -40,7 +39,7 @@ for (const { path, ready } of routes) {
     await page.waitForLoadState('networkidle');
     const bodies = await Promise.all(scripts);
     expect(bodies.length).toBeGreaterThan(0);
-    expect(bodies.some(body => body.includes(reactMarker))).toBe(fixor);
+    expect(bodies.some(body => body.includes(reactMarker))).toBe(false);
   });
 }
 
