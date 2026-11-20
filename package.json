@@ -35,6 +35,7 @@
     "playwright": "1.65.1",
     "postcss-lit": "^1.4.1",
     "prettier": "^3.10.1",
+    "smol-toml": "^1.9.1",
     "stylelint": "^18.0.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2",

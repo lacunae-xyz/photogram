@@ -152,18 +152,17 @@ test('routes without a native URLPattern', async ({ page, pageErrors }) => {
   expect(pageErrors).toEqual([]);
 });
 
-// Fixor iframes photogram.app/fixor until phase 7. Only meaningful against Netlify (BASE_URL), `serve` sends no such headers.
-test('/fixor can be framed by fixor.photogram.app', async ({ request }) => {
-  const response = await request.get('/fixor');
-  expect(response.ok()).toBe(true);
-  const headers = response.headers();
-  expect(headers['x-frame-options']).toBeUndefined();
-  const frameAncestors = headers['content-security-policy']
-    ?.split(';')
-    .map(directive => directive.trim())
-    .find(directive => directive.startsWith('frame-ancestors'));
-  if (frameAncestors !== undefined) {
-    expect(frameAncestors).toContain('https://fixor.photogram.app');
+// netlify.toml's redirects, on the deployed site only: `serve` reads no netlify.toml. src/netlify.test.ts
+// checks the file itself.
+test.describe('on Netlify', () => {
+  test.skip(!process.env.BASE_URL, 'needs BASE_URL: serve reads no netlify.toml');
+
+  for (const path of ['/fixor', '/fixor/', '/fixor/anything']) {
+    test(`${path} moved to fixor.photogram.app`, async ({ request }) => {
+      const response = await request.get(path, { maxRedirects: 0 });
+      expect(response.status()).toBe(301);
+      expect(response.headers()['location']).toBe('https://fixor.photogram.app/');
+    });
   }
 });
 
