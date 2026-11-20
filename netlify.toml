@@ -2,17 +2,29 @@
 [build]
   publish = "dist"
 
+# Fixor moved to its own site. Its photogram route had no subpaths: anything under it goes to Fixor's home.
+[[redirects]]
+  from = "/fixor"
+  to = "https://fixor.photogram.app/"
+  status = 301
+
+[[redirects]]
+  from = "/fixor/*"
+  to = "https://fixor.photogram.app/"
+  status = 301
+
 [[redirects]]
   from = "/*"
   to = "/"
   status = 200
 
-# No X-Frame-Options or frame-ancestors: Fixor iframes photogram.app/fixor from fixor.photogram.app until phase 7.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
 
 [[headers]]
   for = "/assets/*"

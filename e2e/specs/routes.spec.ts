@@ -10,7 +10,6 @@ const routes = [
   { path: '/projects', ready: '.projects-container' },
   { path: '/project-demo', ready: tileSelector },
   { path: '/privacy-policy', ready: 'h1' },
-  { path: '/fixor', ready: '.fixor-empty-container' },
 ];
 
 for (const { path, ready } of routes) {
@@ -23,12 +22,11 @@ for (const { path, ready } of routes) {
   });
 }
 
-// React 19's element type: in React's own chunks, in no other code.
+// React 19's element type, in React's own code. Photogram has no React since Fixor left (07).
 const reactMarker = 'react.transitional.element';
 
 for (const { path, ready } of routes) {
-  const fixor = path === '/fixor';
-  test(`${path} ${fixor ? 'loads' : 'does not load'} React`, async ({ page, baseURL }) => {
+  test(`${path} does not load React`, async ({ page, baseURL }) => {
     const { origin } = new URL(baseURL!);
     const scripts: Promise<string>[] = [];
     page.on('response', response => {
@@ -41,7 +39,7 @@ for (const { path, ready } of routes) {
     await page.waitForLoadState('networkidle');
     const bodies = await Promise.all(scripts);
     expect(bodies.length).toBeGreaterThan(0);
-    expect(bodies.some(body => body.includes(reactMarker))).toBe(fixor);
+    expect(bodies.some(body => body.includes(reactMarker))).toBe(false);
   });
 }
 
@@ -154,18 +152,27 @@ test('routes without a native URLPattern', async ({ page, pageErrors }) => {
   expect(pageErrors).toEqual([]);
 });
 
-// Fixor iframes photogram.app/fixor until phase 7. Only meaningful against Netlify (BASE_URL), `serve` sends no such headers.
-test('/fixor can be framed by fixor.photogram.app', async ({ request }) => {
-  const response = await request.get('/fixor');
-  expect(response.ok()).toBe(true);
-  const headers = response.headers();
-  expect(headers['x-frame-options']).toBeUndefined();
-  const frameAncestors = headers['content-security-policy']
-    ?.split(';')
-    .map(directive => directive.trim())
-    .find(directive => directive.startsWith('frame-ancestors'));
-  if (frameAncestors !== undefined) {
-    expect(frameAncestors).toContain('https://fixor.photogram.app');
+// netlify.toml's headers and redirects, on the deployed site only: `serve` reads no netlify.toml. src/netlify.test.ts
+// checks the file itself.
+test.describe('on Netlify', () => {
+  test.skip(!process.env.BASE_URL, 'needs BASE_URL: serve sends no such headers or redirects');
+
+  for (const { path } of routes) {
+    test(`${path} cannot be framed`, async ({ request }) => {
+      const response = await request.get(path);
+      expect(response.ok()).toBe(true);
+      const headers = response.headers();
+      expect(headers['x-frame-options']).toBe('DENY');
+      expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
+    });
+  }
+
+  for (const path of ['/fixor', '/fixor/', '/fixor/anything']) {
+    test(`${path} moved to fixor.photogram.app`, async ({ request }) => {
+      const response = await request.get(path, { maxRedirects: 0 });
+      expect(response.status()).toBe(301);
+      expect(response.headers()['location']).toBe('https://fixor.photogram.app/');
+    });
   }
 });
 
@@ -203,7 +210,6 @@ const routeIllustrations = [
   { path: '/projects', names: () => ['empty-street'] },
   { path: '/project-demo', names: () => [] },
   { path: '/privacy-policy', names: () => [] },
-  { path: '/fixor', names: () => [] },
 ];
 
 for (const { path, names } of routeIllustrations) {

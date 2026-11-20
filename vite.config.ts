@@ -43,7 +43,7 @@ export default defineConfig({
   css: {
     lightningcss: {
       // Native light-dark(): the polyfill resolves it through variables only CSS files' color-scheme sets, so Lit
-      // styles and inline color-scheme (Fixor, label-coloured tiles) couldn't switch a token. Browsers without
+      // styles and inline color-scheme (label-coloured tiles) couldn't switch a token. Browsers without
       // light-dark() get the light tokens from tokens.css' @supports fallback.
       exclude: Features.LightDark,
     },
@@ -84,9 +84,6 @@ export default defineConfig({
             'lit/directives/repeat.js',
             'lit/directives/style-map.js',
             'lit/static-html.js',
-            'react',
-            'react-dom/client',
-            'react/jsx-dev-runtime',
           ],
         },
         test: {

@@ -237,6 +237,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -263,6 +265,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.number }}
           URL: ${{ steps.deploy.outputs.url }}
+
+  # serve doesn't read netlify.toml: the redirects and headers only exist once Netlify serves the build.
+  preview-netlify:
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      BASE_URL: ${{ needs.deploy-preview.outputs.url }}
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v5
+      - run: npm ci
+      - run: npx playwright test --project=e2e --grep "on Netlify" specs/routes.spec.ts
 
   deploy-production:
     needs: [unit, lint, build, browser]

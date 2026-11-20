@@ -4,7 +4,6 @@ import { customElement } from 'lit/decorators.js';
 import '@lacunae-xyz/photogram-design-system/pg-header.js';
 import '@lacunae-xyz/photogram-design-system/pg-theme-switch.js';
 import '../Demo/photogram-demo';
-import '../Fixor/photogram-fixor';
 import '../Landing/photogram-landing';
 import '../NotFound/photogram-not-found';
 import '../PrivacyPolicy/photogram-privacy';
@@ -63,7 +62,7 @@ function documentMeta(): Meta {
 
 /**
  * Photogram: routes the address to its page, with its title and description.
- * Links and pages' `navigate` events change the address without a reload. Fixor renders in the light DOM.
+ * Links and pages' `navigate` events change the address without a reload.
  */
 @customElement('photogram-app')
 export class PhotogramApp extends LitElement {
@@ -87,8 +86,6 @@ export class PhotogramApp extends LitElement {
 
   /** index.html's, for the pages that have none of their own. */
   readonly #defaultMeta = documentMeta();
-
-  #fixor: HTMLElement | undefined;
 
   /** On the not found page only: the server answers its address with a 200. */
   readonly #noindex = Object.assign(document.createElement('meta'), {
@@ -165,12 +162,6 @@ export class PhotogramApp extends LitElement {
           }),
         render: () => html`<photogram-privacy>${header()}</photogram-privacy>`,
       },
-      {
-        pattern: pattern('/fixor'),
-        enter: () => this.#enter(undefined, { fixor: true }),
-        // Fixor's CSS is global: it renders in the light DOM.
-        render: () => html`<slot></slot>`,
-      },
     ],
     {
       fallback: {
@@ -227,7 +218,7 @@ export class PhotogramApp extends LitElement {
     this.renderRoot.querySelector('.announcer')!.textContent = document.title;
   }
 
-  #enter(meta = this.#defaultMeta, { fixor = false, noindex = false } = {}) {
+  #enter(meta = this.#defaultMeta, { noindex = false } = {}) {
     document.title = meta.title;
     document
       .querySelector('meta[name="description"]')
@@ -236,14 +227,6 @@ export class PhotogramApp extends LitElement {
       document.head.append(this.#noindex);
     } else {
       this.#noindex.remove();
-    }
-    if (fixor) {
-      this.#fixor ??= this.appendChild(
-        document.createElement('photogram-fixor'),
-      );
-    } else {
-      this.#fixor?.remove();
-      this.#fixor = undefined;
     }
     return true;
   }
@@ -275,10 +258,6 @@ export class PhotogramApp extends LitElement {
       return;
     }
     const path = event.composedPath();
-    // Fixor's links load the page, as they did before the island.
-    if (this.#fixor && path.includes(this.#fixor)) {
-      return;
-    }
     const anchor = path.find(
       (target): target is HTMLAnchorElement =>
         target instanceof HTMLAnchorElement,

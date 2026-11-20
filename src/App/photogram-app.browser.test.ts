@@ -176,26 +176,6 @@ describe('photogram-app', () => {
     expect(shownPage(app)).toBe('photogram-not-found');
   });
 
-  it('mounts Fixor in its light DOM on /fixor, and removes it on leaving', async () => {
-    const app = await renderApp('/fixor');
-    const fixor = app.querySelector('photogram-fixor')!;
-    expect(fixor).not.toBeNull();
-    expect(app.shadowRoot!.querySelector('slot')!.assignedElements()).toEqual([
-      fixor,
-    ]);
-    await expect
-      .element(page.getByRole('heading', { name: 'Fixor' }))
-      .toBeVisible();
-    expect(meta()).toEqual(defaultMeta);
-
-    await app.navigate('/fixor');
-    expect(app.querySelectorAll('photogram-fixor')).toHaveLength(1);
-
-    await app.navigate('/tutorial');
-    expect(app.querySelector('photogram-fixor')).toBeNull();
-    expect(fixor.childElementCount).toBe(0);
-  });
-
   it('follows an in-app link without loading the page', async () => {
     const app = await renderApp('/projects');
     const length = history.length;
@@ -310,18 +290,6 @@ describe('photogram-app', () => {
       link.remove();
     }
     expect(location.pathname).toBe('/privacy-policy');
-  });
-
-  it('leaves Fixor’s links to the browser, as before the island', async () => {
-    const app = await renderApp('/fixor');
-    await expect
-      .element(page.getByRole('heading', { name: 'Fixor' }))
-      .toBeVisible();
-    const outcome = clickOutcome();
-    app
-      .querySelector<HTMLAnchorElement>('photogram-fixor a[href="/fixor"]')!
-      .click();
-    expect(outcome.prevented).toBe(false);
   });
 
   it('opens what a page sends with navigate', async () => {

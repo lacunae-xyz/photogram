@@ -14,7 +14,7 @@ const pages = {
 
 async function open(page: Page, url: string) {
   await page.goto(url);
-  await expect(page.locator('pg-header, .header-container').first()).toBeVisible();
+  await expect(page.locator('pg-header').first()).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   await waitForImages(page);
 }
@@ -38,14 +38,6 @@ for (const scheme of schemes) {
       }
     });
   }
-
-  // Fixor stays light (07 ports it): under the dark scheme, the light baseline.
-  test(`${scheme} Fixor`, async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.emulateMedia({ colorScheme: scheme });
-    await open(page, '/fixor');
-    await expect(page).toHaveScreenshot('fixor-1280.png');
-  });
 
   // Print is always light: under the dark scheme, a page prints as the light baseline.
   test.describe(`${scheme} print`, () => {
@@ -150,12 +142,6 @@ for (const scheme of schemes) {
       await open(page, '/tutorial');
       await page.emulateMedia({ media: 'print' });
       await expect(page.locator('pg-header')).toHaveScreenshot('header-print.png');
-    });
-
-    test("Fixor's, print", async ({ page }) => {
-      await open(page, '/fixor');
-      await page.emulateMedia({ media: 'print' });
-      await expect(page.locator('.header-container')).toHaveScreenshot('fixor-header-print.png');
     });
   });
 }
