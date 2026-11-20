@@ -1,6 +1,7 @@
 import { html, render } from 'lit';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
+import { palette } from '../Application/colors';
 import './photogram-colors';
 
 afterEach(() => render(null, document.body));
@@ -48,6 +49,30 @@ describe('photogram-colors', () => {
     expect(onChange.mock.calls[0][0].detail).toEqual({
       label: 'salon',
       color: '#00ff00',
+    });
+  });
+
+  it('offers the label palette as presets on every colour input', async () => {
+    await renderColors({ salon: '#F44336', cuisine: '#abc' });
+    const expected = palette.map(color => color.toLowerCase());
+    for (const name of ['Default', 'salon', 'cuisine']) {
+      const list = input(name).list;
+      expect(list).toBeInstanceOf(HTMLDataListElement);
+      expect([...list!.options].map(option => option.value)).toEqual(expected);
+    }
+  });
+
+  it('saves a preset like any colour', async () => {
+    const element = await renderColors({ salon: '#F44336' });
+    const onChange = vi.fn();
+    element.addEventListener('color-change', onChange);
+    const salon = input('salon');
+    const preset = salon.list!.options[7].value;
+    salon.value = preset;
+    salon.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(onChange.mock.calls[0][0].detail).toEqual({
+      label: 'salon',
+      color: preset,
     });
   });
 
