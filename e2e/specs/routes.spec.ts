@@ -152,10 +152,20 @@ test('routes without a native URLPattern', async ({ page, pageErrors }) => {
   expect(pageErrors).toEqual([]);
 });
 
-// netlify.toml's redirects, on the deployed site only: `serve` reads no netlify.toml. src/netlify.test.ts
+// netlify.toml's headers and redirects, on the deployed site only: `serve` reads no netlify.toml. src/netlify.test.ts
 // checks the file itself.
 test.describe('on Netlify', () => {
-  test.skip(!process.env.BASE_URL, 'needs BASE_URL: serve reads no netlify.toml');
+  test.skip(!process.env.BASE_URL, 'needs BASE_URL: serve sends no such headers or redirects');
+
+  for (const { path } of routes) {
+    test(`${path} cannot be framed`, async ({ request }) => {
+      const response = await request.get(path);
+      expect(response.ok()).toBe(true);
+      const headers = response.headers();
+      expect(headers['x-frame-options']).toBe('DENY');
+      expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
+    });
+  }
 
   for (const path of ['/fixor', '/fixor/', '/fixor/anything']) {
     test(`${path} moved to fixor.photogram.app`, async ({ request }) => {

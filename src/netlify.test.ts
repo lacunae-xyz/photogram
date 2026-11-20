@@ -31,4 +31,12 @@ describe('netlify.toml', () => {
       status: 200,
     });
   });
+
+  it('denies framing on every path', () => {
+    const all = config.headers.find(rule => rule.for === '/*');
+    expect(all?.values['X-Frame-Options']).toBe('DENY');
+    expect(all?.values['Content-Security-Policy']).toBe(
+      "frame-ancestors 'none'",
+    );
+  });
 });
