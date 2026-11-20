@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@lacunae-xyz/photogram-design-system": "0.1.0",
+    "@lacunae-xyz/photogram-design-system": "0.2.0",
     "@lit-labs/router": "^0.1.4",
     "lit": "^3.3.3",
     "papaparse": "^5.3.2",
