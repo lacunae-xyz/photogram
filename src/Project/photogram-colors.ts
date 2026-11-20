@@ -1,14 +1,16 @@
 import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { normalizeHex } from '../Application/colors';
+import { normalizeHex, palette } from '../Application/colors';
 import type { Colors } from '../Application/types';
 
 const defaultColorFallback = '#ffffff';
+const presetsId = 'color-presets';
 
 /**
  * The default colour and the label colours, each with a native colour input.
  * Saves on `change` (the picker closed), not on every `input`.
+ * The label palette is offered as presets through a `<datalist>` (Chromium shows the swatches; Firefox ignores them; Safari not verified).
  *
  * Events: `default-color-change` ({ color }), `color-change` ({ label, color }), `color-delete` ({ label }).
  */
@@ -81,6 +83,7 @@ export class PhotogramColors extends LitElement {
     return html`<input
       type="color"
       aria-label="${label} colour"
+      list=${presetsId}
       .value=${normalizeHex(color) ?? '#000000'}
       @change=${(event: Event) =>
         onChange((event.target as HTMLInputElement).value)}
@@ -88,7 +91,10 @@ export class PhotogramColors extends LitElement {
   }
 
   render() {
-    return html`<table>
+    return html`<datalist id=${presetsId}>
+        ${palette.map(color => html`<option value=${normalizeHex(color)}></option>`)}
+      </datalist>
+      <table>
         <tbody>
           <tr>
             <td>
