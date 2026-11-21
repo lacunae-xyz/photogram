@@ -27,3 +27,7 @@ yarn-error.log*
 
 .idea
 .env.production
+
+# Chromium coverage (PW_COVERAGE=1)
+/e2e/coverage-raw
+/dist-maps

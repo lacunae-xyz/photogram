@@ -32,6 +32,6 @@ fi
 exec docker run --rm --init --ipc=host \
   -v "$PWD":/work -v "${E2E_NODE_MODULES_VOLUME:-photogram-e2e-node-modules}":/work/e2e/node_modules -w /work/e2e \
   ${baseline:+-v "$baseline":/baseline:ro} \
-  -e CI -e PLAYWRIGHT_DOCKER=1 -e PERF_SLOW \
+  -e CI -e PLAYWRIGHT_DOCKER=1 -e PERF_SLOW -e PW_COVERAGE -e PW_COVERAGE_ARGS \
   "mcr.microsoft.com/playwright:v$version-noble" \
   sh -c "npm ci --no-audit --no-fund >/dev/null && $command" playwright "$@"

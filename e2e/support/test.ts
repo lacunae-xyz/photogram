@@ -1,4 +1,5 @@
-import { test as base, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test as base } from './coverage';
 
 // What an ad blocker does: Umami's script and its endpoint. analytics.spec serves both itself.
 export const blockedHosts = ['sagix-umami.netlify.app', 'analytics.lacunae.xyz'];
