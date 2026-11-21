@@ -34,11 +34,42 @@ jobs:
     permissions:
       contents: read
       packages: read
+    # Vitest browser mode runs the Lit element tests in the image's Chromium, which only fits the same Playwright version.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+      options: --ipc=host
+    env:
+      HOME: /root
     steps:
       - uses: actions/checkout@v5
+      - name: Playwright versions match the image tag
+        run: |
+          node -e '
+            const fs = require("fs");
+            const versions = {
+              "package-lock.json playwright": require("./package-lock.json").packages["node_modules/playwright"].version,
+              "e2e/package.json @playwright/test": require("./e2e/package.json").devDependencies["@playwright/test"],
+              "e2e/package-lock.json @playwright/test": require("./e2e/package-lock.json").packages["node_modules/@playwright/test"].version,
+            };
+            // Every image reference counts, so a tag in another form (no v, latest, digest) fails instead of being skipped.
+            const tags = [...fs.readFileSync(".github/workflows/ci.yml", "utf8").matchAll(/mcr\.microsoft\.com\/playwright:(\S+)/g)];
+            tags.forEach(([, tag], i) => {
+              versions["ci.yml image " + (i + 1) + " " + tag] = (/^v(\d+\.\d+\.\d+)(?![\d.])/.exec(tag) || [, tag])[1];
+            });
+            console.table(versions);
+            // A missing package fails above or differs; an image count would need a bump each time a job is added or removed.
+            if (!tags.length) {
+              console.log("::error file=.github/workflows/ci.yml::No mcr.microsoft.com/playwright image found in ci.yml");
+              process.exit(1);
+            }
+            if (new Set(Object.values(versions)).size > 1) {
+              console.log("::error file=.github/workflows/ci.yml::Playwright versions differ: bump the image tags with the packages");
+              process.exit(1);
+            }
+          '
+      # The image's Node, same as .nvmrc. setup-node writes the GitHub Packages auth and restores the npm cache.
       - uses: actions/setup-node@v5
         with:
-          node-version-file: .nvmrc
           cache: npm
           registry-url: https://npm.pkg.github.com
           scope: '@lacunae-xyz'
@@ -46,8 +77,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run typecheck
-      # Vitest browser mode runs the Lit element tests in Chromium.
-      - run: npx playwright install --with-deps chromium
       - run: npm test -- --coverage
       - name: Coverage summary
         if: ${{ !cancelled() }}
@@ -162,7 +191,7 @@ jobs:
     # build-base is skipped outside pull requests and may fail: only build is required.
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
-    # Keep the tag in sync with @playwright/test in e2e/package.json. The image ships Node 26, same as .nvmrc.
+    # Same tag as unit, which checks it against the Playwright packages. The image ships Node 26, same as .nvmrc.
     container:
       image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
