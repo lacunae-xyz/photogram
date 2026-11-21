@@ -3,7 +3,7 @@ import { test, expect } from '../support/test';
 
 // The theme switch in every engine: the stored theme from the first paint, theme-color included, the switch over the
 // system and on the next visit, garbage in storage, the OS setting live on Auto, print light under a forced dark, the
-// keyboard. pages.spec has the screenshots.
+// keyboard. pages.spec shows the switch at rest; the design system's gallery shoots its hover and focus.
 
 const dark = 'rgb(34, 34, 34)';
 const light = 'rgb(255, 255, 255)';

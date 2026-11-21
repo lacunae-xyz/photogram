@@ -74,40 +74,6 @@ test.describe('theme override', () => {
   });
 });
 
-for (const scheme of schemes) {
-  test.describe(`${scheme} header`, () => {
-    test.use({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
-
-    // The header follows the scheme. Its print is in tutorial-print.
-    test('nav hover', async ({ page }) => {
-      await open(page, '/tutorial');
-      await page.getByRole('link', { name: 'Projects' }).hover();
-      await expect(page.locator('pg-header')).toHaveScreenshot(`header-hover${suffix(scheme)}.png`);
-    });
-
-    test('nav focus', async ({ page }) => {
-      await open(page, '/tutorial');
-      const link = page.getByRole('link', { name: 'Tutorial' });
-      for (let i = 0; i < 10 && !(await link.evaluate(element => element.matches(':focus-visible'))); i++) {
-        await page.keyboard.press('Tab');
-      }
-      await expect(link).toBeFocused();
-      await expect(page.locator('pg-header')).toHaveScreenshot(`header-focus${suffix(scheme)}.png`);
-    });
-
-    test('theme switch hover and focus', async ({ page }) => {
-      await open(page, '/tutorial');
-      const light = page.getByRole('button', { name: 'Light' });
-      for (let i = 0; i < 12 && !(await light.evaluate(element => element.matches(':focus-visible'))); i++) {
-        await page.keyboard.press('Tab');
-      }
-      await expect(light).toBeFocused();
-      await page.getByRole('button', { name: 'Dark' }).hover();
-      await expect(page.locator('pg-theme-switch')).toHaveScreenshot(`theme-switch-states${suffix(scheme)}.png`);
-    });
-  });
-}
-
 test.describe('header', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
