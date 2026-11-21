@@ -60,6 +60,14 @@ export default defineConfig({
     },
   },
   test: {
+    // Every src file, so the ones no test loads show at 0%. Run one project at a time with its own
+    // --coverage.reportsDirectory to get a report per suite.
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,js}'],
+      exclude: ['src/**/*.test.{ts,js}', 'src/setupTests.js'],
+      reporter: ['html', 'json-summary', 'lcov', 'text-summary'],
+    },
     projects: [
       {
         extends: true,

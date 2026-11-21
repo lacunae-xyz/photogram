@@ -7,6 +7,8 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}',
   // Baselines come from the Playwright Docker image (./docker.sh), never from a host run.
   updateSnapshots: process.env.PLAYWRIGHT_DOCKER ? 'missing' : 'none',
+  globalSetup: './support/coverage-setup.mjs',
+  globalTeardown: './support/coverage-teardown.mjs',
   fullyParallel: true,
   forbidOnly: ci,
   retries: ci ? 1 : 0,

@@ -20,7 +20,10 @@
     "format": "prettier --write .",
     "test:e2e": "cd e2e && ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit && ./docker.sh --perf",
     "test:screenshots:update": "cd e2e && ./docker.sh --project=screenshots --project=e2e --update-snapshots",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:coverage": "vitest run --coverage",
+    "build:coverage": "rm -rf dist-maps && vite build --sourcemap hidden --outDir dist-maps && find dist-maps -type f ! -name '*.map' -delete",
+    "test:e2e:coverage": "cd e2e && PW_COVERAGE=1 PW_COVERAGE_ARGS='--dist ../dist-maps' ./docker.sh --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
