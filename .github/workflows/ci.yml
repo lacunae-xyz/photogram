@@ -185,9 +185,8 @@ jobs:
           name: dist
           path: dist
       # dist-maps/ and node_modules/@lacunae-xyz/photogram-design-system/dist/, at the checkout's root.
-      # Kept 1 day: a later re-run still tests, its coverage report just has no src files.
+      # Kept 1 day: after that, re-run all jobs, not just this one.
       - uses: actions/download-artifact@v5
-        continue-on-error: true
         with:
           name: dist-maps
       - uses: actions/download-artifact@v5
