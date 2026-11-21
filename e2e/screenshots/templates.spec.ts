@@ -19,6 +19,22 @@ const viewports = {
 const schemes = ['light', 'dark'] as const;
 const suffix = (scheme: (typeof schemes)[number]) => (scheme === 'dark' ? '-dark' : '');
 
+// Rows with no shot: another baseline already shows them. Indicator rows 6 and 7 render as the card ones. Dark rows
+// other than the labelled tile (1) and the theme background (6, 7) render as the light ones, title sizing included.
+const unshotRows: Record<(typeof schemes)[number], Record<'indicator' | 'card', string[]>> = {
+  light: { indicator: ['6', '7'], card: [] },
+  dark: {
+    indicator: ['2', '3', '4', '6', '7', '10', '11 bis'],
+    card: ['2', '3', '4', '5', '8', '9', '10', '11 bis'],
+  },
+};
+
+// Dark prints match the light baselines, so two of them are enough: both templates, both distributions, both spacings.
+const printSpacings: Record<(typeof schemes)[number], Record<'small' | 'large', Record<'indicator' | 'card', boolean[]>>> = {
+  light: { small: { indicator: [true, false], card: [true, false] }, large: { indicator: [true, false], card: [true, false] } },
+  dark: { small: { indicator: [true], card: [] }, large: { indicator: [], card: [false] } },
+};
+
 for (const scheme of schemes) {
   for (const template of ['small', 'large'] as const) {
     for (const distribution of ['indicator', 'card'] as const) {
@@ -35,13 +51,14 @@ for (const scheme of schemes) {
         test('screen', async ({ page }) => {
           const tiles = page.locator(tileSelector);
           for (const [i, row] of demoRows.entries()) {
+            if (unshotRows[scheme][distribution].includes(row)) continue;
             await expect(tiles.nth(i)).toHaveScreenshot(
               `${template}-${distribution}-tile-${row.replace(' ', '-')}${suffix(scheme)}.png`,
             );
           }
         });
 
-        for (const spaceAround of [true, false]) {
+        for (const spaceAround of printSpacings[scheme][template][distribution]) {
           // The first two tiles show the print styles and the spacing between tiles. Pagination is in print-pdf.spec.
           test(`print, space around ${spaceAround ? 'on' : 'off'}`, async ({ page }) => {
             await setPrintSpaceAround(page, spaceAround);
