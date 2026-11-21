@@ -25,8 +25,14 @@ const dynamic = (page: Page) => [page.locator('photogram-quota')];
 const schemes = ['light', 'dark'] as const;
 const suffix = (scheme: (typeof schemes)[number]) => (scheme === 'dark' ? '-dark' : '');
 
+// Dark at 1280 only: light at 700 already shows the narrow layout.
+const widths = { light: [1280, 700], dark: [1280] };
+
+// Dark prints match the light baselines: the tutorial is enough, and the landing page prints under a forced dark below.
+const printedPages = { light: Object.keys(pages), dark: ['tutorial'] };
+
 for (const scheme of schemes) {
-  for (const width of [1280, 700]) {
+  for (const width of widths[scheme]) {
     test.describe(`${scheme} @${width}`, () => {
       test.use({ viewport: { width, height: 900 }, colorScheme: scheme });
 
@@ -43,7 +49,7 @@ for (const scheme of schemes) {
   test.describe(`${scheme} print`, () => {
     test.use({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
 
-    for (const [name, url] of Object.entries(pages)) {
+    for (const [name, url] of Object.entries(pages).filter(([key]) => printedPages[scheme].includes(key))) {
       test(name, async ({ page }) => {
         await open(page, url);
         await page.emulateMedia({ media: 'print' });
@@ -110,7 +116,7 @@ for (const scheme of schemes) {
   test.describe(`${scheme} header`, () => {
     test.use({ viewport: { width: 1280, height: 900 }, colorScheme: scheme });
 
-    // The header follows the scheme; print is always light, so its print baselines are shared.
+    // The header follows the scheme. Its print is in tutorial-print.
     test('nav hover', async ({ page }) => {
       await open(page, '/tutorial');
       await page.getByRole('link', { name: 'Projects' }).hover();
@@ -136,12 +142,6 @@ for (const scheme of schemes) {
       await expect(light).toBeFocused();
       await page.getByRole('button', { name: 'Dark' }).hover();
       await expect(page.locator('pg-theme-switch')).toHaveScreenshot(`theme-switch-states${suffix(scheme)}.png`);
-    });
-
-    test('print', async ({ page }) => {
-      await open(page, '/tutorial');
-      await page.emulateMedia({ media: 'print' });
-      await expect(page.locator('pg-header')).toHaveScreenshot('header-print.png');
     });
   });
 }
