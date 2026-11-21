@@ -60,48 +60,10 @@ for (const scheme of schemes) {
   });
 }
 
-/** The theme picked in the header's switch wins over the system's, on screen only, from the first paint. */
+/** The theme picked in the header's switch wins over the system's, on screen only. theme.spec checks it in every
+ * engine; this is its print. */
 test.describe('theme override', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
-
-  const background = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  const dark = 'rgb(34, 34, 34)';
-  const light = 'rgb(255, 255, 255)';
-
-  test('the switch overrides the system, and the next visit keeps it', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'light' });
-    await open(page, '/');
-    expect(await background(page)).toBe(light);
-    await page.getByRole('button', { name: 'Dark' }).click();
-    await expect(page.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
-    expect(await background(page)).toBe(dark);
-    await page.reload();
-    await expect(page.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
-    expect(await background(page)).toBe(dark);
-
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await page.getByRole('button', { name: 'Light' }).click();
-    expect(await background(page)).toBe(light);
-    await page.getByRole('button', { name: 'Auto' }).click();
-    expect(await background(page)).toBe(dark);
-    expect(await page.evaluate(() => localStorage.getItem('pg-theme'))).toBeNull();
-  });
-
-  test('applies before the scripts run: no light flash', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'light' });
-    await page.addInitScript(() => localStorage.setItem('pg-theme', 'dark'));
-    // Only the HTML and the CSS: what paints before the app's module loads.
-    await page.route('**/assets/*.js', route => route.abort());
-    await page.goto('/');
-    expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('dark');
-    expect(await background(page)).toBe(dark);
-    const themeColors = page.locator('meta[name="theme-color"]');
-    await expect(themeColors).toHaveCount(2);
-    expect(await themeColors.evaluateAll(metas => metas.map(meta => [meta.getAttribute('content'), meta.getAttribute('media')]))).toEqual([
-      ['#ffffff', 'not all'],
-      ['#222222', 'all'],
-    ]);
-  });
 
   test('dark, printed light', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('pg-theme', 'dark'));
