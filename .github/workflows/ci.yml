@@ -35,8 +35,8 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -52,7 +52,7 @@ jobs:
       - name: Coverage summary
         if: ${{ !cancelled() }}
         run: node e2e/support/coverage-summary.mjs vitest=coverage/coverage-summary.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: coverage-vitest
@@ -66,8 +66,8 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -89,8 +89,8 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -100,7 +100,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -108,7 +108,7 @@ jobs:
       # Maps for the Playwright coverage, from a second build, so the deployed dist stays a plain build. The design
       # system's maps take coverage on to its src.
       - run: npm run build:coverage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist-maps
           path: |
@@ -133,7 +133,7 @@ jobs:
     steps:
       # The merge commit build measures, then its first parent, so A and B differ by exactly the PR's changes.
       # pull_request.base.sha can lag the base the merge commit was made on.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - name: Check out the merge commit's first parent
@@ -141,7 +141,7 @@ jobs:
           git rev-parse --verify --quiet HEAD^2 >/dev/null || { echo "::error::$(git rev-parse HEAD) is not a merge commit"; exit 1; }
           git checkout --detach HEAD^1
           echo "Base: $(git log -1 --format='%H %s')"
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -151,7 +151,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build-base
           path: dist/
@@ -177,19 +177,19 @@ jobs:
       # The Playwright image ships git but not git-lfs, which the baselines need.
       - run: apt-get update && apt-get install -y --no-install-recommends git-lfs
         working-directory: /
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
       # dist-maps/ and node_modules/@lacunae-xyz/photogram-design-system/dist/, at the checkout's root.
       # Kept 1 day: after that, re-run all jobs, not just this one.
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: dist-maps
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         if: ${{ needs.build-base.result == 'success' }}
         # No base build (or expired on a re-run): the Perf step falls back to the absolute budgets.
         continue-on-error: true
@@ -230,13 +230,13 @@ jobs:
       - name: Coverage summary
         if: ${{ !cancelled() }}
         run: node support/coverage-summary.mjs screenshots=../coverage/e2e/screenshots/coverage-summary.json e2e=../coverage/e2e/e2e/coverage-summary.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: coverage-e2e
           path: coverage/e2e/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: playwright-report
@@ -246,14 +246,14 @@ jobs:
             e2e/test-results/
             e2e/test-results-perf/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ always() && env.UPDATE_SNAPSHOTS == 'true' }}
         with:
           name: screenshot-baselines
           path: |
             e2e/screenshots/__screenshots__/
             e2e/specs/__screenshots__/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() && env.UPDATE_BUDGETS == 'true' }}
         with:
           name: perf-budgets
@@ -273,11 +273,11 @@ jobs:
     outputs:
       url: ${{ steps.deploy.outputs.url }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -313,7 +313,7 @@ jobs:
       run:
         working-directory: e2e
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - run: npm ci
       - run: npx playwright test --project=e2e --grep "on Netlify" specs/routes.spec.ts
 
@@ -334,11 +334,11 @@ jobs:
       group: deploy-production
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
