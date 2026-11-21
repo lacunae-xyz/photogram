@@ -57,7 +57,12 @@ jobs:
               versions["ci.yml image " + (i + 1) + " " + tag] = (/^v(\d+\.\d+\.\d+)(?![\d.])/.exec(tag) || [, tag])[1];
             });
             console.table(versions);
-            if (Object.keys(versions).length < 6 || new Set(Object.values(versions)).size > 1) {
+            // A missing package fails above or differs; an image count would need a bump each time a job is added or removed.
+            if (!tags.length) {
+              console.log("::error file=.github/workflows/ci.yml::No mcr.microsoft.com/playwright image found in ci.yml");
+              process.exit(1);
+            }
+            if (new Set(Object.values(versions)).size > 1) {
               console.log("::error file=.github/workflows/ci.yml::Playwright versions differ: bump the image tags with the packages");
               process.exit(1);
             }
