@@ -1,45 +1,63 @@
 import type { Page } from '@playwright/test';
 import { test, expect, tileSelector } from '../support/test';
-import { routeDemo } from '../support/demo';
 import { openFolder } from '../support/open-folder';
 import { importProject, importRows } from '../support/projects';
 
+// B11: the landing loaded an illustration from a relative URL, which only resolved on `/`. The folder card is
+// Chromium only.
 const routes = [
-  { path: '/', ready: '.landing-container' },
-  { path: '/tutorial', ready: 'h1' },
-  { path: '/projects', ready: '.projects-container' },
-  { path: '/project-demo', ready: tileSelector },
-  { path: '/privacy-policy', ready: 'h1' },
+  {
+    path: '/',
+    ready: '.landing-container',
+    illustrations: (chromium: boolean) => [
+      'learning',
+      'upload-image',
+      ...(chromium ? ['folder'] : []),
+      'presentation',
+      'web-developer',
+      'videographer',
+    ],
+  },
+  { path: '/tutorial', ready: 'h1', illustrations: () => ['editable', 'the-search'] },
+  { path: '/projects', ready: '.projects-container', illustrations: () => ['empty-street'] },
+  // The real demo, not routeDemo's fixture: its data and images are what visitors load.
+  { path: '/project-demo', ready: tileSelector, illustrations: () => [] },
+  { path: '/privacy-policy', ready: 'h1', illustrations: () => [] },
 ];
-
-for (const { path, ready } of routes) {
-  test(`${path} renders with no console errors`, async ({ page, consoleErrors, pageErrors }) => {
-    await page.goto(path);
-    await expect(page.locator(ready).first()).toBeVisible();
-    await page.waitForLoadState('networkidle');
-    expect(pageErrors).toEqual([]);
-    expect(consoleErrors).toEqual([]);
-  });
-}
 
 // React 19's element type, in React's own code. Photogram has no React since Fixor left (07).
 const reactMarker = 'react.transitional.element';
 
-for (const { path, ready } of routes) {
-  test(`${path} does not load React`, async ({ page, baseURL }) => {
-    const { origin } = new URL(baseURL!);
+for (const { path, ready, illustrations: names } of routes) {
+  test(`${path} renders its illustrations with no console errors and no React (B11)`, async ({
+    page,
+    baseURL,
+    browserName,
+    consoleErrors,
+    pageErrors,
+  }) => {
+    const chromium = browserName === 'chromium';
+    // The served script text, the same in every engine: Chromium is enough.
     const scripts: Promise<string>[] = [];
-    page.on('response', response => {
-      if (response.request().resourceType() === 'script' && new URL(response.url()).origin === origin) {
-        scripts.push(response.text());
-      }
-    });
+    if (chromium) {
+      const { origin } = new URL(baseURL!);
+      page.on('response', response => {
+        if (response.request().resourceType() === 'script' && new URL(response.url()).origin === origin) {
+          scripts.push(response.text());
+        }
+      });
+    }
     await page.goto(path);
     await expect(page.locator(ready).first()).toBeVisible();
     await page.waitForLoadState('networkidle');
-    const bodies = await Promise.all(scripts);
-    expect(bodies.length).toBeGreaterThan(0);
-    expect(bodies.some(body => body.includes(reactMarker))).toBe(false);
+    await expectIllustrations(page, names(chromium));
+    expect(pageErrors).toEqual([]);
+    expect(consoleErrors).toEqual([]);
+    if (chromium) {
+      const bodies = await Promise.all(scripts);
+      expect(bodies.length).toBeGreaterThan(0);
+      expect(bodies.some(body => body.includes(reactMarker))).toBe(false);
+    }
   });
 }
 
@@ -191,34 +209,6 @@ function illustrations(page: Page) {
 async function expectIllustrations(page: Page, names: string[]) {
   const expected: Illustration[] = names.map(name => ({ name, loaded: true }));
   await expect.poll(() => illustrations(page)).toEqual(expected);
-}
-
-// B11: the landing loaded an illustration from a relative URL, which only resolved on `/`.
-const routeIllustrations = [
-  {
-    path: '/',
-    names: ({ chromium }: { chromium: boolean }) => [
-      'learning',
-      'upload-image',
-      ...(chromium ? ['folder'] : []),
-      'presentation',
-      'web-developer',
-      'videographer',
-    ],
-  },
-  { path: '/tutorial', names: () => ['editable', 'the-search'] },
-  { path: '/projects', names: () => ['empty-street'] },
-  { path: '/project-demo', names: () => [] },
-  { path: '/privacy-policy', names: () => [] },
-];
-
-for (const { path, names } of routeIllustrations) {
-  test(`${path} loads its illustrations (B11)`, async ({ page, browserName }) => {
-    await routeDemo(page);
-    await page.goto(path);
-    await page.waitForLoadState('networkidle');
-    await expectIllustrations(page, names({ chromium: browserName === 'chromium' }));
-  });
 }
 
 test('/project/:id loads its illustrations (B11)', async ({ page }) => {
