@@ -6,9 +6,6 @@ on:
   pull_request:
     # labeled: the update-snapshots / update-budgets labels. Dispatch only works once ci.yml is on master.
     types: [opened, synchronize, reopened, labeled]
-  schedule:
-    # Nightly: adds the @slow 3000-row perf scenarios.
-    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       update-snapshots:
@@ -254,7 +251,7 @@ jobs:
           fi
         env:
           BUILD_BASE: ${{ needs.build-base.result }}
-          PERF_SLOW: ${{ (github.event_name == 'schedule' || env.UPDATE_BUDGETS == 'true') && '1' || '' }}
+          PERF_SLOW: ${{ env.UPDATE_BUDGETS == 'true' && '1' || '' }}
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-perf
       - name: Coverage summary
         if: ${{ !cancelled() }}
