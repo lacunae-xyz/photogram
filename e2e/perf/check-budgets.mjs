@@ -1,9 +1,9 @@
 // The CI perf gate. A single total blocking time measure on a shared runner varies by more than the budget margin,
-// so each scenario runs 3 times and the median is gated. LayoutCount is deterministic: the spec checks it on every
-// run against budgets.json.
+// so each scenario runs 3 times and the median is gated. LayoutCount varies less but isn't deterministic either
+// (load-1000 has spiked 20 % over its usual count in CI).
 //
 // Absolute mode (push to master): node perf/check-budgets.mjs [playwright args]
-//   The median is compared with budgets.json.
+//   The median is compared with budgets.json. The spec checks LayoutCount on every run against budgets.json.
 // A/B mode (pull requests): node perf/check-budgets.mjs --baseline <base dist> [playwright args]
 //   Runner speed moves the median from one job to the next by more than any budget margin, so the PR's dist and the
 //   base commit's dist are served side by side and measured interleaved (PR, base, PR, base…) in the same job. A
@@ -11,7 +11,8 @@
 //   isn't served, or base runs that fail (the PR changed the spec's flow, say), are logged and the scenarios without
 //   all their base runs fall back to the absolute budget. A scenario that fails its A/B is measured again, once (3 more
 //   interleaved rounds of that test alone), and the new runs decide: runner noise fails a good PR now and then, a
-//   regression fails both measures.
+//   regression fails both measures. The spec only records here: LayoutCount is gated on the median of the deciding PR
+//   runs against budgets.json, so one spiking run doesn't fail a PR whose A/B passed.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -74,6 +75,23 @@ if (tables[0].length === 0) {
   });
   if (baseline) {
     console.log(`A/B limit: base median × ${abRatio} + ${abSlackMs} ms. budget: perf/budgets.json.`);
+    // The deciding runs: the re-measure's for a scenario measured again.
+    const layoutRows = Object.keys(first.pr).map(scenario => {
+      const runs = (second?.pr[scenario] ?? first.pr[scenario]).map(run => run.layoutCount);
+      const result = decide({ pr: runs, budget: budgets[scenario]?.layoutCount, samples });
+      failed ||= !result.ok;
+      const remark =
+        runs.length !== samples
+          ? `${runs.length}/${samples} PR runs`
+          : result.limit === undefined
+            ? 'no budget in budgets.json'
+            : second?.pr[scenario]
+              ? 'runs of the re-measure'
+              : '';
+      return [result.ok ? '✓' : '✘', scenario, ms(result.prMedian), ms(result.limit), runs.map(ms).join(', '), remark];
+    });
+    console.log(`\nPR LayoutCount, median of ${samples} runs`);
+    printTable([['', 'scenario', 'median', 'budget', 'runs', ''], ...layoutRows]);
   }
   if (second) {
     const remeasured = Object.keys(second.pr);
@@ -115,13 +133,14 @@ async function rounds(sides, suffix, args, output, htmlOutput) {
         [...args, `--output=${output}/${side.name}${suffix}-${run}`],
         {
           BASE_URL: `http://localhost:${side.port}`,
-          PERF_CHECK: side.check ? '1' : '',
+          // Record only: the median is gated here, not each run in the spec.
+          PERF_CHECK: '',
           PLAYWRIGHT_HTML_OUTPUT_DIR: `${htmlOutput}/${side.name}${suffix}-${run}`,
         },
         side.record,
       );
       if (result.status !== 0) {
-        if (side.check) {
+        if (side.gates) {
           measures.status = result.status ?? 1;
         } else {
           const recorded = Object.keys(result.byScenario).join(', ') || 'none';
@@ -147,9 +166,9 @@ async function rounds(sides, suffix, args, output, htmlOutput) {
 async function measureAB(baseDir) {
   const output = takeOption('--output') ?? 'test-results';
   const sides = [
-    { name: 'pr', dir: path.join(e2eDir, '..', 'dist'), port: 5000, check: true },
-    // The base only records: the PR's budgets.json may have lowered a LayoutCount budget the base doesn't meet.
-    { name: 'base', dir: path.resolve(baseDir), port: 5001, check: false },
+    { name: 'pr', dir: path.join(e2eDir, '..', 'dist'), port: 5000, gates: true },
+    // Base runs that fail don't fail the gate: the PR may have changed the spec's flow.
+    { name: 'base', dir: path.resolve(baseDir), port: 5001, gates: false },
   ];
   fs.mkdirSync(output, { recursive: true });
   const servers = sides.map(side => serve(side.dir, side.port));

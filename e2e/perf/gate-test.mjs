@@ -86,3 +86,8 @@ test('fails twice: fails', () => {
   assert.equal(result.ok, false);
   assert.equal(result.first.ok, false);
 });
+
+test('A/B LayoutCount: the PR median against the budget, one run over it passes', () => {
+  assert.equal(decide({ pr: [161, 185, 170], budget: 180, samples: 3 }).ok, true);
+  assert.equal(decide({ pr: [181, 185, 170], budget: 180, samples: 3 }).ok, false);
+});

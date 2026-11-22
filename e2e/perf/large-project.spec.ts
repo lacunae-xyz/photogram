@@ -65,7 +65,8 @@ function report(scenario: string, measure: Measure, wallClockMs: number) {
     const title = info.titlePath.slice(1).join(' ');
     fs.appendFileSync(process.env.PERF_RECORD, JSON.stringify({ scenario, title, ...measure }) + '\n');
   }
-  // update-budgets.mjs records without checking. check-budgets.mjs checks LayoutCount here and the blocking time median itself.
+  // update-budgets.mjs and check-budgets.mjs's A/B mode record without checking: A/B gates the medians itself.
+  // Its absolute mode checks LayoutCount here and the blocking time median itself.
   const recordOnly = process.env.PERF_RECORD && !process.env.PERF_CHECK;
   if (recordOnly) {
     return;
