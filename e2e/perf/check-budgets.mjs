@@ -2,7 +2,7 @@
 // so each scenario runs 3 times and the median is gated. LayoutCount is deterministic: the spec checks it on every
 // run against budgets.json.
 //
-// Absolute mode (push to master, nightly): node perf/check-budgets.mjs [playwright args]
+// Absolute mode (push to master): node perf/check-budgets.mjs [playwright args]
 //   The median is compared with budgets.json.
 // A/B mode (pull requests): node perf/check-budgets.mjs --baseline <base dist> [playwright args]
 //   Runner speed moves the median from one job to the next by more than any budget margin, so the PR's dist and the
