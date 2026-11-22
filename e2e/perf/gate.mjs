@@ -28,3 +28,18 @@ export function decide({ pr, base, budget, samples }) {
   }
   return { mode: 'absolute', prMedian, limit: budget, ok: pr.length === samples && budget !== undefined && prMedian <= budget };
 }
+
+/**
+ * A/B mode: a scenario that fails on all its PR runs is measured again, once, and the new runs alone decide it.
+ * Runner noise fails a good PR now and then; a regression fails both measures. An absolute fallback isn't measured
+ * again (its budget is a ceiling with margin), nor a scenario missing PR runs (the run failed, not the measure).
+ */
+export function needsRemeasure({ pr, base, budget, samples }) {
+  const result = decide({ pr, base, budget, samples });
+  return result.mode === 'ab' && pr.length === samples && !result.ok;
+}
+
+/** The decision for a measured-again scenario: the second measure's, with the first kept for the log. */
+export function decideRemeasured({ first, second, budget, samples }) {
+  return { ...decide({ ...second, budget, samples }), first: decide({ ...first, budget, samples }) };
+}

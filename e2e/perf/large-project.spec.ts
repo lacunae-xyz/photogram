@@ -61,7 +61,9 @@ function report(scenario: string, measure: Measure, wallClockMs: number) {
   const info = test.info();
   info.annotations.push({ type: scenario, description: JSON.stringify({ ...measure, wallClockMs: Math.round(wallClockMs) }) });
   if (process.env.PERF_RECORD) {
-    fs.appendFileSync(process.env.PERF_RECORD, JSON.stringify({ scenario, ...measure }) + '\n');
+    // title: check-budgets.mjs re-runs a scenario that failed its A/B with --grep.
+    const title = info.titlePath.slice(1).join(' ');
+    fs.appendFileSync(process.env.PERF_RECORD, JSON.stringify({ scenario, title, ...measure }) + '\n');
   }
   // update-budgets.mjs records without checking. check-budgets.mjs checks LayoutCount here and the blocking time median itself.
   const recordOnly = process.env.PERF_RECORD && !process.env.PERF_CHECK;
