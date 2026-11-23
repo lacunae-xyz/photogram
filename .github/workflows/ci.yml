@@ -227,8 +227,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:gate
       - name: Screenshots and e2e
-        run: npx playwright test --project=screenshots --project=e2e --project=e2e-firefox --project=e2e-webkit ${{ env.UPDATE_SNAPSHOTS == 'true' && '--update-snapshots' || '' }}
-        # Chromium projects only: Firefox and WebKit have no coverage API. Never on Perf, coverage slows what it measures.
+        run: npx playwright test --project=screenshots --project=e2e ${{ env.UPDATE_SNAPSHOTS == 'true' && '--update-snapshots' || '' }}
+        # Firefox and WebKit run in browser-engines. Never on Perf, coverage slows what it measures.
         env:
           PW_COVERAGE: 1
           PW_COVERAGE_ARGS: --dist ../dist-maps
@@ -285,8 +285,40 @@ jobs:
           name: perf-budgets
           path: e2e/perf/budgets.json
 
+  # Firefox and WebKit, alongside browser. Their specs take no screenshot, so no LFS, and Firefox and WebKit have no
+  # coverage API, so no maps.
+  browser-engines:
+    needs: build
+    runs-on: ubuntu-latest
+    # Same tag as unit, which checks it against the Playwright packages.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist
+      - run: npm ci
+      - name: Firefox and WebKit e2e
+        run: npx playwright test --project=e2e-firefox --project=e2e-webkit
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: playwright-report-engines
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7
+
   deploy-preview:
-    needs: [unit, lint, build, browser]
+    needs: [unit, lint, build, browser, browser-engines]
     # Dependabot and fork PRs don't get the Netlify secrets.
     if: >-
       github.event_name == 'pull_request' &&
@@ -344,7 +376,7 @@ jobs:
       - run: npx playwright test --project=e2e --grep "on Netlify" specs/routes.spec.ts
 
   deploy-production:
-    needs: [unit, lint, build, browser]
+    needs: [unit, lint, build, browser, browser-engines]
     # build-base only runs on PRs. Without explicit results, the implicit
     # success() sees it skipped upstream of browser and skips the deploy.
     if: >-
@@ -353,6 +385,7 @@ jobs:
       needs.lint.result == 'success' &&
       needs.build.result == 'success' &&
       needs.browser.result == 'success' &&
+      needs.browser-engines.result == 'success' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
